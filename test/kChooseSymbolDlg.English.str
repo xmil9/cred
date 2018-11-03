@@ -1,0 +1,4 @@
+#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"
+#define	DLGPROP_kChooseSymbolDlg_2_Text	"OK"
+#define	DLGPROP_kChooseSymbolDlg_3_Text	"PlaceHolder"
+#define	DLGPROP_kChooseSymbolDlg_4_Text	"PlaceHolder"

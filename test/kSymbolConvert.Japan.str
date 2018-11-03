@@ -1,0 +1,6 @@
+#define	DLGPROP_kSymbolConvert_0_Text	"ﾏｸﾛﾌｧｲﾙを変換"
+#define	DLGPROP_kSymbolConvert_1_Text	"各々のｼﾝﾎﾞﾙﾌｧｲﾙは、[ﾌﾟﾚﾌｨｯｸｽ][#].csy として保存されます。元のﾏｸﾛ名をﾌｧｲﾙ名に使用するにはﾌﾟﾚﾌｨｯｸｽに何も入力しないでください。"
+#define	DLGPROP_kSymbolConvert_4_Text	"ｷｰﾜｰﾄﾞ:"
+#define	DLGPROP_kSymbolConvert_5_Text	"変換"
+#define	DLGPROP_kSymbolConvert_6_Text	"ｷｬﾝｾﾙ"
+#define	DLGPROP_kSymbolConvert_7_Text	"ﾌﾟﾚﾌｨｯｸｽ:"

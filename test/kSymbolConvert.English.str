@@ -1,0 +1,6 @@
+#define	DLGPROP_kSymbolConvert_0_Text	"Convert Macro File"
+#define	DLGPROP_kSymbolConvert_1_Text	"Each Symbol file will be saved as [Prefix][#].csy.          Leave prefix blank to use original macro name as filename."
+#define	DLGPROP_kSymbolConvert_4_Text	"Keywords:"
+#define	DLGPROP_kSymbolConvert_5_Text	"Export"
+#define	DLGPROP_kSymbolConvert_6_Text	"Cancel"
+#define	DLGPROP_kSymbolConvert_7_Text	"Prefix:"

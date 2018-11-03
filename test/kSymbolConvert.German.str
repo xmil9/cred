@@ -1,0 +1,6 @@
+#define	DLGPROP_kSymbolConvert_0_Text	"Makrodatei konvertieren"
+#define	DLGPROP_kSymbolConvert_1_Text	"Jede Symboldatei wird als [Prefix] [#] gespeichert.Csy. Lassen Präfix leer um den ursprünglichen Makronamen als Dateinamen zu verwenden."
+#define	DLGPROP_kSymbolConvert_4_Text	"Stichwörter:"
+#define	DLGPROP_kSymbolConvert_5_Text	"Exportieren"
+#define	DLGPROP_kSymbolConvert_6_Text	"Abbrechen"
+#define	DLGPROP_kSymbolConvert_7_Text	"Prefix:"

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="cred.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="encoding.min.js"></script>
+    <script src="util.js"></script>
+    <script src="filesys.js"></script>
+    <script src="geom.js"></script>
+    <script src="html.js"></script>
+    <script src="svg.js"></script>
+    <script src="cred_types.js"></script>
+    <script src="dlg_spec.js"></script>
+    <script src="dlg_resource.js"></script>
+    <script src="dlg_lexer.js"></script>
+    <script src="dlg_parser.js"></script>
+    <script src="dlg_generator.js"></script>
+    <script src="dlg_io.js"></script>
+    <script src="dlg_svg_layout.js"></script>
+    <script src="cred_ui.js"></script>
+    <script src="cred_controller.js"></script>
+    <script src="cred_app.js"></script>
+    <title>Canvas Resource Editor</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <div id="caption">Canvas Resource Editor</div>
+    <div id="file-bar">
+        <!-- Hidden file input element. -->
+        <input type="file" id="file-input" name="file-input" size="4" multiple>
+        <button class="bar-btn" id="open-cmd"></button>
+        <span id="filename" class="text-field">No file open</span>
+        <button class="bar-btn" id="save-cmd"></button>
+        <a id="save-download-link"></a>
+    </div>
+    <div id="tools-bar">
+        <button class="bar-btn" id="zoom-in-tool"></button>
+        <button class="bar-btn" id="zoom-out-tool"></button>
+        <button class="bar-btn" id="pan-tool"></button>
+    </div>
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab default-tab" data-contentid="master-tab">Master</button>
+        <button class="tab" data-contentid="en-tab">English</button>
+        <button class="tab" data-contentid="jp-tab">Japanese</button>
+        <button class="tab" data-contentid="de-tab">German</button>
+    </div>
+    <div id="panes">
+        <div id="display-pane">
+            <div id="display-header">
+                <input type="checkbox" id="linked-flag">
+                <label>Linked to Master</label>
+            </div>
+            <!-- Tab content -->
+            <div id="master-tab" class="tab-content">
+                <div id="any-display" class="dialog-display" data-locale="any"></div>
+            </div>
+            <div id="en-tab" class="tab-content">
+                <div id="en-display" class="dialog-display" data-locale="en"></div>
+            </div>
+            <div id="jp-tab" class="tab-content">
+                <div id="jp-display" class="dialog-display" data-locale="jp"></div>
+            </div>
+            <div id="de-tab" class="tab-content">
+                <div id="de-display" class="dialog-display" data-locale="de"></div>
+            </div>
+        </div>
+        <div id="property-pane">
+            <div id="item-title">Properties</div>
+            <div id="property-list"></div>
+        </div>
+    </div>
+</body>
+</html>

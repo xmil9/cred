@@ -1,0 +1,351 @@
+body {
+    background-color: white;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#caption {
+    background-color: #ccc;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: rgb(80, 80, 80);
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+/* --- Bars --- */
+
+.bar-btn {
+    background-size: 24px 24px;
+    width: 26px;
+    height: 26px;
+    border: 1px solid #ddd;
+    outline: none;
+    background-color: #f1f1f1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    transition: 0.3s;
+}
+
+.bar-btn:hover {
+    border: 1px solid #aaa;
+}
+
+/* --- File bar --- */
+
+#file-bar {
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#file-input {
+    /* Hide file input element. */
+    display: none;
+}
+
+#filename {
+    font-size: 0.9em;
+}
+
+#open-cmd {
+    background-image: url("resources/open.png");
+}
+
+#save-cmd {
+    background-image: url("resources/save.png");
+}
+
+/* --- Tool bar --- */
+
+#tools-bar {
+    padding-left: 10px;
+    padding-bottom: 5px;
+}
+
+/* --- Tabs --- */
+
+.tabs {
+    overflow: hidden;
+    border: 1px solid #f1f1f1;
+    background-color: #ddd;
+}
+
+.tabs button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: 0.3s;
+}
+
+.tabs button:hover {
+    background-color: #ccc;
+}
+
+.tabs button.active {
+    background-color: #f1f1f1;
+}
+
+/* --- Panes --- */
+
+#panes {
+    /* Position 'relative' to be able to position the inner panes 'absolute' to this. */
+    position: relative;
+    /* Ideally the display would fill the vertical space.
+       'height: 100hv' would make sense but it makes the
+       display extend the vertical page size! */
+    height: 75vh;
+    width: 100vw;
+}
+
+/* --- Display pane --- */
+
+#display-pane {
+    /* Position 'absolute' (within the parent div). This allows to divide the parent
+       space between the different panes. */
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+#display-header {
+    background-color: #f1f1f1;
+    padding-left: 50px;
+    padding-top: 5px;
+    font-size: 0.9em;
+}
+
+.tab-content {
+    display: none;
+}
+
+.dialog-display {
+    height: 80vh;
+    width: 75vw;
+    background-color: #f1f1f1;
+    border-style: solid;
+    border-width: 1px;
+    border-top: none;
+    border-color: #ddd;
+    /* include border in size calculations */
+    box-sizing: border-box;
+}
+
+.dialog {
+    fill: #d0d0d0;
+    stroke: #444;
+    stroke-width: 1px;
+}
+
+.control {
+    fill: #e0e0e0;
+    stroke: #444;
+    stroke-width: 1px;
+}
+
+.selection.enabled {
+    fill: #1a54d3
+}
+
+.selection.disabled {
+    fill: #6e737a
+}
+
+.selection.enabled.nw-marker {
+    cursor: nw-resize
+}
+
+.selection.enabled.n-marker {
+    cursor: n-resize
+}
+
+.selection.enabled.ne-marker {
+    cursor: ne-resize
+}
+
+.selection.enabled.e-marker {
+    cursor: e-resize
+}
+
+.selection.enabled.se-marker {
+    cursor: se-resize
+}
+
+.selection.enabled.s-marker {
+    cursor: s-resize
+}
+
+.selection.enabled.sw-marker {
+    cursor: sw-resize
+}
+
+.selection.enabled.w-marker {
+    cursor: w-resize
+}
+
+/* --- Property pane --- */
+
+#property-pane {
+    /* Position 'absolute' (within the parent div). This allows to divide the parent
+       space between the different panes. */
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    height: 82vh;
+    width: 25vw;
+    /* Stay on top in z-order. */
+    z-index: 1;
+    /* Disable horizontal scroll. */
+    overflow-x: hidden;
+    background-color: #f1f1f1;
+    border-style: solid;
+    border-width: 1px;
+    border-top: none;
+    border-color: #ddd;
+    /* Include border in size calculations. */
+    box-sizing: border-box;
+}
+
+#item-title {
+    background-color: #ccc;
+    margin-bottom: 10px;
+    color: rgb(80, 80, 80);
+    font-size: 1.1em;
+    font-weight: 500;
+    padding: 5px;
+}
+
+/* --- Property components --- */
+
+.component-container {
+    white-space: nowrap;
+}
+
+.line-container {
+    display: flex;
+    flex-direction: row;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.block-container {
+    display: flex;
+    flex-direction: row;
+    /* Revert 'white-space: nowrap' of component container */
+    white-space: normal;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.line-container > label, .block-container > label {
+    float: left;
+    clear: left;
+    width: 120px;
+    text-align: right;
+    font-size: 0.8em;
+}
+
+.line-container > input {
+    flex: 1;
+    margin-left: 2px;
+    margin-bottom: 7px;
+}
+
+/* --- Boolean component --- */
+
+/* Align checkbox input elements to the left. */
+.checkbox-line {
+    display: inline-block;
+}
+
+/* Align checkbox input elements to the left. */
+.checkbox-line > .global-image-checkbox {
+    display: inline-block;
+}
+
+/* Align checkbox input elements to the left. */
+.line-container > .checkbox {
+    float: left;
+}
+
+/* --- Enum component --- */
+
+.line-container > select {
+    flex: 1;
+    margin-left: 2px;
+    margin-bottom: 7px;
+    width: 170px;
+}
+
+/* --- Flags component --- */
+
+.block-container > fieldset {
+    flex: 1;
+    display: block;
+    width: 160px;
+    border-width: 1px;
+    border-color: #fff;
+    padding: 3px;
+    margin-bottom: 7px;
+}
+
+fieldset > .leftColumn {
+    width: 120px;
+    float: left;
+}
+
+fieldset > .rightColumn {
+    width: 120px;
+    float: right;
+    margin-right: 10px;
+}
+
+fieldset > div > span {
+    display: block;
+    white-space: nowrap;
+}
+
+fieldset > div > span > label {
+    font-size: 0.75em;
+}
+
+/* --- Image checkbox element for 'global/local' property state --- */
+
+.global-image-checkbox {
+    width: 11px;
+    height: 11px;
+    margin-left: 5px;
+    margin-top: 5px;
+    background-image: url("resources/globally.png");
+    background-repeat: no-repeat;
+ }
+ 
+ .global-image-checkbox:hover {
+    background-image: url("resources/globally_hover.png");
+    background-repeat: no-repeat;
+}
+ 
+.global-image-checkbox.disabled{
+    background-image: url("resources/globally_disabled.png");
+    background-repeat: no-repeat;
+}
+
+ .global-image-checkbox.checked {
+    background-image: url("resources/locally.png");
+    background-repeat: no-repeat;
+ }
+
+.global-image-checkbox.checked:hover {
+    background-image: url("resources/locally_hover.png");
+    background-repeat: no-repeat;
+ }
+
+ .global-image-checkbox.checked.disabled {
+    background-image: url("resources/locally_disabled.png");
+    background-repeat: no-repeat;
+ }

@@ -105,7 +105,7 @@ cred.lexer = (function() {
         return new IdentifierState(this._lexer, ch);
       }
 
-      throw `Unexpected character ${ch}`;
+      throw new Error(`Unexpected character ${ch}`);
     }
   }
 
@@ -124,7 +124,7 @@ cred.lexer = (function() {
       if (isWhitespace(ch)) {
         let matchedKeyword = DirectiveState._findMatch(this._value);
         if (!matchedKeyword) {
-          throw `Illegal directive: ${this._value}`;
+          throw new Error(`Illegal directive: ${this._value}`);
         }
         this._lexer.storeToken(cred.tokenKind.directive, matchedKeyword);
         return new UndecidedState(this._lexer);
@@ -175,7 +175,7 @@ cred.lexer = (function() {
       if (isEOL(ch)) {
         let comment = this._value.trim();
         if (!CommentState._isValidComment(comment)) {
-          throw `Illegal comment: ${comment}`;
+          throw new Error(`Illegal comment: ${comment}`);
         }
         this._lexer.storeToken(cred.tokenKind.comment, comment);
         return new UndecidedState(this._lexer);

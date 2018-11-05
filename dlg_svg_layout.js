@@ -1201,7 +1201,7 @@ cred.layout = (function() {
         return Math.round(geom.toNumber(coord));
       }
       default: {
-        throw 'Unexpected type to convert to dialog coordinate.';
+        throw new Error('Unexpected type to convert to dialog coordinate.');
       }
     }
   }

@@ -436,7 +436,7 @@ cred.resource = (function() {
           let stringId = property.value;
           this.addString(stringId, value, language);
         } else {
-          throw 'Unexpected property type for localized string property.';
+          throw new Error('Unexpected property type for localized string property.');
         }
       }
     }
@@ -657,7 +657,7 @@ cred.resource = (function() {
         }
 
         default: {
-          throw 'Unexpected property type when normalizing localized strings.';
+          throw new Error('Unexpected property type when normalizing localized strings.');
         }
       }
     }
@@ -739,7 +739,7 @@ cred.resource = (function() {
     // Denormalizes the string of a given property.
     _denormalizeProperty(item, prop) {
       if (prop.type !== cred.spec.physicalPropertyType.identifier) {
-        throw 'Unexpected property type when denormalizing localized strings.';
+        throw new Error('Unexpected property type when denormalizing localized strings.');
       }
 
       const internalStrId = prop.value;
@@ -1046,7 +1046,7 @@ cred.resource = (function() {
     // Polymorphic function to return the definition's identifier.
     get id() {
       if (!this._properties.has(cred.spec.propertyLabel.id)) {
-        throw 'Dialog must have an identifier.';
+        throw new Error('Dialog must have an identifier.');
       }
       return this.property(cred.spec.propertyLabel.id).value;
     }
@@ -1104,7 +1104,7 @@ cred.resource = (function() {
       if (!this._controls.has(ctrl.id)) {
         this._controls.set(ctrl.id, ctrl);
       } else {
-        throw 'Control exists already.';
+        throw new Error('Control exists already.');
       }
     }
 
@@ -1129,7 +1129,7 @@ cred.resource = (function() {
   class ControlDefinition {
     constructor(type, id) {
       if (!type || !id) {
-        throw 'Invalid arguments. Control must have a type and an identifier.';
+        throw new Error('Invalid arguments. Control must have a type and an identifier.');
       }
       // Map that associates property labels with property definition objects.
       this._properties = new Map();
@@ -1400,7 +1400,7 @@ cred.resource = (function() {
         return new FlagsPropertyDefinition(label, type, value);
       }
       default: {
-        throw 'Unexpected physical property type.';
+        throw new Error('Unexpected physical property type.');
       }
     }
   }

@@ -196,7 +196,7 @@ geom = (function() {
       horz = firstValueOf(horzArg, horzProperties);
     }
     if (typeof horz === 'undefined') {
-      throw 'Invalid argument.';
+      throw new Error('Invalid argument.');
     }
 
     let vert = undefined;
@@ -206,7 +206,7 @@ geom = (function() {
       vert = firstValueOf(vertArg, vertProperties);
     }
     if (typeof vert === 'undefined') {
-      throw 'Invalid argument.';
+      throw new Error('Invalid argument.');
     }
 
     return [horz, vert];

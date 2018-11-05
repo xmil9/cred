@@ -1910,7 +1910,7 @@ cred.spec = (function() {
         return new TextBoxSpec();
       }
       default: {
-        throw 'Unexpected control type.';
+        throw new Error('Unexpected control type.');
       }
     }
   }

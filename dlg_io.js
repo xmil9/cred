@@ -192,6 +192,7 @@ cred.io = (function() {
       this._contentGen = new cred.gen.ResourceGenerator(dlgResourceSet);
     }
 
+    // Starts the write process.
     write() {
       this._dlgResourceSet.denormalizeLocalizedStrings();
 
@@ -203,12 +204,14 @@ cred.io = (function() {
       this._dlgResourceSet.normalizeLocalizedStrings();
     }
 
+    // Writes the master dialog file.
     _writeMasterFile() {
       let fileName = this._dlgResourceSet.masterFileName;
       let content = this._contentGen.generateContent(cred.locale.any);
       this._writeFile(fileName, content);
     }
 
+    // Writes the dialog and string files of a given language.
     _writeLanguageFiles(language) {
       const targetLocale = cred.localeFromLanguage(language);
       let [dlgContent, strContent] = this._contentGen.generateContent(targetLocale);
@@ -231,6 +234,7 @@ cred.io = (function() {
       );
     }
 
+    // Write given text to a file with a given name.
     _writeFile(fileName, text) {
       filesys.saveTextFile(fileName, text, $('#save-download-link')[0]);
     }
@@ -329,7 +333,7 @@ cred.io = (function() {
     _populate(files) {
       this.masterFile = FileSet._findMasterFile(files);
       if (!this.masterFile) {
-        throw 'No master dialog file found in file set.';
+        throw new Error('No master dialog file found in file set.');
       }
       this._populateLanguageFiles(files);
     }

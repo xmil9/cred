@@ -19,7 +19,7 @@ cred.controller = (function() {
   class Controller {
     constructor(app, model, view, layout) {
       if (!app || !model || !view || !layout) {
-        throw 'Invalid arguments. Required argument missing.';
+        throw new Error('Invalid arguments. Required argument missing.');
       }
 
       this._app = app;

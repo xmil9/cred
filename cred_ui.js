@@ -553,7 +553,7 @@ cred.ui = (function() {
   class PropertyComponent {
     constructor(propDefintion, propSpec) {
       if (!propDefintion || !propSpec) {
-        throw 'Invalid arguments. Property defintion and spec required.';
+        throw new Error('Invalid arguments. Property defintion and spec required.');
       }
       // The defintion of the property containing the data read from the
       // resource for this property.
@@ -979,7 +979,7 @@ cred.ui = (function() {
         return cred.locale.german;
       }
       default: {
-        throw 'Invalid tab content id.';
+        throw new Error('Invalid tab content id.');
       }
     }
   }

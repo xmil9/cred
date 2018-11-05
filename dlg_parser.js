@@ -38,7 +38,7 @@ cred.parser = (function() {
     // Returns the next token.
     nextToken() {
       if (!this.haveToken()) {
-        throw 'Syntax error. Unexpected end of file.';
+        throw new Error('Syntax error. Unexpected end of file.');
       }
       return this._tokens[this._tokenIdx++];
     }
@@ -54,14 +54,14 @@ cred.parser = (function() {
     peekAheadBy(numTokens) {
       const peekIdx = this._tokenIdx + numTokens - 1;
       if (peekIdx >= this._tokens.length) {
-        throw 'Peeked past end.';
+        throw new Error('Peeked past end.');
       }
       return this._tokens[peekIdx];
     }
 
     token(idx) {
       if (idx >= this.countTokens()) {
-        throw 'Invalid argument. Token index too high.';
+        throw new Error('Invalid argument. Token index too high.');
       }
       return this._tokens[idx];
     }
@@ -133,11 +133,11 @@ cred.parser = (function() {
       } else if (token.isMatch(cred.tokenKind.directive, '#elif')) {
         cvLangMacro = parseElifDirective(this, token);
       } else {
-        throw 'Syntax error. Expected ifdef- or elif-directive.';
+        throw new Error('Syntax error. Expected ifdef- or elif-directive.');
       }
       const lang = languageFromCanvasLanguageMacro(cvLangMacro);
       if (!lang) {
-        throw 'Syntax error. Expected language identifier.';
+        throw new Error('Syntax error. Expected language identifier.');
       }
 
       // Read the file name from the include-directive.
@@ -457,7 +457,7 @@ cred.parser = (function() {
   // Returns a dialog resource object generated from tokens.
   function parseDialog(tokens, locale) {
     if (typeof tokens === 'undefined') {
-      throw 'Invalid arguments. Tokens expected.';
+      throw new Error('Invalid arguments. Tokens expected.');
     }
     let parser = new DialogParser(tokens, locale);
     return parser.parse();
@@ -496,7 +496,7 @@ cred.parser = (function() {
   // Returns a string map object generated from the tokens.
   function parseStrings(tokens, language) {
     if (typeof tokens === 'undefined') {
-      throw 'Invalid arguments. Tokens expected.';
+      throw new Error('Invalid arguments. Tokens expected.');
     }
     let parser = new StringParser(tokens, language);
     return parser.parse();
@@ -541,7 +541,7 @@ cred.parser = (function() {
     }
 
     if (!serialized.startsWith('{') || !serialized.endsWith('}')) {
-      throw 'Invalid serialized properties.';
+      throw new Error('Invalid serialized properties.');
     }
 
     // Trim off the enclosing braces.
@@ -609,10 +609,10 @@ cred.parser = (function() {
         return util.toNumber(valueAsStr);
       }
       case cred.spec.physicalPropertyType.flags: {
-        throw 'Flags are not supported as serialized properties. Implement!';
+        throw new Error('Flags are not supported as serialized properties. Implement!');
       }
       default: {
-        throw 'Unexpected physical property type to convert to.';
+        throw new Error('Unexpected physical property type to convert to.');
       }
     }
   }
@@ -630,7 +630,7 @@ cred.parser = (function() {
     verifyToken(token, cred.tokenKind.comment);
     let version = findVersionSpecifier(token.value);
     if (!version) {
-      throw 'Syntax error. Expected format version.';
+      throw new Error('Syntax error. Expected format version.');
     }
     return version;
   }
@@ -653,7 +653,7 @@ cred.parser = (function() {
     let [propValue, propType] = determinePropertyValueAndType(token);
     const isTypePermitted = propertySpec.types.indexOf(propType) !== -1;
     if (!isTypePermitted) {
-      throw 'Unexpected property type.';
+      throw new Error('Unexpected property type.');
     }
 
     let property = cred.resource.makePropertyDefinition(
@@ -697,7 +697,7 @@ cred.parser = (function() {
     } else if (token.isKind(cred.tokenKind.string)) {
       parseSerializedProperties(parser, token, ctrl);
     } else {
-      throw 'Control has invalid caption field.';
+      throw new Error('Control has invalid caption field.');
     }
   }
 
@@ -731,7 +731,9 @@ cred.parser = (function() {
         return [token.value, cred.spec.physicalPropertyType.identifier];
       }
       default: {
-        throw 'Syntax error. Expected a number, string, or identifier as property value.';
+        throw new Error(
+          'Syntax error. Expected a number, string, or identifier as property value.'
+        );
       }
     }
   }
@@ -833,11 +835,13 @@ cred.parser = (function() {
   // Verifies that a given token is of a given kind and optionally has a given
   // value. Throws given error, if not.
   // Returns the value of the token.
-  function verifyToken(token, expectedKind, expectedValue, err) {
+  function verifyToken(token, expectedKind, expectedValue, errMsg) {
     if (!token.isMatch(expectedKind, expectedValue)) {
-      throw typeof err !== 'undefined'
-        ? err
-        : buildErrorMessage(token, expectedKind, expectedValue);
+      throw new Error(
+        typeof errMsg !== 'undefined'
+          ? errMsg
+          : buildErrorMessage(token, expectedKind, expectedValue)
+      );
     }
     return token.value;
   }

@@ -6,7 +6,9 @@
 ///////////////////
 
 // Imports
+// These are provided through (ordered!) script tags in the HTML file.
 var svg = svg || {};
+var geom = geom || {};
 
 ///////////////////
 

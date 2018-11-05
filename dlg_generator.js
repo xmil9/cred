@@ -24,7 +24,7 @@ cred.gen = (function() {
 
     // Generates the dialog and string content for a given locale.
     // Returns [<dialog content>, <string content>] pair. For the master locale the
-    // string content will be undefined.
+    // string content element of the pair will be undefined.
     generateContent(locale) {
       if (locale == cred.locale.any) {
         return this._generateMasterContent();
@@ -32,6 +32,8 @@ cred.gen = (function() {
       return this._generateLanguageContent(cred.languageFromLocale(locale));
     }
 
+    // Generates the dialog content of the master resource.
+    // Returns a [<dialog content>, undefined] pair.
     _generateMasterContent() {
       if (this._dlgResourceSet.areAllLocalesUnlinked()) {
         return this._generateUnlinkedMasterContent();
@@ -39,6 +41,9 @@ cred.gen = (function() {
       return this._generateLinkedMasterContent();
     }
 
+    // Generates the dialog content of the master resource when no language resources
+    // are linked to it.
+    // Returns a [<dialog content>, undefined] pair.
     _generateUnlinkedMasterContent() {
       const indent = 0;
       const dlgContent = generateAllLanguageDialogIncludes(
@@ -48,11 +53,16 @@ cred.gen = (function() {
       return [dlgContent, undefined];
     }
 
+    // Generates the dialog content of the master resource when at least one language
+    // resource is linked to it.
+    // Returns a [<dialog content>, undefined] pair.
     _generateLinkedMasterContent() {
       const dlgContent = this._generateDialogContent(cred.locale.any);
       return [dlgContent, undefined];
     }
 
+    // Generates the dialog and string content for a given language.
+    // Returns [<dialog content>, <string content>] pair.
     _generateLanguageContent(language) {
       const locale = cred.localeFromLanguage(language);
       const strContent = this._generateStringContent(language);
@@ -68,12 +78,16 @@ cred.gen = (function() {
       return [dlgContent, strContent];
     }
 
+    // Generates dialog content for a linked resource.
+    // Returns the content as string.
     _generateLinkedDialogContent() {
       let text = '';
       text += makeLine(0, generateIncludeDirective(this._dlgResourceSet.masterFileName));
       return text;
     }
 
+    // Generates the dialog file content for a given locale.
+    // Returns the content as string.
     _generateDialogContent(locale) {
       let dlgResource = this._dlgResourceSet.dlgResources(locale);
       let dlg = dlgResource.dialogDefinition;
@@ -98,6 +112,7 @@ cred.gen = (function() {
       return text;
     }
 
+    // Generates the string file content for a given language.
     _generateStringContent(language) {
       let text = '';
       let langGen = this._dlgResourceSet.languageStrings(language);
@@ -111,52 +126,65 @@ cred.gen = (function() {
   ///////////////////
 
   const newline = '\n';
+  // Number of space to insert for each level of indentation.
   const spacesPerIndentLevel = 4;
 
+  // Returns the number of spaces to insert for a given level of indentation.
   function indentLevel(base, level) {
     return base + level * spacesPerIndentLevel;
   }
 
+  // Returns a string with a given number of spaces.
   function indentBy(count) {
     return ' '.repeat(count);
   }
 
+  // Returns a string with a given indent and content that is terminated by a newline.
   function makeLine(indent, content) {
     return indentBy(indent) + content + newline;
   }
 
+  // Returns the text for a C++ #ifdef-directive.
   function generateIfdefDirective(condition) {
     return `#ifdef ${condition}`;
   }
 
+  // Returns the text for a C++ #elif-directive.
   function generateElifDirective(condition) {
     return `#elif defined ${condition}`;
   }
 
+  // Returns the text for a C++ #error-directive.
   function generateErrorDirective(errText) {
     return `#error "${errText}"`;
   }
 
+  // Returns the text for a C++ #include-directive.
   function generateIncludeDirective(fileName) {
     return `#include "${fileName}"`;
   }
 
+  // Returns the value of a property as a string.
   function generatePropertyValue(item, propLabel) {
     return item.property(propLabel).valueAsString();
   }
 
+  // Generates the string for including a dialog file.
   function generateDialogInclude(dlgName, locale) {
     return generateIncludeDirective(cred.dialogFileName(dlgName, locale));
   }
 
+  // Generates the string for including a string file.
   function generateStringInclude(dlgName, language) {
     return generateIncludeDirective(cred.stringFileName(dlgName, language));
   }
 
+  // Generates the string for the version specifier of the dialog format.
   function generateVersionSpecifier() {
     return `// Version [${cred.resourceVersion}] //`;
   }
 
+  // Generates a line containing the C++ resource includes.
   function generateCppIncludes(indent) {
     return makeLine(
       indent,
@@ -200,6 +228,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the beginning of a dialog's definition section.
   function generateDialogDefintionBeginning(dlg, indent) {
     return makeLine(
       indent,
@@ -207,10 +236,12 @@ cred.gen = (function() {
     );
   }
 
+  // Generates the end of a dialog's definition section.
   function generateDialogDefintionEnding(indent) {
     return makeLine(indent, 'end_dialog_definition_ex_()');
   }
 
+  // Generates the positional properties of a given dialog.
   function generatePositionalDialogProperties(dlg) {
     let text = '';
     text += dlg.id + ',';
@@ -227,6 +258,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the control declaration section for a given dialog.
   function generateControlDeclarations(dlg, indent) {
     let text = '';
     for (const [, ctrl] of dlg.controls) {
@@ -235,6 +267,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the declaration for a given control.
   function generateControlDeclaration(ctrl) {
     return (
       'declare_control(' +
@@ -245,6 +278,7 @@ cred.gen = (function() {
     );
   }
 
+  // Generates the control definition section for a given dialog.
   function generateControlDefinitions(dlg, indent) {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
@@ -256,6 +290,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the definition for a given control.
   function generateControlDefinition(ctrl, indent) {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
@@ -265,6 +300,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the beginning of a control declaration.
   function generateControlDefintionBeginning(ctrl, indent) {
     return makeLine(
       indent,
@@ -272,10 +308,12 @@ cred.gen = (function() {
     );
   }
 
+  // Generates the end of a control declaration.
   function generateControlDefintionEnding(indent) {
     return makeLine(indent, 'end_control_ex()');
   }
 
+  // Generates the positional properties for a given control.
   function generatePositionalControlProperties(ctrl) {
     let text = '';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.ctrlType) + ',';
@@ -291,6 +329,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the caption property for a given control.
   function generateControlCaption(ctrl) {
     const ctrlSpec = cred.spec.makeControlSpec(ctrl.type);
     if (ctrlSpec.hasBehaviorFlag(cred.spec.controlBehavior.serializeProperties)) {
@@ -301,6 +340,7 @@ cred.gen = (function() {
     return captionProp ? captionProp.valueAsString() : '""';
   }
 
+  // Generates the serialized properties for a given control.
   function generateSerializedItemProperties(item, itemSpec) {
     let text = '{';
 
@@ -321,6 +361,7 @@ cred.gen = (function() {
     return numSerizalizedProps > 0 ? text : '';
   }
 
+  // // Decides whether to generate the serialized representation of a given property.
   function generateSerializedItemProperty(itemId, property, propertySpec) {
     let text = '';
     if (propertySpec.writeSerialized) {
@@ -328,19 +369,20 @@ cred.gen = (function() {
         if (property.hasValue()) {
           text += generateSerializedProperty(property, propertySpec);
         } else if (!propertySpec.isNullable) {
-          throw `Non-nullable property '${
+          throw new Error(`Non-nullable property '${
             propertySpec.label
-          }' doesn't have a value in definition of ${itemId}.`;
+          }' doesn't have a value in definition of ${itemId}.`);
         }
       } else if (propertySpec.isRequired) {
-        throw `Required property '${
+        throw new Error(`Required property '${
           propertySpec.label
-        }' not present in definition of ${itemId}.`;
+        }' not present in definition of ${itemId}.`);
       }
     }
     return text;
   }
 
+  // Generates the serialized representation of a given property.
   function generateSerializedProperty(property, spec) {
     let generatedValue = property.valueAsString();
     if (spec.writeAsStringWhenLabeled) {
@@ -350,6 +392,7 @@ cred.gen = (function() {
     return `[${property.label}=${generatedValue}]`;
   }
 
+  // Generates the labeled properties for a given control.
   function generateLabeledControlProperties(ctrl, indent) {
     let text = '';
     text += generateLabeledItemProperties(
@@ -361,6 +404,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the labeled properties for a given dialog.
   function generateLabeledDialogProperties(dlg, indent) {
     let text = '';
     text += makeLine(indent, 'begin_dialog_properties()');
@@ -374,6 +418,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Generates the labeled properties for a given item.
   function generateLabeledItemProperties(item, itemSpec, indent, keyword) {
     const sortedLabels = Array.from(itemSpec.propertySpecs.keys()).sort(
       // Note that the labels cannot be equal because keys of a map have to be distinct.
@@ -395,6 +440,7 @@ cred.gen = (function() {
     return text;
   }
 
+  // Decides whether to generate the labeled representation of a given property.
   function generateLabeledItemProperty(itemId, property, propertySpec, keyword) {
     let text = '';
     if (propertySpec.writeLabeled) {
@@ -403,15 +449,16 @@ cred.gen = (function() {
         if (property.hasValue() || propertySpec.isNullable) {
           text += generateLabeledProperty(property, propertySpec, keyword);
         } else {
-          throw `Non-nullable property '${propLabel}' doesn't have a value in control definition of ${itemId}.`;
+          throw new Error(`Non-nullable property '${propLabel}' doesn't have a value in control definition of ${itemId}.`);
         }
       } else if (propertySpec.isRequired) {
-        throw `Required property '${propLabel}' not present in item definition of ${itemId}.`;
+        throw new Error(`Required property '${propLabel}' not present in item definition of ${itemId}.`);
       }
     }
     return text;
   }
 
+  // Generates the labeled representation of a given property.
   function generateLabeledProperty(property, spec, keyword) {
     let generatedValue = property.valueAsString();
     if (spec.writeAsStringWhenLabeled && !util.isSurroundedBy(generatedValue, '"')) {
@@ -420,6 +467,7 @@ cred.gen = (function() {
     return `${keyword}(${property.label},${generatedValue})`;
   }
 
+  // Generates the layers section of a dialog resource.
   function generateLayers(dlgResource, indent) {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
@@ -435,17 +483,19 @@ cred.gen = (function() {
     return text;
   }
 
-  function generateLayer(layerDefinition, indent) {
+  // Generates the section for a given layer of a dialog resource.
+  function generateLayer(layer, indent) {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
-    text += makeLine(indent, `BEGIN_LAYER "${layerDefinition.name}"`);
-    for (let val of layerDefinition.values) {
+    text += makeLine(indent, `BEGIN_LAYER "${layer.name}"`);
+    for (let val of layer.values) {
       text += makeLine(indented_1, val);
     }
     text += makeLine(indent, 'END_LAYER');
     return text;
   }
 
+  // Returns the string for C++ #define.
   function generateCppStringDefinition(id, text) {
     return `#define ${id} "${text}"`;
   }

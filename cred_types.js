@@ -56,7 +56,7 @@ cred.localeFromLanguage = function(language) {
       return cred.locale.german;
     }
     default: {
-      throw 'Unexpected language value.';
+      throw new Error('Unexpected language value.');
     }
   }
 };
@@ -78,7 +78,7 @@ cred.languageFromLocale = function(locale, replaceAnyWith = undefined) {
       return replaceAnyWith;
     }
     default: {
-      throw 'Unexpected locale value.';
+      throw new Error('Unexpected locale value.');
     }
   }
 };

@@ -47,7 +47,7 @@ cred.gen = (function() {
     _generateUnlinkedMasterContent() {
       const indent = 0;
       const dlgContent = generateAllLanguageDialogIncludes(
-        this._dlgResourceSet.dialogName(),
+        this._dlgResourceSet.dialogName,
         indent
       );
       return [dlgContent, undefined];
@@ -89,18 +89,15 @@ cred.gen = (function() {
     // Generates the dialog file content for a given locale.
     // Returns the content as string.
     _generateDialogContent(locale) {
-      let dlgResource = this._dlgResourceSet.dlgResources(locale);
-      let dlg = dlgResource.dialogDefinition;
+      let resource = this._dlgResourceSet.dialogResource(locale);
+      let dlg = resource.dialogDefinition;
       const indent = 0;
       const indented_1 = indentLevel(indent, 1);
 
       let text = '';
       text += generateCppIncludes(indent);
       text += newline;
-      text += generateAllLanguageStringIncludes(
-        this._dlgResourceSet.dialogName(),
-        indent
-      );
+      text += generateAllLanguageStringIncludes(this._dlgResourceSet.dialogName, indent);
       text += newline;
       text += generateDialogDefintionBeginning(dlg, indent);
       text += generateLabeledDialogProperties(dlg, indented_1);
@@ -108,7 +105,7 @@ cred.gen = (function() {
       text += generateControlDefinitions(dlg, indented_1);
       text += generateDialogDefintionEnding(indent);
       text += newline;
-      text += generateLayers(dlgResource, indent);
+      text += generateLayers(resource, indent);
       return text;
     }
 
@@ -261,7 +258,7 @@ cred.gen = (function() {
   // Generates the control declaration section for a given dialog.
   function generateControlDeclarations(dlg, indent) {
     let text = '';
-    for (const [, ctrl] of dlg.controls) {
+    for (const ctrl of dlg.controls()) {
       text += makeLine(indent, generateControlDeclaration(ctrl));
     }
     return text;
@@ -283,7 +280,7 @@ cred.gen = (function() {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
     text += makeLine(indent, 'begin_control_definitions()');
-    for (const [, ctrl] of dlg.controls) {
+    for (const ctrl of dlg.controls()) {
       text += generateControlDefinition(ctrl, indented_1);
     }
     text += makeLine(indent, 'end_control_definitions()');
@@ -369,14 +366,18 @@ cred.gen = (function() {
         if (property.hasValue()) {
           text += generateSerializedProperty(property, propertySpec);
         } else if (!propertySpec.isNullable) {
-          throw new Error(`Non-nullable property '${
-            propertySpec.label
-          }' doesn't have a value in definition of ${itemId}.`);
+          throw new Error(
+            `Non-nullable property '${
+              propertySpec.label
+            }' doesn't have a value in definition of ${itemId}.`
+          );
         }
       } else if (propertySpec.isRequired) {
-        throw new Error(`Required property '${
-          propertySpec.label
-        }' not present in definition of ${itemId}.`);
+        throw new Error(
+          `Required property '${
+            propertySpec.label
+          }' not present in definition of ${itemId}.`
+        );
       }
     }
     return text;
@@ -449,10 +450,14 @@ cred.gen = (function() {
         if (property.hasValue() || propertySpec.isNullable) {
           text += generateLabeledProperty(property, propertySpec, keyword);
         } else {
-          throw new Error(`Non-nullable property '${propLabel}' doesn't have a value in control definition of ${itemId}.`);
+          throw new Error(
+            `Non-nullable property '${propLabel}' doesn't have a value in control definition of ${itemId}.`
+          );
         }
       } else if (propertySpec.isRequired) {
-        throw new Error(`Required property '${propLabel}' not present in item definition of ${itemId}.`);
+        throw new Error(
+          `Required property '${propLabel}' not present in item definition of ${itemId}.`
+        );
       }
     }
     return text;

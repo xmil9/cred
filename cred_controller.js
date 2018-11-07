@@ -67,8 +67,10 @@ cred.controller = (function() {
       return this._model.isLinkedToMaster(locale);
     }
 
-    allLinkedLocales() {
-      return this._model.allLinkedLocales();
+    *linkedLocales() {
+      for (const locale of this._model.linkedLocales()) {
+        yield locale;
+      }
     }
 
     lookupString(stringId) {

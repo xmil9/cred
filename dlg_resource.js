@@ -19,46 +19,49 @@ cred.resource = (function() {
   // Handles interactions between the resource model and other parts of the app.
   class ResourceManager {
     constructor() {
-      this._dlgResourceSet = undefined;
+      this._resourceSet = undefined;
       this._controller = undefined;
     }
 
-    // --- External interface ---
+    setup() {
+      // Nothing to do.
+    }
 
-    setup() {}
-
+    // Inject controller.
     set controller(value) {
       this._controller = value;
     }
 
     dialogResource(locale) {
-      return this._dlgResourceSet.dlgResources(locale);
+      return this._resourceSet.dialogResource(locale);
     }
 
     isLinkedToMaster(locale) {
-      if (this._dlgResourceSet) {
-        return this._dlgResourceSet.isLinkedToMaster(locale);
+      if (this._resourceSet) {
+        return this._resourceSet.isLinkedToMaster(locale);
       }
       return false;
     }
 
-    // Returns an array of all locales whose dialog resource is linked to the master
-    // resource. The locale for the master resource is included in the array.
-    allLinkedLocales() {
-      let linkedLocales = [];
-      for (let locale of cred.locale) {
-        if (this.isLinkedToMaster(locale)) {
-          linkedLocales.push(locale);
-        }
+    // Generator function for all locales that have linked resources.
+    *linkedLocales() {
+      for (let locale of this._resourceSet.linkedLocales()) {
+        yield locale;
       }
-      return linkedLocales;
+    }
+
+    // Generator function for all locales that have unlinked resources.
+    *unlinkedLocales() {
+      for (let locale of this._resourceSet.unlinkedLocales()) {
+        yield locale;
+      }
     }
 
     lookupString(stringId, language) {
-      return this._dlgResourceSet.lookupString(stringId, language);
+      return this._resourceSet.lookupString(stringId, language);
     }
 
-    // --- Notifications ---
+    // Notifications
 
     onFilesChosenNotification(files) {
       this._openFiles(files);
@@ -76,22 +79,22 @@ cred.resource = (function() {
       this._updateItemBounds(this._controller.selectedItem, bounds);
     }
 
-    onItemPropertyModifiedNotification(propertyLabel, value) {
-      this._updateItemProperty(this._controller.selectedItem, propertyLabel, value);
+    onItemPropertyModifiedNotification(propLabel, value) {
+      this._updateItemProperty(this._controller.selectedItem, propLabel, value);
     }
 
-    onItemLocalizedStringPropertyModifiedNotification(propertyLabel, value) {
+    onItemLocalizedStringPropertyModifiedNotification(propLabel, value) {
       this._updateItemLocalizedStringProperty(
         this._controller.selectedItem,
-        propertyLabel,
+        propLabel,
         value
       );
     }
 
-    onItemFlagPropertyModifiedNotification(propertyLabel, flagText, flagValue, isSet) {
+    onItemFlagPropertyModifiedNotification(propLabel, flagText, flagValue, isSet) {
       this._updateItemFlagProperty(
         this._controller.selectedItem,
-        propertyLabel,
+        propLabel,
         flagText,
         flagValue,
         isSet
@@ -102,134 +105,129 @@ cred.resource = (function() {
       this._updateLinkingToMasterLocale(this._controller.currentLocale, isLinked);
     }
 
-    // --- Internal functions ---
-
     // Opens a given array of files.
     _openFiles(files) {
-      let dlgFileSet = new cred.io.FileSet(files);
-      if (dlgFileSet.isValid()) {
-        this._loadDialog(dlgFileSet);
+      let fileSet = new cred.io.FileSet(files);
+      if (fileSet.isValid()) {
+        this._loadDialog(fileSet);
       } else {
-        this._controller.notifyErrorOccurred(
-          this,
-          composeOpenDlgErrorMessage(dlgFileSet)
-        );
+        this._controller.notifyErrorOccurred(this, composeOpenDlgErrorMessage(fileSet));
       }
     }
 
     // Load a dialog from a given set of dialog files.
-    _loadDialog(dlgFileSet) {
+    _loadDialog(fileSet) {
       let self = this;
-      let reader = new cred.io.Reader(dlgFileSet);
+      let reader = new cred.io.Reader(fileSet);
       reader
         .read()
-        .then(dlgResourceSet => {
-          self._dlgResourceSet = dlgResourceSet;
-          self._controller.notifyDialogLoaded(this, dlgResourceSet);
+        .then(resourceSet => {
+          self._resourceSet = resourceSet;
+          self._controller.notifyDialogLoaded(this, resourceSet);
         })
         .catch(err => {
           self._controller.notifyErrorOccurred(
             this,
-            `Unable to open file ${dlgFileSet.dialogName}.\nError: ${err}`
+            `Unable to open file ${fileSet.dialogName}.\nError: ${err}`
           );
         });
     }
 
     // Stores the current dialog resources.
     _storeDialog() {
-      if (this._dlgResourceSet) {
-        let writer = new cred.io.Writer(this._dlgResourceSet);
+      if (this._resourceSet) {
+        let writer = new cred.io.Writer(this._resourceSet);
         writer.write();
       }
     }
 
-    // Updates the id of a given item.
-    _updateItemId(item, id) {
+    // Updates the id of a given layout item.
+    _updateItemId(layoutItem, id) {
       // An item's id is shared among all locale resources, so we have to change
       // all of them. Also, control ids are used as keys in some dialog data
       // structures and need special treatment there.
-      if (item.isDialog) {
-        this._dlgResourceSet.updateDialogId(id);
+      if (layoutItem.isDialog()) {
+        this._resourceSet.updateDialogId(id);
       } else {
-        this._dlgResourceSet.updateControlId(item.id, id);
+        this._resourceSet.updateControlId(layoutItem.id, id);
       }
     }
 
-    // Updates the bounds stored in the resource of a given item.
-    _updateItemBounds(item, bounds) {
+    // Updates the bounds stored in the resource of a given layout item.
+    _updateItemBounds(layoutItem, bounds) {
       // The bounds of an item are specific to that item and can be different
       // for each locale, so only the item's definition needs to be changed,
       // the other locales remain untouched (in case they are linked the
       // item definition will be the same!).
-      const propertyLabel = cred.spec.propertyLabel;
-      let itemDefinition = item.itemDefinition();
-      itemDefinition.property(propertyLabel.left).value = bounds.left;
-      itemDefinition.property(propertyLabel.top).value = bounds.top;
-      itemDefinition.property(propertyLabel.width).value = bounds.width;
-      itemDefinition.property(propertyLabel.height).value = bounds.height;
+      const propLabel = cred.spec.propertyLabel;
+      let resourceDef = layoutItem.resourceDefinition();
+      resourceDef.property(propLabel.left).value = bounds.left;
+      resourceDef.property(propLabel.top).value = bounds.top;
+      resourceDef.property(propLabel.width).value = bounds.width;
+      resourceDef.property(propLabel.height).value = bounds.height;
     }
 
-    // Updates a given property of a given item.
-    _updateItemProperty(item, propertyLabel, value) {
-      this._dlgResourceSet.updateProperty(
-        item,
-        propertyLabel,
+    // Updates a given property of a given layout item.
+    _updateItemProperty(layoutItem, propLabel, value) {
+      this._resourceSet.updateProperty(
+        layoutItem,
+        propLabel,
         value,
-        this._selectAffectedLocales(propertyLabel)
+        this._selectAffectedLocales(propLabel)
       );
     }
 
-    // Updates a given localized string property of a given item.
-    _updateItemLocalizedStringProperty(item, propertyLabel, value) {
+    // Updates a given localized string property of a given layout item.
+    _updateItemLocalizedStringProperty(layoutItem, propLabel, value) {
       // Localized string properties are specific to the current locale.
-      this._dlgResourceSet.updateLocalizedStringProperty(
-        item,
-        propertyLabel,
+      this._resourceSet.updateLocalizedStringProperty(
+        layoutItem,
+        propLabel,
         value,
         this._controller.currentLocale
       );
     }
 
-    // Updates a given flag property of a given item.
-    _updateItemFlagProperty(item, propertyLabel, flagText, flagValue, isSet) {
-      this._dlgResourceSet.updateFlagProperty(
-        item,
-        propertyLabel,
+    // Updates a given flag property of a given layout item.
+    _updateItemFlagProperty(layoutItem, propLabel, flagText, flagValue, isSet) {
+      this._resourceSet.updateFlagProperty(
+        layoutItem,
+        propLabel,
         flagText,
         flagValue,
         isSet,
-        this._selectAffectedLocales(propertyLabel)
+        this._selectAffectedLocales(propLabel)
       );
     }
 
     // Updates the linking of the resource of a given locale to the master resource.
     _updateLinkingToMasterLocale(locale, isLinked) {
       if (isLinked) {
-        this._dlgResourceSet.linkToMaster(locale);
+        this._resourceSet.linkToMaster(locale);
       } else {
-        this._dlgResourceSet.unlinkFromMaster(locale);
+        this._resourceSet.unlinkFromMaster(locale);
       }
     }
 
     // Returns an array with the locales affected when a given property changes.
-    _selectAffectedLocales(propertyLabel) {
-      if (this._isGlobalProperty(propertyLabel)) {
+    _selectAffectedLocales(propLabel) {
+      if (this._isGlobalProperty(propLabel)) {
         return Array.from(cred.locale);
       }
       return [this._controller.currentLocale];
     }
 
     // Returns whether a given property is set to have global effect when edited.
-    _isGlobalProperty(propertyLabel) {
-      return this._controller.isCurrentPropertyGlobal(propertyLabel);
+    _isGlobalProperty(propLabel) {
+      return this._controller.isCurrentPropertyGlobal(propLabel);
     }
   }
 
   // Returns an error message for a failed dialog opening operation.
-  function composeOpenDlgErrorMessage(dlgFileSet) {
-    if (!dlgFileSet.masterFile) {
+  function composeOpenDlgErrorMessage(fileSet) {
+    if (!fileSet.masterFile) {
       return 'Unable to open dialog files. No master dialog file found.';
-    } else if (!dlgFileSet.haveAllLanguageStringFiles()) {
+    } else if (!fileSet.haveAllLanguageStringFiles()) {
       return 'Unable to open dialog files. Some string files are missing.';
     } else {
       return 'Unable to open dialog files. Unexpected error.';
@@ -241,11 +239,9 @@ cred.resource = (function() {
   // Holds all data contained in a set of dialog resource files.
   class DialogResourceSet {
     constructor() {
-      // Map that associates locales with their dialog resources.
-      this._dlgResources = new Map();
-      // Map that associates locales with a flag indicating whether they
-      // are linked to the master layout of the dialog.
-      this._linkedToMaster = new Map();
+      // Map of unlinked resources that associates locales their resources.
+      // Linked resources are not contained in the map.
+      this._resources = new Map();
       // Maps that associates locales with a log of collected issues when
       // importing the dialog.
       this._importLog = new Map();
@@ -255,55 +251,48 @@ cred.resource = (function() {
       this._init();
     }
 
-    // --- External interface ---
-
     // Returns the file name of the master resource file.
     get masterFileName() {
-      return cred.dialogFileName(this.dialogName(), cred.locale.any);
+      return cred.dialogFileName(this.dialogName, cred.locale.any);
     }
 
     languageDialogFileName(language) {
-      return cred.dialogFileName(this.dialogName(), cred.localeFromLanguage(language));
+      return cred.dialogFileName(this.dialogName, cred.localeFromLanguage(language));
     }
 
     languageStringFileName(language) {
-      return cred.stringFileName(this.dialogName(), cred.localeFromLanguage(language));
+      return cred.stringFileName(this.dialogName, cred.localeFromLanguage(language));
     }
 
-    dialogName() {
+    get dialogName() {
       // The dialog name is the same for all locales, so grab the first available one.
-      let dlgRes = this._firstAvailableDialogResource();
-      if (typeof dlgRes === 'undefined') {
+      let resource = this._firstAvailableDialogResource();
+      if (typeof resource === 'undefined') {
         return undefined;
       }
-      return dlgRes.dialogName();
+      return resource.dialogName;
     }
 
     // Returns the dialog resource for a given locale.
-    dlgResources(locale) {
+    dialogResource(locale) {
       // Resolve the link, if any.
       const resolvedLocale = this.isLinkedToMaster(locale) ? cred.locale.any : locale;
-      return this._dlgResources.get(resolvedLocale);
+      return this._resources.get(resolvedLocale);
     }
 
-    setDlgResources(locale, dlgResource) {
-      this._dlgResources.set(locale, dlgResource);
-      // Because a resource is set, clear the 'linked to master' flag. Except
-      // for the master locale because for it the flag should always stay set.
-      if (locale !== cred.locale.any) {
-        this._linkedToMaster.set(locale, false);
-      }
+    setDialogResource(locale, resource) {
+      this._resources.set(locale, resource);
     }
 
     // Generator function for all unlinked dialog resources.
-    *unlinkedDlgResources() {
-      for (let [, dlgResource] of this._dlgResources) {
-        yield dlgResource;
+    *unlinkedDialogResources() {
+      for (let resource of this._resources.values()) {
+        yield resource;
       }
     }
 
     isLinkedToMaster(locale) {
-      return this._linkedToMaster.get(locale);
+      return locale === cred.locale.any || !this._resources.has(locale);
     }
 
     // Unlink a given locale to the master resource.
@@ -319,23 +308,21 @@ cred.resource = (function() {
         this._copyResource(locale, cred.locale.any);
       }
 
-      this._dlgResources.delete(locale);
-      this._linkedToMaster.set(locale, true);
+      this._resources.delete(locale);
     }
 
     // Unlink a given locale from the master resource.
     unlinkFromMaster(locale) {
       if (locale === cred.locale.any) {
-        // Cannot link master to master.
+        // Cannot unlink master to master.
         return;
       }
 
       this._copyResource(cred.locale.any, locale);
-      this._linkedToMaster.set(locale, false);
 
       // Clear the master resource, if all resources are unlinked.
       if (this.areAllLocalesUnlinked()) {
-        this._dlgResources.delete(cred.locale.any);
+        this._resources.delete(cred.locale.any);
       }
     }
 
@@ -357,6 +344,22 @@ cred.resource = (function() {
         }
       }
       return true;
+    }
+
+    // Generator function for all locales that have linked resources.
+    *linkedLocales() {
+      for (let locale of cred.locale) {
+        if (!this._resources.has(locale)) {
+          yield locale;
+        }
+      }
+    }
+
+    // Generator function for all locales that have unlinked resources.
+    *unlinkedLocales() {
+      for (let locale of this._resources.keys()) {
+        yield locale;
+      }
     }
 
     importLog(locale) {
@@ -400,31 +403,31 @@ cred.resource = (function() {
 
     // Updates the dialog's id in all dialog resources.
     updateDialogId(id) {
-      for (let [, dlgResource] of this._dlgResources) {
+      for (let [, dlgResource] of this._resources) {
         dlgResource.updateDialogId(id);
       }
     }
 
     // Updates a control's id in all dialog resources.
     updateControlId(currentId, id) {
-      for (let [, dlgResource] of this._dlgResources) {
+      for (let [, dlgResource] of this._resources) {
         dlgResource.updateControlId(currentId, id);
       }
     }
 
     // Updates the value of a given property for a given layout item in the given
     // locales.
-    updateProperty(item, propertyLabel, value, locales) {
+    updateProperty(layoutItem, propLabel, value, locales) {
       for (const locale of locales) {
-        let property = this._itemPropertyForLocale(item, propertyLabel, locale);
+        let property = this._resourceProperty(layoutItem, propLabel, locale);
         property.value = value;
       }
     }
 
     // Updates the value of a given localized string property for a given layout
     // item in the given locale.
-    updateLocalizedStringProperty(item, propertyLabel, value, locale) {
-      let property = this._itemPropertyForLocale(item, propertyLabel, locale);
+    updateLocalizedStringProperty(layoutItem, propLabel, value, locale) {
+      let property = this._resourceProperty(layoutItem, propLabel, locale);
       let language = cred.languageFromLocale(locale);
       // Safeguard against master locale, although localized properties should
       // be read-only in for the master layout.
@@ -443,9 +446,9 @@ cred.resource = (function() {
 
     // Updates the value of a given flags property for a given layout item in the
     // given locales.
-    updateFlagProperty(item, propertyLabel, flagText, flagValue, isSet, locales) {
+    updateFlagProperty(layoutItem, propLabel, flagText, flagValue, isSet, locales) {
       for (const locale of locales) {
-        let property = this._itemPropertyForLocale(item, propertyLabel, locale);
+        let property = this._resourceProperty(layoutItem, propLabel, locale);
 
         if (isSet) {
           property.addFlag(flagText, flagValue);
@@ -469,47 +472,45 @@ cred.resource = (function() {
       this._stringMap = denormalization.denormalize();
     }
 
-    // --- Internal functions ---
-
     // Initializes the internal data structures.
     _init() {
       for (const locale of cred.locale) {
-        this._linkedToMaster.set(locale, true);
         this._importLog.set(locale, []);
       }
     }
 
     // Copies the resource of a given source locale to a given target locale.
     _copyResource(fromLocale, toLocale) {
-      if (this._dlgResources.has(fromLocale)) {
-        let copy = this._dlgResources.get(fromLocale).copyAs(toLocale);
-        this._dlgResources.set(toLocale, copy);
+      if (this._resources.has(fromLocale)) {
+        let copy = this._resources.get(fromLocale).copyAs(toLocale);
+        this._resources.set(toLocale, copy);
       } else {
-        this._dlgResources.delete(toLocale);
+        this._resources.delete(toLocale);
       }
     }
 
     // Returns the first available dialog resource.
     _firstAvailableDialogResource() {
-      for (const [, dlgRes] of this._dlgResources) {
-        return dlgRes;
+      for (const [, resource] of this._resources) {
+        return resource;
       }
       return undefined;
     }
 
     // Returns a property of a given layout item for a given locale.
-    _itemPropertyForLocale(item, propertyLabel, locale) {
-      let itemLocaleDefinition = this._itemDefintionForLocale(item, locale);
-      return itemLocaleDefinition.property(propertyLabel);
+    _resourceProperty(layoutItem, propLabel, locale) {
+      let resourceDef = this._resourceDefinition(layoutItem, locale);
+      return resourceDef.property(propLabel);
     }
 
-    // Returns the resource definition of a given layout item for a given locale.
-    _itemDefintionForLocale(item, locale) {
-      let dlgResource = this.dlgResources(locale);
-      if (item.isDialog) {
-        return dlgResource.dialogDefinition;
+    // Returns the resource definition of a given layout item for a given
+    // locale.
+    _resourceDefinition(layoutItem, locale) {
+      let resource = this.dialogResource(locale);
+      if (layoutItem.isDialog()) {
+        return resource.dialogDefinition;
       }
-      return dlgResource.controls.get(item.id);
+      return resource.control(layoutItem.id);
     }
   }
 
@@ -603,21 +604,21 @@ cred.resource = (function() {
     _normalizeProperties() {
       const dlgSpec = cred.spec.makeDialogSpec();
 
-      for (let dlgRes of this._dlgResourceSet.unlinkedDlgResources()) {
+      for (let dlgRes of this._dlgResourceSet.unlinkedDialogResources()) {
         let dlg = dlgRes.dialogDefinition;
         let locale = dlgRes.locale;
 
         // Normalize dialog properties.
-        for (let [, prop] of dlg.properties) {
+        for (let prop of dlg.properties()) {
           if (isLocalizedStringProperty(prop, dlgSpec)) {
             this._normalizeProperty(dlg, prop, locale);
           }
         }
 
         // Normalize control properties.
-        for (let [, ctrl] of dlg.controls) {
+        for (let ctrl of dlg.controls()) {
           let ctrlSpec = cred.spec.makeControlSpec(ctrl.type);
-          for (let [, prop] of ctrl.properties) {
+          for (let prop of ctrl.properties()) {
             if (isLocalizedStringProperty(prop, ctrlSpec)) {
               this._normalizeProperty(ctrl, prop, locale);
             }
@@ -707,27 +708,27 @@ cred.resource = (function() {
 
     _denormalizeStrings() {
       [this._denormalizedMap, this._idLookup] = this._stringMap.copyWithRegeneratedIds(
-        generatePersistentStringId(this._dlgResourceSet.dialogName())
+        generatePersistentStringId(this._dlgResourceSet.dialogName)
       );
     }
 
     _denormalizeProperties() {
       const dlgSpec = cred.spec.makeDialogSpec();
 
-      for (let dlgRes of this._dlgResourceSet.unlinkedDlgResources()) {
+      for (let dlgRes of this._dlgResourceSet.unlinkedDialogResources()) {
         let dlg = dlgRes.dialogDefinition;
 
         // Denormalize dialog properties.
-        for (let [, prop] of dlg.properties) {
+        for (let prop of dlg.properties()) {
           if (isLocalizedStringProperty(prop, dlgSpec)) {
             this._denormalizeProperty(dlg, prop);
           }
         }
 
         // Denormalize control properties.
-        for (let [, ctrl] of dlg.controls) {
+        for (let ctrl of dlg.controls()) {
           let ctrlSpec = cred.spec.makeControlSpec(ctrl.type);
-          for (let [, prop] of ctrl.properties) {
+          for (let prop of ctrl.properties()) {
             if (isLocalizedStringProperty(prop, ctrlSpec)) {
               this._denormalizeProperty(ctrl, prop);
             }
@@ -918,12 +919,15 @@ cred.resource = (function() {
     copyAs(targetLocale) {
       let copy = new DialogResource(targetLocale);
       copy.version = this.version;
-      copy._includedHeaders = Object.assign({}, this._includedHeaders);
+      copy._includedHeaders = util.copyArrayShallow(this._includedHeaders);
       for (const [lang, strFile] of this._stringFiles) {
         copy._stringFiles.set(lang, strFile);
       }
       copy._dlgDefinition = this._dlgDefinition.copy();
-      copy.layerDefinitions = Object.assign({}, this.layerDefinitions);
+      copy.layerDefinitions = [];
+      for (const layerDef of this.layerDefinitions) {
+        copy.layerDefinitions = layerDef.copy();
+      }
       return copy;
     }
 
@@ -943,14 +947,14 @@ cred.resource = (function() {
     stringFileName() {
       if (this._locale !== cred.locale.any) {
         return cred.stringFileName(
-          this.dialogName(),
+          this.dialogName,
           cred.languageFromLocale(this._locale)
         );
       }
       return undefined;
     }
 
-    dialogName() {
+    get dialogName() {
       return this.dialogProperty(cred.spec.propertyLabel.id);
     }
 
@@ -963,8 +967,14 @@ cred.resource = (function() {
       return this._dlgDefinition.property(label).value;
     }
 
-    get controls() {
-      return this._dlgDefinition.controls;
+    control(id) {
+      return this._dlgDefinition.control(id);
+    }
+
+    *controls() {
+      for (let ctrl of this._dlgDefinition.controls()) {
+        yield ctrl;
+      }
     }
 
     // Adds an included C/C++ header file.
@@ -1057,7 +1067,7 @@ cred.resource = (function() {
     }
 
     // Polymorphic function to check if this definition is for a dialog.
-    get isDialog() {
+    isDialog() {
       return true;
     }
 
@@ -1072,31 +1082,43 @@ cred.resource = (function() {
     }
 
     // Polymorphic function to set a dialog property.
+    // Sets the property straight without considering any policies.
     setProperty(label, property) {
       this._properties.set(label, property);
     }
 
-    get properties() {
-      return this._properties;
-    }
-
-    get controls() {
-      return this._controls;
+    *properties() {
+      for (let prop of this._properties.values()) {
+        yield prop;
+      }
     }
 
     // Polymorphic function that adds a positional property for the dialog.
+    // Uses policy to resolve situations where a property is added multiple times.
     addPositionalProperty(label, property) {
       addPositionalProperty(label, property, this);
     }
 
     // Polymorphic function that adds a labeled property for the dialog.
+    // Uses policy to resolve situations where a property is added multiple times.
     addLabeledProperty(label, property) {
       addLabeledProperty(label, property, this);
     }
 
     // Polymorphic function that adds a serialized property for the dialog.
+    // Uses policy to resolve situations where a property is added multiple times.
     addSerializedProperty(label, property) {
       addSerializedProperty(label, property, this);
+    }
+
+    control(id) {
+      return this._controls.get(id);
+    }
+
+    *controls() {
+      for (let ctrl of this._controls.values()) {
+        yield ctrl;
+      }
     }
 
     // Adds a control definition to the dialog.
@@ -1178,7 +1200,7 @@ cred.resource = (function() {
     }
 
     // Polymorphic function to check if this definition is for a dialog.
-    get isDialog() {
+    isDialog() {
       return false;
     }
 
@@ -1193,25 +1215,31 @@ cred.resource = (function() {
     }
 
     // Polymorphic function to set a control property.
+    // Sets the property straight without considering any policies.
     setProperty(label, property) {
       this._properties.set(label, property);
     }
 
-    get properties() {
-      return this._properties;
+    *properties() {
+      for (let prop of this._properties.values()) {
+        yield prop;
+      }
     }
 
     // Polymorphic function that adds a positional property for the control.
+    // Uses policy to resolve situations where a property is added multiple times.
     addPositionalProperty(pos, property) {
       addPositionalProperty(pos, property, this);
     }
 
     // Polymorphic function that adds a labeled property for the control.
+    // Uses policy to resolve situations where a property is added multiple times.
     addLabeledProperty(label, property) {
       addLabeledProperty(label, property, this);
     }
 
     // Polymorphic function that adds a serialized property for the control.
+    // Uses policy to resolve situations where a property is added multiple times.
     addSerializedProperty(label, property) {
       addSerializedProperty(label, property, this);
     }
@@ -1234,7 +1262,7 @@ cred.resource = (function() {
     if (!isDialogOrControl(a) || !isDialogOrControl(b)) {
       return false;
     }
-    return a.isDialog === b.isDialog && a.id === b.id;
+    return a.isDialog() === b.isDialog() && a.id === b.id;
   }
 
   ///////////////////
@@ -1332,7 +1360,7 @@ cred.resource = (function() {
     // Polymorthic function that returns a deep copy of the property definition.
     copy() {
       let copy = new FlagsPropertyDefinition(this.label, this.type, this.value);
-      copy._flags = Object.assign({}, this._flags);
+      copy._flags = util.copyArrayShallow(this._flags);
       return copy;
     }
 
@@ -1449,6 +1477,28 @@ cred.resource = (function() {
 
   ///////////////////
 
+  // Definition of a layer in a dialog resource.
+  class LayerDefinition {
+    constructor(name, values) {
+      this.name = name;
+      // Array of integer numbers.
+      this.values = values || [];
+    }
+
+    // Returns a deep copy of the object.
+    copy() {
+      let copy = new LayerDefinition(this.name);
+      copy.values = util.copyArrayShallow(this.values);
+      return copy;
+    }
+
+    addNumber(num) {
+      this.values.push(num);
+    }
+  }
+
+  ///////////////////
+
   // Verifies the definition of a dialog against a dialog specification.
   class DialogVerifier {
     constructor(dlgDefinition) {
@@ -1458,16 +1508,12 @@ cred.resource = (function() {
       this._log = [];
     }
 
-    // --- External interface ---
-
     // Starts the verification process and returns the log of collected issues.
     verify() {
       this._verifyDialogProperties();
       this._verifyControlProperties();
       return this._log;
     }
-
-    // --- Internal functions ---
 
     // Verifies the properties of the dialog.
     _verifyDialogProperties() {
@@ -1478,12 +1524,12 @@ cred.resource = (function() {
     // Verifies that the properties defined in the dialog resource follow the
     // dialog specification.
     _verifyDefinedDialogProperties() {
-      for (let [label, property] of this._dlgDefinition.properties) {
+      for (let prop of this._dlgDefinition.properties()) {
         this._verifyDefinedProperty(
-          property,
-          this._dlgSpec.propertySpec(label),
+          prop,
+          this._dlgSpec.propertySpec(prop.label),
           'dialog',
-          label
+          prop.label
         );
       }
     }
@@ -1503,7 +1549,7 @@ cred.resource = (function() {
 
     // Verifies the properties of each of the dialog's controls.
     _verifyControlProperties() {
-      for (let [, ctrl] of this._dlgDefinition.controls) {
+      for (let ctrl of this._dlgDefinition.controls()) {
         let ctrlSpec = cred.spec.makeControlSpec(ctrl.type);
         this._verifyDefinedControlProperties(ctrl, ctrlSpec);
         this._verifySpecifiedControlProperties(ctrl, ctrlSpec);
@@ -1513,12 +1559,12 @@ cred.resource = (function() {
     // Verifies that the properties defined in a control definition follow the
     // control's specification.
     _verifyDefinedControlProperties(ctrl, ctrlSpec) {
-      for (let [label, property] of ctrl.properties) {
+      for (let prop of ctrl.properties()) {
         this._verifyDefinedProperty(
-          property,
-          ctrlSpec.propertySpec(label),
+          prop,
+          ctrlSpec.propertySpec(prop.label),
           'control',
-          label
+          prop.label
         );
       }
     }
@@ -1584,6 +1630,7 @@ cred.resource = (function() {
     DialogDefinition: DialogDefinition,
     DialogResource: DialogResource,
     DialogResourceSet: DialogResourceSet,
+    LayerDefinition: LayerDefinition,
     makePropertyDefinition: makePropertyDefinition,
     ResourceManager: ResourceManager,
     StringMap: StringMap,

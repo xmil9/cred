@@ -436,18 +436,14 @@ cred.parser = (function() {
     _parseLayer(token) {
       verifyToken(token, cred.tokenKind.identifier, 'BEGIN_LAYER');
 
-      let name = parseString(this.nextToken());
-      let values = [];
+      const name = parseString(this.nextToken());
+      let layerDef = new cred.resource.LayerDefinition(name);
       token = this.nextToken();
       while (token.isKind(cred.tokenKind.number)) {
-        values.push(parseNumber(token));
+        layerDef.addNumber(parseNumber(token));
         token = this.nextToken();
       }
-
-      this._dlgResource.layerDefinitions.push({
-        name: name,
-        values: values
-      });
+      this._dlgResource.layerDefinitions.push(layerDef);
 
       verifyToken(token, cred.tokenKind.identifier, 'END_LAYER');
     }

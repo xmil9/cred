@@ -218,8 +218,7 @@ cred.layout = (function() {
       const currentLocale = this._controller.currentLocale;
 
       if (this._controller.isLinkedToMaster(currentLocale)) {
-        let linkedLocales = this._controller.allLinkedLocales();
-        for (let locale of linkedLocales) {
+        for (let locale of this._controller.linkedLocales()) {
           linkedDisplays.push(this._svgDisplays.get(locale));
         }
       } else {
@@ -580,7 +579,7 @@ cred.layout = (function() {
     }
 
     // Polymorphic function to return the resource definition for the dialog.
-    itemDefinition() {
+    resourceDefinition() {
       return this._dlgResource.dialogDefinition;
     }
 
@@ -591,19 +590,18 @@ cred.layout = (function() {
 
     // Polymorphic function to return the resource id of the item.
     get id() {
-      return this.itemDefinition().id;
+      return this.resourceDefinition().id;
     }
 
     // Polymorphic function to return whether the item represents a dialog.
-    get isDialog() {
-      return this.itemDefinition().isDialog;
+    isDialog() {
+      return this.resourceDefinition().isDialog();
     }
 
     // Builds the SVG items for the controls of the dialog.
     buildControls() {
-      const ctrlResources = this._dlgResource.controls;
-      for (let [ctrlId, ctrl] of ctrlResources) {
-        this._controlItems.set(ctrlId, new SvgControl(ctrl, this.svgDisplay));
+      for (let ctrl of this._dlgResource.controls()) {
+        this._controlItems.set(ctrl.id, new SvgControl(ctrl, this.svgDisplay));
       }
     }
 
@@ -661,7 +659,7 @@ cred.layout = (function() {
     }
 
     // Polymorphic function to return the resource definition for the control.
-    itemDefinition() {
+    resourceDefinition() {
       return this._ctrlDefinition;
     }
 
@@ -672,12 +670,12 @@ cred.layout = (function() {
 
     // Polymorphic function to return the resource id of the item.
     get id() {
-      return this.itemDefinition().id;
+      return this.resourceDefinition().id;
     }
 
     // Polymorphic function to return whether the item represents a dialog.
-    get isDialog() {
-      return this.itemDefinition().isDialog;
+    isDialog() {
+      return this.resourceDefinition().isDialog();
     }
 
     // Returns the bounds of the control as they are defined in the resource.

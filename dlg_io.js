@@ -172,7 +172,7 @@ cred.io = (function() {
         // is only including another resource file. Ignore those results.
         else if (result.resource) {
           const resultLocale = result.resource.locale;
-          resourceSet.setDlgResources(resultLocale, result.resource);
+          resourceSet.setDialogResource(resultLocale, result.resource);
           resourceSet.setImportLog(resultLocale, result.log);
         }
       }

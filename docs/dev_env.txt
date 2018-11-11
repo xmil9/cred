@@ -1,0 +1,58 @@
+- Visual Studio Code
+- ESLint
+- Prettier
+- Jest
+
+Shortcut to format code:
+- Ctrl-KD
+Execute tests:
+- npm test
+
+Install and integrate ESLint and Prettier
+Source: https://www.39digits.com/configure-prettier-and-eslint-in-visual-studio-code/
+Prettier:
+- npm install --save-dev prettier
+- create .prettierrc file with personal style settings
+- in VS Code install Prettier extension
+ESLint:
+- npm install --save-dev eslint
+- create .eslintrc.json file with personal linting settings
+- in VS Code install ESLint extension
+- set up ESLint to use Prettier for formatting (instead of using its own formatting):
+  npm install --save-dev eslint-config-prettier
+  add Prettier to .eslintrc.json (needs to be placed after other rule extensions to
+  take precedence
+  "extends": [<other extensions> , "prettier"],
+- set up ESLint to display Prettier errors:
+  npm install --save-dev eslint-plugin-prettier
+  add Prettier plugin to .eslintrc.json:
+  "plugins": ["prettier"],
+  
+Install Jest
+- npm install --save-dev jest
+- edit package.json to use Jest for testing:
+  "scripts": {
+    "test": "jest"
+  },
+- integrate with ESLint:
+  npm install --save-dev eslint-plugin-jest
+  add Jest plugin to .eslintrc.json:
+  "plugins": ["jest"],
+  "env": {"jest": true, "node": true}
+  (setting "node": true prevents errors for 'module.exports')
+- for custom settings create jest.config.js
+- to debug Jest tests in VSCode create launch.json debug configuration:
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest Tests",
+      "program": "${workspaceRoot}\\node_modules\\jest\\bin\\jest.js",
+      "args": [
+          "-i"
+      ],
+      "internalConsoleOptions": "openOnSessionStart"
+    }
+
+Install JQuery (to be able to test code in Jest that uses JQuery)
+- npm install --save-dev jquery
+- note that when running in the browser jquery is added with a script tag

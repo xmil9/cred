@@ -5,7 +5,7 @@
 
 ///////////////////
 
-// Imports
+// Namespaces
 var geom = geom || {};
 
 ///////////////////
@@ -15,8 +15,12 @@ geom = (function() {
   ///////////////////
 
   // Represents a rectangle.
+  // Rect instances are immutable.
   class Rect {
     constructor(left, top, width, height) {
+      if (width < 0 || height < 0) {
+        throw Error('Negative Rect dimensions are not valid.');
+      }
       this._left = left;
       this._top = top;
       this._width = width;
@@ -98,6 +102,8 @@ geom = (function() {
 
   ///////////////////
 
+  // Represents a point.
+  // Point instances are immutable.
   class Point {
     constructor(x, y) {
       this._x = x;
@@ -113,6 +119,9 @@ geom = (function() {
     }
 
     equals(other) {
+      if (typeof other.x === 'undefined' || typeof other.y === 'undefined') {
+        return false;
+      }
       return this.x === other.x && this.y === other.y;
     }
 
@@ -137,6 +146,8 @@ geom = (function() {
 
   ///////////////////
 
+  // Represents a size.
+  // Size instances are immutable.
   class Size {
     constructor(width, height) {
       this._w = width;
@@ -179,7 +190,7 @@ geom = (function() {
   // Resolves the different combination of arguments that are permitted for
   // specifying horizontal and vertical values.
   // The horizontal argument is required. The vertical argument is optional.
-  // Each can either be a numeric value or an object with a given, order list
+  // Each can either be a numeric value or an object with a given, ordered list
   // of property names to access the values to use.
   // Returns array with the resolved horizontal argument as first element and
   // the vertical argument as second.
@@ -218,7 +229,7 @@ geom = (function() {
   function firstValueOf(obj, properties) {
     for (let i = 0; i < properties.length; ++i) {
       const property = properties[i];
-      if (typeof obj[property] !== undefined) {
+      if (typeof obj[property] !== 'undefined') {
         return obj[property];
       }
     }
@@ -234,3 +245,7 @@ geom = (function() {
     Size: Size
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = geom;

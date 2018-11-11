@@ -5,9 +5,10 @@
 
 ///////////////////
 
-// Imports
-// These are provided through (ordered!) script tags in the HTML file.
+// Namespaces
 var cred = cred || {};
+// Dependencies
+// These are provided through (ordered!) script tags in the HTML file.
 var filesys = filesys || {};
 var util = util || {};
 
@@ -101,7 +102,7 @@ cred.parser = (function() {
       ) {
         return false;
       }
-      return filesys.extractExtension(secondToken.value) === 'dlg';
+      return filesys.extractExtension(secondToken.value).toLowerCase() === 'dlg';
     }
 
     // Parses the 'include' section of the resource.

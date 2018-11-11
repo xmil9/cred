@@ -5,7 +5,7 @@
 
 ///////////////////
 
-// Imports
+// Namespaces
 var cred = cred || {};
 
 ///////////////////

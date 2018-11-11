@@ -5,9 +5,10 @@
 
 ///////////////////
 
-// Imports
-// These are provided through (ordered!) script tags in the HTML file.
+// Namespaces
 var cred = cred || {};
+// Dependencies
+// These are provided through (ordered!) script tags in the HTML file.
 var geom = geom || {};
 var svg = svg || {};
 var util = util || {};

@@ -5,7 +5,7 @@
 
 ///////////////////
 
-// Imports
+// Namespaces
 var util = util || {};
 
 ///////////////////
@@ -23,19 +23,24 @@ util = (function() {
   }
 
   // Inserts a given element into a target array after a given element.
-  function insertAfter(targetArray, elem, afterElem) {
-    let idx = targetArray.indexOf(afterElem);
+  function insertAfter(arr, elem, afterElem) {
+    let idx = arr.indexOf(afterElem);
     if (idx === -1) {
-      idx = targetArray.length;
+      idx = arr.length;
     }
     idx++;
-    targetArray.splice(idx, 0, elem);
-    return targetArray;
+    arr.splice(idx, 0, elem);
+    return arr;
+  }
+
+  // Returns shallow copy of array.
+  function copyArrayShallow(arr) {
+    return arr.slice();
   }
 
   // Checks whether a given map contains a given value.
-  function hasValue(targetMap, value) {
-    for (const val of targetMap.values()) {
+  function hasValue(map, value) {
+    for (const val of map.values()) {
       if (val === value) {
         return true;
       }
@@ -48,6 +53,11 @@ util = (function() {
     return str.startsWith(pattern) && str.endsWith(pattern);
   }
 
+  // Checks whether a passed character (a string) is a hexadecimal character.
+  function isHexDigit(char) {
+    return char.length == 1 && '0123456789abcdefABCDEF'.indexOf(char) !== -1;
+  }
+
   // Generates a UUID. The UUID conforms to RFC4122 since the spec allows UUIDs
   // created randomly. However, since the time and machine are not accounted for
   // there is a (small) chance of collisions.
@@ -55,18 +65,27 @@ util = (function() {
   // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
   function uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-      (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+      (
+        c ^
+        (window.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
     );
   }
 
   ///////////////////
 
-  // Exports
+  // Exports for util module.
   return {
+    copyArrayShallow: copyArrayShallow,
     hasValue: hasValue,
     insertAfter: insertAfter,
+    isHexDigit: isHexDigit,
     isSurroundedBy: isSurroundedBy,
     toNumber: toNumber,
     uuidv4: uuidv4
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = util;

@@ -5,7 +5,7 @@
 
 ///////////////////
 
-// Imports
+// Namespaces
 var html = html || {};
 
 ///////////////////
@@ -111,3 +111,7 @@ html = (function() {
     makeSpanElement: makeSpanElement
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = html;

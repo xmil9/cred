@@ -5,9 +5,10 @@
 
 ///////////////////
 
-// Imports
-// These are provided through (ordered!) script tags in the HTML file.
+// Namespaces
 var svg = svg || {};
+// Dependencies
+// These are provided through (ordered!) script tags in the HTML file.
 var geom = geom || {};
 
 ///////////////////
@@ -53,10 +54,14 @@ svg = (function() {
 
   ///////////////////
 
-  // Exports
+  // Exports for util module.
   return {
     create: create,
     screenFromSvgPoint: screenFromSvgPoint,
     svgFromScreenPoint: svgFromScreenPoint
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = svg;

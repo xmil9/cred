@@ -5,8 +5,7 @@
 
 ///////////////////
 
-// Imports
-// These are provided through (ordered!) script tags in the HTML file.
+// Namespaces
 var cred = cred || {};
 
 ///////////////////

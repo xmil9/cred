@@ -19,7 +19,7 @@ geom = (function() {
   class Rect {
     constructor(left, top, width, height) {
       if (width < 0 || height < 0) {
-        throw Error('Negative Rect dimensions are not valid.');
+        throw new Error('Negative Rect dimensions are not valid.');
       }
       this._left = left;
       this._top = top;

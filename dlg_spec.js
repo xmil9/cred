@@ -5,11 +5,18 @@
 
 ///////////////////
 
-// Namespaces
-var cred = cred || {};
+// Attempts to require a given file. Returns undefined if 'require' is not available.
+// Helps to use the calling js file in both node.js and browser environments. In a
+// node.js environment the passed dependency will be loaded through the require
+// mechanism. In a browser environment this function will return undefined and the
+// dependency has to be loaded through a script tag.
+function tryRequire(file) {
+  return typeof require !== 'undefined' ? require(file) : undefined;
+}
+
 // Dependencies
-// These are provided through (ordered!) script tags in the HTML file.
-var util = util || {};
+var cred = tryRequire('./cred_types') || cred || {};
+var util = tryRequire('./util') || util || {};
 
 ///////////////////
 
@@ -362,6 +369,39 @@ cred.spec = (function() {
 
     addFlag(flagConfig) {
       this._flags.push(flagConfig);
+    }
+  }
+
+  // Factory function for property specs.
+  function makePropertySpec(logicalPropType, config) {
+    switch (logicalPropType) {
+      case logicalPropertyType.bool: {
+        return new BooleanPropertySpec(config);
+      }
+      case logicalPropertyType.enum: {
+        return new EnumPropertySpec(config);
+      }
+      case logicalPropertyType.flags: {
+        return new FlagsPropertySpec(config);
+      }
+      case logicalPropertyType.float: {
+        return new FloatingPointPropertySpec(config);
+      }
+      case logicalPropertyType.identifier: {
+        return new IdentifierPropertySpec(config);
+      }
+      case logicalPropertyType.integer: {
+        return new IntegerPropertySpec(config);
+      }
+      case logicalPropertyType.localizedString: {
+        return new LocalizedStringPropertySpec(config);
+      }
+      case logicalPropertyType.string: {
+        return new StringPropertySpec(config);
+      }
+      default: {
+        throw new Error('Unexpected logical property type.');
+      }
     }
   }
 
@@ -1924,8 +1964,13 @@ cred.spec = (function() {
     logicalPropertyType: logicalPropertyType,
     makeControlSpec: makeControlSpec,
     makeDialogSpec: makeDialogSpec,
+    makePropertySpec: makePropertySpec,
     physicalPropertyType: physicalPropertyType,
     propertyLabel: propertyLabel,
     semanticPropertyTag: semanticPropertyTag
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = cred.spec;

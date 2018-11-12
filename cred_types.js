@@ -5,7 +5,7 @@
 
 ///////////////////
 
-// Namespaces
+// Namespace
 var cred = cred || {};
 
 ///////////////////
@@ -134,6 +134,9 @@ cred.tokenKindName = function(kind) {
     case cred.tokenKind.keyword: {
       return 'keyword';
     }
+    default: {
+      return '';
+    }
   }
 };
 
@@ -204,3 +207,7 @@ cred.editContext = {
   localOnly: 'local_only'
 };
 Object.freeze(cred.editContext);
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = cred;

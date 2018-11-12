@@ -5,11 +5,19 @@
 
 ///////////////////
 
+// Attempts to require a given file. Returns undefined if 'require' is not available.
+// Helps to use the calling js file in both node.js and browser environments. In a
+// node.js environment the passed dependency will be loaded through the require
+// mechanism. In a browser environment this function will return undefined and the
+// dependency has to be loaded through a script tag.
+function tryRequire(file) {
+  return typeof require !== 'undefined' ? require(file) : undefined;
+}
+
 // Namespaces
 var cred = cred || {};
 // Dependencies
-// These are provided through (ordered!) script tags in the HTML file.
-var util = util || {};
+var util = tryRequire('./util') || util || {};
 
 ///////////////////
 
@@ -46,16 +54,12 @@ cred.resource = (function() {
 
     // Generator function for all locales that have linked resources.
     *linkedLocales() {
-      for (let locale of this._resourceSet.linkedLocales()) {
-        yield locale;
-      }
+      yield* this._resourceSet.linkedLocales();
     }
 
     // Generator function for all locales that have unlinked resources.
     *unlinkedLocales() {
-      for (let locale of this._resourceSet.unlinkedLocales()) {
-        yield locale;
-      }
+      yield* this._resourceSet.unlinkedLocales();
     }
 
     lookupString(stringId, language) {
@@ -973,9 +977,7 @@ cred.resource = (function() {
     }
 
     *controls() {
-      for (let ctrl of this._dlgDefinition.controls()) {
-        yield ctrl;
-      }
+      yield* this._dlgDefinition.controls();
     }
 
     // Adds an included C/C++ header file.
@@ -1480,21 +1482,44 @@ cred.resource = (function() {
 
   // Definition of a layer in a dialog resource.
   class LayerDefinition {
-    constructor(name, values) {
-      this.name = name;
+    constructor(name, numbers) {
+      this._name = name;
       // Array of integer numbers.
-      this.values = values || [];
+      this._numbers = numbers || [];
     }
 
     // Returns a deep copy of the object.
     copy() {
-      let copy = new LayerDefinition(this.name);
-      copy.values = util.copyArrayShallow(this.values);
+      let copy = new LayerDefinition(this._name);
+      // Since array is only holding primitive values we can make a shallow copy of
+      // it.
+      copy._numbers = util.copyArrayShallow(this._numbers);
       return copy;
     }
 
+    get name() {
+      return this._name;
+    }
+
+    countNumbers() {
+      return this._numbers.length;
+    }
+
+    // Generator function for the numbers of the layer.
+    *numbers() {
+      for (const num of this._numbers) {
+        yield num;
+      }
+    }
+
+    hasNumber(num) {
+      return this._numbers.includes(num);
+    }
+
     addNumber(num) {
-      this.values.push(num);
+      if (!this._numbers.includes(num)) {
+        this._numbers.push(num);
+      }
     }
   }
 
@@ -1638,3 +1663,7 @@ cred.resource = (function() {
     verifyDialog: verifyDialog
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = cred.resource;

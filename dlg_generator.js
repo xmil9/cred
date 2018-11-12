@@ -494,8 +494,8 @@ cred.gen = (function() {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
     text += makeLine(indent, `BEGIN_LAYER "${layer.name}"`);
-    for (let val of layer.values) {
-      text += makeLine(indented_1, val);
+    for (const num of layer.numbers()) {
+      text += makeLine(indented_1, num);
     }
     text += makeLine(indent, 'END_LAYER');
     return text;

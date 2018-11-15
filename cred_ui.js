@@ -463,9 +463,7 @@ cred.ui = (function() {
       const definition = item.resourceDefinition();
       let $containerElem = $('#property-list');
 
-      const propOrder = spec.propertyDisplayOrder;
-      for (let i = 0; i < propOrder.length; ++i) {
-        const label = propOrder[i];
+      for (const label of spec.propertyDisplayOrder()) {
         // Build the appropriate DOM structure using double-dispatch between
         // the property spec and property builder classes.
         let component = spec
@@ -601,7 +599,7 @@ cred.ui = (function() {
       let $input = html.makeInputElement(
         inputType,
         makeHtmlPropertyId(this.propertySpec.label),
-        !this.propertySpec.isModifiable,
+        !this.propertySpec.isModifiable(),
         value
       );
       html.addClasses($input, this.propertySpec.tags);
@@ -614,7 +612,7 @@ cred.ui = (function() {
       let $checkbox = html.makeInputElement(
         'checkbox',
         makeHtmlPropertyId(this.propertySpec.label),
-        !this.propertySpec.isModifiable
+        !this.propertySpec.isModifiable()
       );
       const isChecked =
         this.propertyDefinition.value === true || this.propertyDefinition.value === 1;
@@ -627,7 +625,7 @@ cred.ui = (function() {
     // Returns a select element in jQuery representation.
     buildEnumElement(enums) {
       const elemId = makeHtmlPropertyId(this.propertySpec.label);
-      let $select = html.makeSelectElement(elemId, !this.propertySpec.isModifiable);
+      let $select = html.makeSelectElement(elemId, !this.propertySpec.isModifiable());
       html.addClasses($select, this.propertySpec.tags);
 
       for (let i = 0; i < enums.length; ++i) {
@@ -645,7 +643,7 @@ cred.ui = (function() {
     // Returns a fieldset element in jQuery representation.
     buildFlagsElement(flags) {
       let $fieldset = html.makeFieldsetElement(
-        !this.propertySpec.isModifiable,
+        !this.propertySpec.isModifiable(),
         makeHtmlPropertyId(this.propertySpec.label)
       );
       html.addClasses($fieldset, this.propertySpec.tags);

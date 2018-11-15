@@ -167,8 +167,8 @@ cred.spec = (function() {
       // Should the property value be written as string when writing it out as a
       // serialized property?
       this._writeAsStringWhenSerialized =
-        typeof config._writeAsStringWhenSerialized !== 'undefined'
-          ? config._writeAsStringWhenSerialized
+        typeof config.writeAsStringWhenSerialized !== 'undefined'
+          ? config.writeAsStringWhenSerialized
           : false;
       // Contextual tags for the property.
       this._tags = config.tags || [];
@@ -185,11 +185,11 @@ cred.spec = (function() {
       return this._displayedLabel;
     }
 
-    get isRequired() {
+    isRequired() {
       return this._required;
     }
 
-    get isNullable() {
+    isNullable() {
       return this._nullable;
     }
 
@@ -197,27 +197,27 @@ cred.spec = (function() {
       return this._editContext;
     }
 
-    get isModifiable() {
+    isModifiable() {
       return this._modifiable;
     }
 
-    get isLocalized() {
+    isLocalized() {
       return this._localized;
     }
 
-    get writeLabeled() {
+    writeLabeled() {
       return this._writeLabeled;
     }
 
-    get writeAsStringWhenLabeled() {
+    writeAsStringWhenLabeled() {
       return this._writeAsStringWhenLabeled;
     }
 
-    get writeSerialized() {
+    writeSerialized() {
       return this._writeSerialized;
     }
 
-    get writeAsStringWhenSerialized() {
+    writeAsStringWhenSerialized() {
       return this._writeAsStringWhenSerialized;
     }
 
@@ -349,7 +349,7 @@ cred.spec = (function() {
       // Array of supported flags represented by an object with 'textValue',
       // 'numericValue', and 'display' properties holding the internal string
       // value, the internal numeric value, and the displayed text for the flag.
-      this._flags = config.flags;
+      this._flags = config.flags || [];
     }
 
     // Polymorphic function to build a DOM represetation of the property.
@@ -364,11 +364,15 @@ cred.spec = (function() {
     }
 
     haveFlags() {
-      return typeof this._flags !== 'undefined' && this._flags.length > 0;
+      return this._flags.length > 0;
     }
 
     addFlag(flagConfig) {
       this._flags.push(flagConfig);
+    }
+
+    hasFlag(flagText) {
+      return this._flags.findIndex(elem => elem.textValue === flagText) !== -1;
     }
   }
 
@@ -417,7 +421,7 @@ cred.spec = (function() {
       this._propertySpecs = DialogSpec._createPropertySpecs();
       // Array of property labels defining the order in which properties should
       // be displayed.
-      this._propertyDisplayOrder = DialogSpec.definePropertyDisplayOrder();
+      this._propertyDisplayOrder = DialogSpec._definePropertyDisplayOrder();
     }
 
     // Polymorphic function that returns a description of what the spec is for.
@@ -429,12 +433,22 @@ cred.spec = (function() {
       return this._propertySpecs.get(label);
     }
 
-    get propertySpecs() {
-      return this._propertySpecs;
+    *propertySpecs() {
+      for (const spec of this._propertySpecs.values()) {
+        yield spec;
+      }
     }
 
-    get propertyDisplayOrder() {
-      return this._propertyDisplayOrder;
+    *propertyLabels() {
+      for (const label of this._propertySpecs.keys()) {
+        yield label;
+      }
+    }
+
+    *propertyDisplayOrder() {
+      for (const label of this._propertyDisplayOrder) {
+        yield label;
+      }
     }
 
     // Creates a collection of property specs for all properties that dialogs
@@ -673,7 +687,7 @@ cred.spec = (function() {
 
     // Creates an array of property labels that defines the order in which
     // properties should be displayed.
-    static definePropertyDisplayOrder() {
+    static _definePropertyDisplayOrder() {
       return [
         propertyLabel.resourceClass,
         propertyLabel.id,
@@ -721,9 +735,9 @@ cred.spec = (function() {
       // Special behavior flags.
       this._behaviorFlags = controlBehavior.none;
 
-      this.populatePropertySpecs();
-      this.definePropertyDisplayOrder();
-      this.setBehaviorFlags();
+      this._populatePropertySpecs();
+      this._definePropertyDisplayOrder();
+      this._setBehaviorFlags();
     }
 
     // Polymorphic function that returns a description of what the spec is for.
@@ -735,12 +749,22 @@ cred.spec = (function() {
       return this._propertySpecs.get(label);
     }
 
-    get propertySpecs() {
-      return this._propertySpecs;
+    *propertySpecs() {
+      for (const spec of this._propertySpecs.values()) {
+        yield spec;
+      }
     }
 
-    get propertyDisplayOrder() {
-      return this._propertyDisplayOrder;
+    *propertyLabels() {
+      for (const label of this._propertySpecs.keys()) {
+        yield label;
+      }
+    }
+
+    *propertyDisplayOrder() {
+      for (const label of this._propertyDisplayOrder) {
+        yield label;
+      }
     }
 
     setBehaviorFlag(flag) {
@@ -753,7 +777,7 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs with the properties that are common to all controls.
-    populatePropertySpecs() {
+    _populatePropertySpecs() {
       this._propertySpecs.set(
         propertyLabel.ctrlType,
         new IdentifierPropertySpec({
@@ -1090,7 +1114,7 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the display order array
     // with the properties that are common to all controls.
-    definePropertyDisplayOrder() {
+    _definePropertyDisplayOrder() {
       this._propertyDisplayOrder.push(propertyLabel.ctrlType);
       // The cv resource class cannot be changed. We could display it as
       // pure information. For now don't show.
@@ -1119,7 +1143,7 @@ cred.spec = (function() {
     }
 
     // Polymorphic function to set behavior flags for the control.
-    setBehaviorFlags() {
+    _setBehaviorFlags() {
       // Nothing to do here. Derived classes can set flags.
     }
 
@@ -1144,14 +1168,14 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs.
-    populatePropertySpecs() {
-      super.populatePropertySpecs();
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
       this._addPropertySpecs();
     }
 
     // Polymorphic function that populates the display order array.
-    definePropertyDisplayOrder() {
-      super.definePropertyDisplayOrder();
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
 
       this._propertyDisplayOrder.push(propertyLabel.pushButtonLike);
       this._propertyDisplayOrder.push(propertyLabel.splitButtonLike);
@@ -1172,7 +1196,7 @@ cred.spec = (function() {
     }
 
     // Polymorphic function to set behavior flags for the control.
-    setBehaviorFlags() {
+    _setBehaviorFlags() {
       this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
     }
 
@@ -1500,14 +1524,14 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs.
-    populatePropertySpecs() {
-      super.populatePropertySpecs();
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
       this._addPropertySpecs();
     }
 
     // Polymorphic function that populates the display order array.
-    definePropertyDisplayOrder() {
-      super.definePropertyDisplayOrder();
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
 
       util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
       util.insertAfter(
@@ -1581,14 +1605,14 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs.
-    populatePropertySpecs() {
-      super.populatePropertySpecs();
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
       this._addPropertySpecs();
     }
 
     // Polymorphic function that populates the display order array.
-    definePropertyDisplayOrder() {
-      super.definePropertyDisplayOrder();
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
 
       util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
     }
@@ -1627,15 +1651,15 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs.
-    populatePropertySpecs() {
-      super.populatePropertySpecs();
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
       this._addPropertySpecs();
       this._addStyleFlags();
     }
 
     // Polymorphic function that populates the display order array.
-    definePropertyDisplayOrder() {
-      super.definePropertyDisplayOrder();
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
 
       util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
     }
@@ -1684,14 +1708,14 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs.
-    populatePropertySpecs() {
-      super.populatePropertySpecs();
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
       this._addPropertySpecs();
     }
 
     // Polymorphic function that populates the display order array.
-    definePropertyDisplayOrder() {
-      super.definePropertyDisplayOrder();
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
 
       util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
       this._propertyDisplayOrder.push(propertyLabel.readOnly);

@@ -343,7 +343,7 @@ cred.gen = (function() {
     let text = '{';
 
     let numSerizalizedProps = 0;
-    for (let [, propSpec] of itemSpec.propertySpecs) {
+    for (let propSpec of itemSpec.propertySpecs()) {
       let serialized = generateSerializedItemProperty(
         item.id,
         item.property(propSpec.label),
@@ -362,18 +362,18 @@ cred.gen = (function() {
   // // Decides whether to generate the serialized representation of a given property.
   function generateSerializedItemProperty(itemId, property, propertySpec) {
     let text = '';
-    if (propertySpec.writeSerialized) {
+    if (propertySpec.writeSerialized()) {
       if (property) {
         if (property.hasValue()) {
           text += generateSerializedProperty(property, propertySpec);
-        } else if (!propertySpec.isNullable) {
+        } else if (!propertySpec.isNullable()) {
           throw new Error(
             `Non-nullable property '${
               propertySpec.label
             }' doesn't have a value in definition of ${itemId}.`
           );
         }
-      } else if (propertySpec.isRequired) {
+      } else if (propertySpec.isRequired()) {
         throw new Error(
           `Required property '${
             propertySpec.label
@@ -387,7 +387,7 @@ cred.gen = (function() {
   // Generates the serialized representation of a given property.
   function generateSerializedProperty(property, spec) {
     let generatedValue = property.valueAsString();
-    if (spec.writeAsStringWhenLabeled) {
+    if (spec.writeAsStringWhenLabeled()) {
       // Serialized string values are surrounded by two double-quotes.
       generatedValue = `""${generatedValue}""`;
     }
@@ -422,7 +422,7 @@ cred.gen = (function() {
 
   // Generates the labeled properties for a given item.
   function generateLabeledItemProperties(item, itemSpec, indent, keyword) {
-    const sortedLabels = Array.from(itemSpec.propertySpecs.keys()).sort(
+    const sortedLabels = Array.from(itemSpec.propertyLabels()).sort(
       // Note that the labels cannot be equal because keys of a map have to be distinct.
       (a, b) => (a > b ? 1 : -1)
     );
@@ -445,17 +445,17 @@ cred.gen = (function() {
   // Decides whether to generate the labeled representation of a given property.
   function generateLabeledItemProperty(itemId, property, propertySpec, keyword) {
     let text = '';
-    if (propertySpec.writeLabeled) {
+    if (propertySpec.writeLabeled()) {
       const propLabel = propertySpec.label;
       if (property) {
-        if (property.hasValue() || propertySpec.isNullable) {
+        if (property.hasValue() || propertySpec.isNullable()) {
           text += generateLabeledProperty(property, propertySpec, keyword);
         } else {
           throw new Error(
             `Non-nullable property '${propLabel}' doesn't have a value in control definition of ${itemId}.`
           );
         }
-      } else if (propertySpec.isRequired) {
+      } else if (propertySpec.isRequired()) {
         throw new Error(
           `Required property '${propLabel}' not present in item definition of ${itemId}.`
         );
@@ -467,7 +467,7 @@ cred.gen = (function() {
   // Generates the labeled representation of a given property.
   function generateLabeledProperty(property, spec, keyword) {
     let generatedValue = property.valueAsString();
-    if (spec.writeAsStringWhenLabeled && !util.isSurroundedBy(generatedValue, '"')) {
+    if (spec.writeAsStringWhenLabeled() && !util.isSurroundedBy(generatedValue, '"')) {
       generatedValue = `"${generatedValue}"`;
     }
     return `${keyword}(${property.label},${generatedValue})`;

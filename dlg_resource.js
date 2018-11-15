@@ -1563,7 +1563,8 @@ cred.resource = (function() {
     // Verifies that the properties specified for the dialog are matched by
     // the actually defined properties.
     _verifySpecifiedDialogProperties() {
-      for (let [label, propSpec] of this._dlgSpec.propertySpecs) {
+      for (let propSpec of this._dlgSpec.propertySpecs()) {
+        const label = propSpec.label;
         this._verifySpecifiedProperty(
           this._dlgDefinition.property(label),
           propSpec,
@@ -1598,7 +1599,8 @@ cred.resource = (function() {
     // Verifies that the properties specified for a control are matched by
     // the actual defined properties.
     _verifySpecifiedControlProperties(ctrl, ctrlSpec) {
-      for (let [label, propSpec] of ctrlSpec.propertySpecs) {
+      for (let propSpec of ctrlSpec.propertySpecs()) {
+        const label = propSpec.label;
         this._verifySpecifiedProperty(ctrl.property(label), propSpec, 'control', label);
       }
     }
@@ -1612,7 +1614,7 @@ cred.resource = (function() {
         // Cannot continue without spec.
         return;
       }
-      if (!propSpec.isNullable && !property.hasValue()) {
+      if (!propSpec.isNullable() && !property.hasValue()) {
         this._reportError(
           `Defined ${parentDescription} property '${propLabel}': Non-nullable property has no value.`
         );
@@ -1621,7 +1623,7 @@ cred.resource = (function() {
 
     // Verifies that a specified property is matched by the actual defined property.
     _verifySpecifiedProperty(property, propSpec, parentDescription, propLabel) {
-      if (!property && propSpec.isRequired) {
+      if (!property && propSpec.isRequired()) {
         this._reportError(
           `Specified ${parentDescription} property '${propLabel}': Required property is not defined.`
         );

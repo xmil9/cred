@@ -313,7 +313,7 @@ cred.parser = (function() {
         'Syntax error. Control id not found.'
       );
       let ctrlId = ctrlIdToken.value;
-      let ctrl = this._dlgResource.findControlDefintion(ctrlId);
+      let ctrl = this._dlgResource.control(ctrlId);
 
       this._parsePositionalControlProperties(this.nextToken(), ctrl);
       this._parseLabeledControlProperties(this.nextToken(), ctrl);

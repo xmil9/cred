@@ -712,6 +712,16 @@ cred.spec = (function() {
 
   ///////////////////
 
+  // Enum for supported types of controls.
+  const controlType = {
+    imagePushButton: 'ImagePushButton',
+    label: 'Label',
+    placeHolder: 'PlaceHolder',
+    pushButton: 'PushButton',
+    textBox: 'TextBox'
+  };
+  Object.freeze(controlType);
+
   // Bit flags for special behavior of controls.
   const controlBehavior = {
     none: 0,
@@ -719,7 +729,7 @@ cred.spec = (function() {
     // properties.
     serializeProperties: 1
   };
-  Object.freeze(cred.controlBehavior);
+  Object.freeze(controlBehavior);
 
   // Base class for control specifications.
   // Defines what properties a control supports and how it and its properties
@@ -1959,19 +1969,19 @@ cred.spec = (function() {
   // Factory function for control specs based on a given control type.
   function makeControlSpec(ctrlType) {
     switch (ctrlType) {
-      case 'ImagePushButton': {
+      case controlType.imagePushButton: {
         return new ImagePushButtonSpec();
       }
-      case 'Label': {
+      case controlType.label: {
         return new LabelSpec();
       }
-      case 'PlaceHolder': {
+      case controlType.placeHolder: {
         return new PlaceHolderSpec();
       }
-      case 'PushButton': {
+      case controlType.pushButton: {
         return new PushButtonSpec();
       }
-      case 'TextBox': {
+      case controlType.textBox: {
         return new TextBoxSpec();
       }
       default: {
@@ -1985,6 +1995,7 @@ cred.spec = (function() {
   // Exports
   return {
     controlBehavior: controlBehavior,
+    controlType: controlType,
     logicalPropertyType: logicalPropertyType,
     makeControlSpec: makeControlSpec,
     makeDialogSpec: makeDialogSpec,

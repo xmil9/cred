@@ -1016,8 +1016,7 @@ cred.ui = (function() {
     return htmlId.replace('-flag', '');
   }
 
-  // Returns an id for a given flag text of a flags property. The id is used as an
-  // HTML attribute.
+  // Returns an id for an image checkbox with a given label.
   function makeHtmlImageCheckboxId(propLabel) {
     return `${propLabel}-global`;
   }

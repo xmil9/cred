@@ -14,9 +14,9 @@ function tryRequire(file) {
   return typeof require !== 'undefined' ? require(file) : undefined;
 }
 
-// Namespaces
-var cred = cred || {};
 // Dependencies
+var cred = tryRequire('./cred_types') || cred || {};
+cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
 var util = tryRequire('./util') || util || {};
 
 ///////////////////
@@ -354,7 +354,7 @@ cred.resource = (function() {
     // Generator function for all locales that have linked resources.
     *linkedLocales() {
       for (let locale of cred.locale) {
-        if (!this._resources.has(locale)) {
+        if (this.isLinkedToMaster(locale)) {
           yield locale;
         }
       }
@@ -362,8 +362,10 @@ cred.resource = (function() {
 
     // Generator function for all locales that have unlinked resources.
     *unlinkedLocales() {
-      for (let locale of this._resources.keys()) {
-        yield locale;
+      for (let locale of cred.locale) {
+        if (!this.isLinkedToMaster(locale)) {
+          yield locale;
+        }
       }
     }
 
@@ -1016,11 +1018,6 @@ cred.resource = (function() {
       this._dlgDefinition.addControlDefinition(ctrl);
     }
 
-    // Returns the control definition for a given control id.
-    findControlDefintion(ctrlId) {
-      return this._dlgDefinition.findControlDefintion(ctrlId);
-    }
-
     // Updates the dialog's id.
     updateDialogId(id) {
       this._dlgDefinition.id = id;
@@ -1059,14 +1056,27 @@ cred.resource = (function() {
     // Polymorphic function to return the definition's identifier.
     get id() {
       if (!this._properties.has(cred.spec.propertyLabel.id)) {
-        throw new Error('Dialog must have an identifier.');
+        throw new Error('Dialog id accessed before being defined.');
       }
       return this.property(cred.spec.propertyLabel.id).value;
     }
 
     // Polymorphic function to set the definition's identifier.
     set id(value) {
-      return (this.property(cred.spec.propertyLabel.id).value = value);
+      let idProp = this.property(cred.spec.propertyLabel.id);
+      if (idProp) {
+        idProp.value = value;
+      } else {
+        // Create a property for the id.
+        this.setProperty(
+          cred.spec.propertyLabel.id,
+          cred.resource.makePropertyDefinition(
+            cred.spec.propertyLabel.id,
+            cred.spec.physicalPropertyType.identifier,
+            value
+          )
+        );
+      }
     }
 
     // Polymorphic function to check if this definition is for a dialog.
@@ -1133,18 +1143,15 @@ cred.resource = (function() {
       }
     }
 
-    // Returns the control definition for a given control id.
-    findControlDefintion(ctrlId) {
-      return this._controls.get(ctrlId);
-    }
-
     // Updates the id of a control.
     updateControlId(currentId, id) {
       let ctrl = this._controls.get(currentId);
-      ctrl.id = id;
-      // Also, change the control map to associate the new id with the control.
-      this._controls.set(id, ctrl);
-      this._controls.delete(currentId);
+      if (ctrl) {
+        ctrl.id = id;
+        // Also, change the control map to associate the new id with the control.
+        this._controls.set(id, ctrl);
+        this._controls.delete(currentId);
+      }
     }
   }
 
@@ -1357,6 +1364,10 @@ cred.resource = (function() {
       super(label, physicalType, value);
       // Array of strings for the flags.
       this._flags = [];
+
+      if (typeof this.value !== 'number') {
+        this.value = 0;
+      }
       // When editing properties, also edit the copy function below!
     }
 
@@ -1369,21 +1380,17 @@ cred.resource = (function() {
 
     // Polymorphic function to check if the property has a non-empty value.
     hasValue() {
-      return !(typeof this.value === 'undefined' && this._flags.length === 0);
+      return this.value !== 0 || this._flags.length > 0;
     }
 
     // Polymorphic function that returns the value as string.
     valueAsString() {
       let str = '';
-      for (const flag of this.flags) {
+      for (const flag of this._flags) {
         str += flag + ' | ';
       }
       str += this.value;
       return str;
-    }
-
-    get flags() {
-      return this._flags;
     }
 
     // Adds a flag string.
@@ -1451,7 +1458,7 @@ cred.resource = (function() {
   // same resource.
 
   // Policy function that adds a positional property to a target object.
-  // The target object has to provide some polymorphic function.
+  // The target object has to provide a polymorphic function.
   function addPositionalProperty(label, property, target) {
     // Overwrite any existing property with that label because positional
     // properties have priority over labeled properties and the same priority
@@ -1460,7 +1467,7 @@ cred.resource = (function() {
   }
 
   // Policy function that adds a labeled property to a target object.
-  // The target object has to provide some polymorphic function.
+  // The target object has to provide a polymorphic function.
   function addLabeledProperty(label, property, target) {
     // Only add the property if it doesn't exist yet because labeled properties have
     // lower priority than positional properties.
@@ -1470,7 +1477,7 @@ cred.resource = (function() {
   }
 
   // Policy function that adds a serialized property to a target object.
-  // The target object has to provide some polymorphic function.
+  // The target object has to provide a polymorphic function.
   function addSerializedProperty(label, property, target) {
     // Overwrite any existing property with that label because serialized properties
     // have priority over labeled properties and the same priority as positional

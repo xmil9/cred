@@ -1581,3 +1581,449 @@ test('DialogDefinition.updateControlId for not existing control', () => {
   expect(dlg.control('new-id')).toBeUndefined();
   expect(dlg.control('label-id')).toBeDefined();
 });
+
+///////////////////
+
+test('DialogResource construction', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.german);
+  expect(dlgRes.locale).toEqual(cred.locale.german);
+  expect(dlgRes.version).toEqual('');
+  expect(Array.from(dlgRes.includedHeaders()).length).toEqual(0);
+  expect(dlgRes.dialogDefinition).toBeDefined();
+  expect(dlgRes.dialogName).toEqual('');
+  expect(Array.from(dlgRes.controls()).length).toEqual(0);
+});
+
+test('DialogResource.copyAs', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.english);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      'myid'
+    )
+  );
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+  dlgRes.addLayer(new cred.resource.LayerDefinition('test-layer', [1, 2]));
+  dlgRes.addIncludedHeader('test-header.h');
+
+  const copy = dlgRes.copyAs(cred.locale.german);
+  expect(copy).toBeDefined();
+  expect(copy).not.toBe(dlgRes);
+  expect(copy.locale).toEqual(cred.locale.german);
+  expect(copy.version).toEqual('');
+  expect(copy.dialogDefinition).not.toBe(dlgRes.dialogDefinition);
+  const dlgId = copy.dialogPropertyValue(cred.spec.propertyLabel.id);
+  expect(dlgId).toEqual('myid');
+  const copiedCtrl = copy.control('label-id');
+  expect(copiedCtrl).toBeDefined();
+  expect(copiedCtrl).not.toBe(dlgRes.control('label-id'));
+  expect(Array.from(copy.includedHeaders()).length).toEqual(1);
+  expect(Array.from(copy.layers()).length).toEqual(1);
+});
+
+test('DialogResource.locale for language locale', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.japanese);
+  expect(dlgRes.locale).toEqual(cred.locale.japanese);
+});
+
+test('DialogResource.locale for master locale', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  expect(dlgRes.locale).toEqual(cred.locale.any);
+});
+
+test('DialogResource.dialogName', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      'mydlg'
+    )
+  );
+
+  expect(dlgRes.dialogName).toEqual('mydlg');
+});
+
+test('DialogResource.dialogName without id property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  expect(dlgRes.dialogName).toEqual('');
+});
+
+test('DialogResource.stringFileName for language locales', () => {
+  const languages = new Map([
+    [cred.locale.english, 'English.str'],
+    [cred.locale.german, 'German.str'],
+    [cred.locale.japanese, 'Japan.str']
+  ]);
+
+  for (const [lang, fileSufffix] of languages) {
+    const dlgRes = new cred.resource.DialogResource(lang);
+    dlgRes.addLabeledProperty(
+      cred.spec.propertyLabel.id,
+      cred.resource.makePropertyDefinition(
+        cred.spec.propertyLabel.id,
+        cred.spec.physicalPropertyType.identifier,
+        'mydlg'
+      )
+    );
+    expect(dlgRes.stringFileName()).toEqual('mydlg.' + fileSufffix);
+  }
+});
+
+test('DialogResource.stringFileName for master locale', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      'mydlg'
+    )
+  );
+  expect(dlgRes.stringFileName()).toBeUndefined();
+});
+
+test('DialogResource.dialogDefinition', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  expect(dlgRes.dialogDefinition).toBeDefined();
+});
+
+test('DialogResource.dialogPropertyValue', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      'mydlg'
+    )
+  );
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.left,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.left,
+      cred.spec.physicalPropertyType.number,
+      10
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.id)).toEqual('mydlg');
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.left)).toEqual(10);
+});
+
+test('DialogResource.addPositionalProperty for new property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+
+  dlgRes.addPositionalProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      0
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.enabled)).toEqual(0);
+});
+
+test('DialogResource.addPositionalProperty for existing property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      1
+    )
+  );
+
+  // Should replace the existing property.
+  dlgRes.addPositionalProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      0
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.enabled)).toEqual(0);
+});
+
+test('DialogResource.addLabeledProperty for new property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      0
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.enabled)).toEqual(0);
+});
+
+test('DialogResource.addLabeledProperty for existing property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      1
+    )
+  );
+
+  // Should not replace the existing property.
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      0
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.enabled)).toEqual(1);
+});
+
+test('DialogResource.addSerializedProperty for new property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+
+  dlgRes.addSerializedProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      0
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.enabled)).toEqual(0);
+});
+
+test('DialogResource.addSerializedProperty for existing property', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      1
+    )
+  );
+
+  // Should replace the existing property.
+  dlgRes.addSerializedProperty(
+    cred.spec.propertyLabel.enabled,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.enabled,
+      cred.spec.physicalPropertyType.number,
+      0
+    )
+  );
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.enabled)).toEqual(0);
+});
+
+test('DialogResource.control for existing control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+  expect(dlgRes.control('label-id')).toBeDefined();
+});
+
+test('DialogResource.control for not existing control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  expect(dlgRes.control('label-id')).toBeUndefined();
+});
+
+test('DialogResource.controls', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.pushButton, 'button-id')
+  );
+
+  const ctrlArray = Array.from(dlgRes.controls());
+  expect(ctrlArray.length).toEqual(2);
+  expect(ctrlArray.findIndex(elem => elem.id === 'label-id')).not.toEqual(-1);
+  expect(ctrlArray.findIndex(elem => elem.id === 'button-id')).not.toEqual(-1);
+});
+
+test('DialogResource.controls for no controls', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const ctrlArray = Array.from(dlgRes.controls());
+  expect(ctrlArray.length).toEqual(0);
+});
+
+test('DialogResource.addControlDefinition for first control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+  expect(dlgRes.control('label-id')).toBeDefined();
+});
+
+test('DialogResource.addControlDefinition for multiple controls', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.pushButton, 'button-id')
+  );
+
+  expect(dlgRes.control('label-id')).toBeDefined();
+  expect(dlgRes.control('button-id')).toBeDefined();
+});
+
+test('DialogResource.addControlDefinition for existing control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+  expect(() =>
+    dlgRes.addControlDefinition(
+      new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+    )
+  ).toThrow();
+});
+
+test('DialogResource.includedHeaders', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addIncludedHeader('header1.h');
+  dlgRes.addIncludedHeader('header2.h');
+
+  const headerArray = Array.from(dlgRes.includedHeaders());
+  expect(headerArray.length).toEqual(2);
+  expect(headerArray.includes('header1.h')).toBeTruthy();
+  expect(headerArray.includes('header2.h')).toBeTruthy();
+});
+
+test('DialogResource.includedHeaders for no headers', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const headerArray = Array.from(dlgRes.includedHeaders());
+  expect(headerArray.length).toEqual(0);
+});
+
+test('DialogResource.addIncludedHeader for first header', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addIncludedHeader('header1.h');
+  expect(Array.from(dlgRes.includedHeaders()).includes('header1.h')).toBeTruthy();
+});
+
+test('DialogResource.addIncludedHeader for multiple headers', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addIncludedHeader('header1.h');
+  dlgRes.addIncludedHeader('header2.h');
+
+  const headerArray = Array.from(dlgRes.includedHeaders());
+  expect(headerArray.includes('header1.h')).toBeTruthy();
+  expect(headerArray.includes('header2.h')).toBeTruthy();
+});
+
+test('DialogResource.addIncludedHeader for existing header', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addIncludedHeader('header1.h');
+  dlgRes.addIncludedHeader('header1.h');
+
+  const headerArray = Array.from(dlgRes.includedHeaders());
+  expect(headerArray.length).toEqual(1);
+  expect(headerArray.includes('header1.h')).toBeTruthy();
+});
+
+test('DialogResource.addIncludedHeader for case insensitive header', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addIncludedHeader('header1.h');
+  dlgRes.addIncludedHeader('Header1.h');
+
+  const headerArray = Array.from(dlgRes.includedHeaders());
+  expect(headerArray.length).toEqual(1);
+  expect(headerArray.includes('header1.h')).toBeTruthy();
+});
+
+test('DialogResource.layers', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 2'));
+
+  const layerArray = Array.from(dlgRes.layers());
+  expect(layerArray.length).toEqual(2);
+  expect(layerArray.findIndex(elem => elem.name === 'layer 1')).not.toEqual(-1);
+  expect(layerArray.findIndex(elem => elem.name === 'layer 2')).not.toEqual(-1);
+});
+
+test('DialogResource.layers for no layers', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const layerArray = Array.from(dlgRes.layers());
+  expect(layerArray.length).toEqual(0);
+});
+
+test('DialogResource.addLayer for first layer', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+  expect(
+    Array.from(dlgRes.layers()).findIndex(elem => elem.name === 'layer 1')
+  ).not.toEqual(-1);
+});
+
+test('DialogResource.addLayer for multiple layers', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 2'));
+
+  const layerArray = Array.from(dlgRes.layers());
+  expect(layerArray.findIndex(elem => elem.name === 'layer 1')).not.toEqual(-1);
+  expect(layerArray.findIndex(elem => elem.name === 'layer 2')).not.toEqual(-1);
+});
+
+test('DialogResource.addLayer for existing layer', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+
+  // No duplicate
+  const layerArray = Array.from(dlgRes.layers());
+  expect(layerArray.length).toEqual(2);
+});
+
+test('DialogResource.updateDialogId', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.english);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makePropertyDefinition(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      'myid'
+    )
+  );
+
+  dlgRes.updateDialogId('other-id');
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.id)).toEqual('other-id');
+});
+
+test('DialogResource.updateDialogId for not existing id', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.english);
+
+  dlgRes.updateDialogId('other-id');
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.id)).toEqual('other-id');
+});
+
+test('DialogResource.updateControlId', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControlDefinition(
+    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  );
+
+  dlgRes.updateControlId('label-id', 'other-id');
+  expect(dlgRes.control('other-id')).toBeDefined();
+});
+
+test('DialogResource.updateControlId for not existing control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  expect(() => dlgRes.updateControlId('label-id', 'other-id')).not.toThrow();
+});

@@ -273,7 +273,7 @@ cred.resource = (function() {
       // The dialog name is the same for all locales, so grab the first available one.
       let resource = this._firstAvailableDialogResource();
       if (typeof resource === 'undefined') {
-        return undefined;
+        return '';
       }
       return resource.dialogName;
     }
@@ -916,7 +916,7 @@ cred.resource = (function() {
       this._dlgDefinition = new DialogDefinition();
       // Array of layer definitions. A layer definition has a name and an array of
       // layer values.
-      this.layerDefinitions = [];
+      this._layerDefinitions = [];
 
       // When editing properties, also edit the copy function below!
     }
@@ -931,9 +931,9 @@ cred.resource = (function() {
         copy._stringFiles.set(lang, strFile);
       }
       copy._dlgDefinition = this._dlgDefinition.copy();
-      copy.layerDefinitions = [];
-      for (const layerDef of this.layerDefinitions) {
-        copy.layerDefinitions = layerDef.copy();
+      copy._layerDefinitions = [];
+      for (const layerDef of this._layerDefinitions) {
+        copy._layerDefinitions.push(layerDef.copy());
       }
       return copy;
     }
@@ -944,9 +944,12 @@ cred.resource = (function() {
       return this._locale;
     }
 
-    // Returns the collection of included headers.
-    get includedHeaders() {
-      return this._includedHeaders;
+    get dialogName() {
+      const name = this.dialogPropertyValue(cred.spec.propertyLabel.id);
+      if (typeof name === 'undefined') {
+        return '';
+      }
+      return name;
     }
 
     // Returns the file name of the dialog string file for language resources or
@@ -961,8 +964,9 @@ cred.resource = (function() {
       return undefined;
     }
 
-    get dialogName() {
-      return this.dialogProperty(cred.spec.propertyLabel.id);
+    // Adds a string file for a given language.
+    addStringFile(language, fileName) {
+      this._stringFiles.set(language, fileName);
     }
 
     get dialogDefinition() {
@@ -970,32 +974,12 @@ cred.resource = (function() {
     }
 
     // Returns the value of a property with a given label.
-    dialogProperty(label) {
-      return this._dlgDefinition.property(label).value;
-    }
-
-    control(id) {
-      return this._dlgDefinition.control(id);
-    }
-
-    *controls() {
-      yield* this._dlgDefinition.controls();
-    }
-
-    // Adds an included C/C++ header file.
-    addIncludedHeader(headerName) {
-      const headerLower = headerName.toLowerCase();
-      let idx = this._includedHeaders.findIndex(elem => {
-        return elem.toLowerCase() === headerLower;
-      });
-      if (idx === -1) {
-        this._includedHeaders.push(headerName);
+    dialogPropertyValue(label) {
+      const prop = this._dlgDefinition.property(label);
+      if (prop) {
+        return prop.value;
       }
-    }
-
-    // Adds a string file for a given language.
-    addStringFile(language, fileName) {
-      this._stringFiles.set(language, fileName);
+      return undefined;
     }
 
     // Polymorphic function that adds a positional property to the dialog.
@@ -1009,13 +993,51 @@ cred.resource = (function() {
     }
 
     // Polymorphic function that adds a serialized property to the dialog.
-    addSerializedDlgProperty(label, property) {
+    addSerializedProperty(label, property) {
       this._dlgDefinition.addSerializedProperty(label, property);
+    }
+
+    control(id) {
+      return this._dlgDefinition.control(id);
+    }
+
+    *controls() {
+      yield* this._dlgDefinition.controls();
     }
 
     // Adds a control definition to the dialog.
     addControlDefinition(ctrl) {
       this._dlgDefinition.addControlDefinition(ctrl);
+    }
+
+    // Generator function for included headers.
+    *includedHeaders() {
+      for (const header of this._includedHeaders) {
+        yield header;
+      }
+    }
+
+    // Adds an included C/C++ header file.
+    addIncludedHeader(headerName) {
+      const headerLower = headerName.toLowerCase();
+      let idx = this._includedHeaders.findIndex(elem => {
+        return elem.toLowerCase() === headerLower;
+      });
+      if (idx === -1) {
+        this._includedHeaders.push(headerName);
+      }
+    }
+
+    // Generator function for layers of the resource.
+    *layers() {
+      for (const layer of this._layerDefinitions) {
+        yield layer;
+      }
+    }
+
+    // Adds a layer to the dialog resource.
+    addLayer(layer) {
+      this._layerDefinitions.push(layer);
     }
 
     // Updates the dialog's id.

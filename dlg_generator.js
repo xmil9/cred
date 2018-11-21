@@ -480,7 +480,7 @@ cred.gen = (function() {
     text += makeLine(indent, '#if 0');
     text += newline;
     text += makeLine(indent, 'BEGIN_LAYERS');
-    for (let layer of dlgResource.layerDefinitions) {
+    for (let layer of dlgResource.layers()) {
       text += generateLayer(layer, indented_1);
     }
     text += makeLine(indent, 'END_LAYERS');

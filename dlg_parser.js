@@ -444,7 +444,7 @@ cred.parser = (function() {
         layerDef.addNumber(parseNumber(token));
         token = this.nextToken();
       }
-      this._dlgResource.layerDefinitions.push(layerDef);
+      this._dlgResource.addLayer(layerDef);
 
       verifyToken(token, cred.tokenKind.identifier, 'END_LAYER');
     }

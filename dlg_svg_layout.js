@@ -611,8 +611,8 @@ cred.layout = (function() {
       return new geom.Rect(
         0,
         0,
-        dlgResource.dialogProperty('Width'),
-        dlgResource.dialogProperty('Height')
+        dlgResource.dialogPropertyValue('Width'),
+        dlgResource.dialogPropertyValue('Height')
       );
     }
 

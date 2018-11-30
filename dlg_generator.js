@@ -36,7 +36,7 @@ cred.gen = (function() {
     // Generates the dialog content of the master resource.
     // Returns a [<dialog content>, undefined] pair.
     _generateMasterContent() {
-      if (this._dlgResourceSet.areAllLocalesUnlinked()) {
+      if (this._dlgResourceSet.areAllLanguagesUnlinked()) {
         return this._generateUnlinkedMasterContent();
       }
       return this._generateLinkedMasterContent();
@@ -48,7 +48,7 @@ cred.gen = (function() {
     _generateUnlinkedMasterContent() {
       const indent = 0;
       const dlgContent = generateAllLanguageDialogIncludes(
-        this._dlgResourceSet.dialogName,
+        this._dlgResourceSet.dialogId,
         indent
       );
       return [dlgContent, undefined];
@@ -70,7 +70,7 @@ cred.gen = (function() {
       let dlgContent = undefined;
       if (this._dlgResourceSet.isLinkedToMaster(locale)) {
         // Skip the dlg files when all languages are linked to the master resource.
-        if (!this._dlgResourceSet.areAllLocalesLinked()) {
+        if (!this._dlgResourceSet.areAllLanguagesLinked()) {
           dlgContent = this._generateLinkedDialogContent();
         }
       } else {
@@ -98,7 +98,7 @@ cred.gen = (function() {
       let text = '';
       text += generateCppIncludes(indent);
       text += newline;
-      text += generateAllLanguageStringIncludes(this._dlgResourceSet.dialogName, indent);
+      text += generateAllLanguageStringIncludes(this._dlgResourceSet.dialogId, indent);
       text += newline;
       text += generateDialogDefintionBeginning(dlg, indent);
       text += generateLabeledDialogProperties(dlg, indented_1);

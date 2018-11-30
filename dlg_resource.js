@@ -57,11 +57,6 @@ cred.resource = (function() {
       yield* this._resourceSet.linkedLocales();
     }
 
-    // Generator function for all locales that have unlinked resources.
-    *unlinkedLocales() {
-      yield* this._resourceSet.unlinkedLocales();
-    }
-
     lookupString(stringId, language) {
       return this._resourceSet.lookupString(stringId, language);
     }
@@ -133,7 +128,7 @@ cred.resource = (function() {
         .catch(err => {
           self._controller.notifyErrorOccurred(
             this,
-            `Unable to open file ${fileSet.dialogName}.\nError: ${err}`
+            `Unable to open file ${fileSet.dialogId}.\nError: ${err}`
           );
         });
     }
@@ -243,50 +238,54 @@ cred.resource = (function() {
 
   // Holds all data contained in a set of dialog resource files.
   class DialogResourceSet {
-    constructor() {
-      // Map of unlinked resources that associates locales their resources.
+    constructor(resourcesMap, stringMap, importLogMap) {
+      // Map of unlinked resources that associates locales with their resources.
       // Linked resources are not contained in the map.
-      this._resources = new Map();
+      this._resources = resourcesMap;
+      // Data structure that maps string identifiers to strings for each language.
+      this._stringMap = stringMap;
       // Maps that associates locales with a log of collected issues when
       // importing the dialog.
-      this._importLog = new Map();
-      // Data structure that maps string identifiers to strings for each language.
-      this._stringMap = new StringMap();
-
-      this._init();
+      this._importLogs = importLogMap || new Map();
+      for (const locale of cred.locale) {
+        if (!this._importLogs.has(locale)) {
+          this._importLogs.set(locale, []);
+        }
+      }
     }
 
     // Returns the file name of the master resource file.
     get masterFileName() {
-      return cred.dialogFileName(this.dialogName, cred.locale.any);
-    }
-
-    languageDialogFileName(language) {
-      return cred.dialogFileName(this.dialogName, cred.localeFromLanguage(language));
-    }
-
-    languageStringFileName(language) {
-      return cred.stringFileName(this.dialogName, cred.localeFromLanguage(language));
-    }
-
-    get dialogName() {
-      // The dialog name is the same for all locales, so grab the first available one.
-      let resource = this._firstAvailableDialogResource();
-      if (typeof resource === 'undefined') {
-        return '';
+      const dlgId = this.dialogId;
+      if (dlgId.length > 0) {
+        return cred.dialogFileName(this.dialogId, cred.locale.any);
       }
-      return resource.dialogName;
+      return '';
     }
 
-    // Returns the dialog resource for a given locale.
+    // Returns the name of the dialog file for a given language.
+    languageDialogFileName(language) {
+      return cred.dialogFileName(this.dialogId, cred.localeFromLanguage(language));
+    }
+
+    // Returns the name of the string file for a given language. Returns empty string if
+    // there is no resource for the given language.
+    languageStringFileName(language) {
+      return cred.stringFileName(this.dialogId, cred.localeFromLanguage(language));
+    }
+
+    get dialogId() {
+      // The dialog name is the same for all locales. Use the English resource.
+      const resource = this.dialogResource(cred.locale.english);
+      return resource.dialogId;
+    }
+
+    // Returns the dialog resource for a given locale or undefined if the resource does
+    // not exist.
     dialogResource(locale) {
       // Resolve the link, if any.
       const resolvedLocale = this.isLinkedToMaster(locale) ? cred.locale.any : locale;
       return this._resources.get(resolvedLocale);
-    }
-
-    setDialogResource(locale, resource) {
-      this._resources.set(locale, resource);
     }
 
     // Generator function for all unlinked dialog resources.
@@ -300,7 +299,7 @@ cred.resource = (function() {
       return locale === cred.locale.any || !this._resources.has(locale);
     }
 
-    // Unlink a given locale to the master resource.
+    // Link a given locale to the master resource.
     linkToMaster(locale) {
       if (locale === cred.locale.any) {
         // Cannot link master to master.
@@ -309,7 +308,7 @@ cred.resource = (function() {
 
       // If all resources are unlinked, we have to re-create the master resource
       // as a copy of the linked resource before we can clear the linked resource.
-      if (this.areAllLocalesUnlinked()) {
+      if (this.areAllLanguagesUnlinked()) {
         this._copyResource(locale, cred.locale.any);
       }
 
@@ -326,23 +325,23 @@ cred.resource = (function() {
       this._copyResource(cred.locale.any, locale);
 
       // Clear the master resource, if all resources are unlinked.
-      if (this.areAllLocalesUnlinked()) {
+      if (this.areAllLanguagesUnlinked()) {
         this._resources.delete(cred.locale.any);
       }
     }
 
-    // Checks if the resources of all locales are unlinked from the master resource.
-    areAllLocalesUnlinked() {
-      for (let locale of cred.locale) {
-        if (locale !== cred.locale.any && this.isLinkedToMaster(locale)) {
+    // Checks if the resources of all languages are unlinked from the master resource.
+    areAllLanguagesUnlinked() {
+      for (let lang of cred.language) {
+        if (this.isLinkedToMaster(cred.localeFromLanguage(lang))) {
           return false;
         }
       }
       return true;
     }
 
-    // Checks if the resources of all locales are linked to the master resource.
-    areAllLocalesLinked() {
+    // Checks if the resources of all languages are linked to the master resource.
+    areAllLanguagesLinked() {
       for (let locale of cred.locale) {
         if (locale !== cred.locale.any && !this.isLinkedToMaster(locale)) {
           return false;
@@ -360,21 +359,8 @@ cred.resource = (function() {
       }
     }
 
-    // Generator function for all locales that have unlinked resources.
-    *unlinkedLocales() {
-      for (let locale of cred.locale) {
-        if (!this.isLinkedToMaster(locale)) {
-          yield locale;
-        }
-      }
-    }
-
     importLog(locale) {
-      return this._importLog.get(locale);
-    }
-
-    setImportLog(locale, log) {
-      this._importLog.set(locale, log);
+      return this._importLogs.get(locale);
     }
 
     lookupString(id, language) {
@@ -386,16 +372,9 @@ cred.resource = (function() {
       this._stringMap.add(id, text, language);
     }
 
-    // Adds the strings and resource encoding for a given language.
-    // Duplicate strings will be overwritten with the passed in copy.
-    addStrings(language, stringMap, resourceEncoding) {
-      this._stringMap.setSourceEncoding(language, resourceEncoding);
-
-      for (const entry of stringMap) {
-        if (entry.length > 0) {
-          this.addString(...entry);
-        }
-      }
+    // Returns a generator function for the strings of a given language.
+    languageStrings(language) {
+      return this._stringMap.languageStrings(language);
     }
 
     // Returns the source encoding of a given language.
@@ -403,21 +382,16 @@ cred.resource = (function() {
       return this._stringMap.sourceEncoding(language);
     }
 
-    // Returns a generator function for the strings of a given language.
-    languageStrings(language) {
-      return this._stringMap.languageStrings(language);
-    }
-
     // Updates the dialog's id in all dialog resources.
     updateDialogId(id) {
-      for (let [, dlgResource] of this._resources) {
+      for (const dlgResource of this._resources.values()) {
         dlgResource.updateDialogId(id);
       }
     }
 
     // Updates a control's id in all dialog resources.
     updateControlId(currentId, id) {
-      for (let [, dlgResource] of this._resources) {
+      for (const dlgResource of this._resources.values()) {
         dlgResource.updateControlId(currentId, id);
       }
     }
@@ -479,13 +453,6 @@ cred.resource = (function() {
       this._stringMap = denormalization.denormalize();
     }
 
-    // Initializes the internal data structures.
-    _init() {
-      for (const locale of cred.locale) {
-        this._importLog.set(locale, []);
-      }
-    }
-
     // Copies the resource of a given source locale to a given target locale.
     _copyResource(fromLocale, toLocale) {
       if (this._resources.has(fromLocale)) {
@@ -494,14 +461,6 @@ cred.resource = (function() {
       } else {
         this._resources.delete(toLocale);
       }
-    }
-
-    // Returns the first available dialog resource.
-    _firstAvailableDialogResource() {
-      for (const [, resource] of this._resources) {
-        return resource;
-      }
-      return undefined;
     }
 
     // Returns a property of a given layout item for a given locale.
@@ -518,6 +477,110 @@ cred.resource = (function() {
         return resource.dialogDefinition;
       }
       return resource.control(layoutItem.id);
+    }
+  }
+
+  ///////////////////
+
+  // Builds a dialog resource set object after collecting all required data. Verifies
+  // invariants for valid dialog resource sets.
+  class DialogResourceSetBuilder {
+    constructor() {
+      // Array of arrays each holding a resource and its import log.
+      this._resources = [];
+      // Array of arrays each holding a language, its string map, and encoding. Note that
+      // the strings for each language are kept in a string map data structure which
+      // supports multiple language. This is done purely for convenience, not because the
+      // multi-language capability is needed. The string maps for each language will be
+      // combined into one string map for the resource set.
+      this._strings = [];
+    }
+
+    addResource(resource, importLog) {
+      this._resources.push([resource, importLog]);
+    }
+
+    addStrings(language, stringMap, encoding) {
+      this._strings.push([language, stringMap, encoding]);
+    }
+
+    // Builds a DialogResourceSet object from the collected data.
+    build() {
+      const resourceMap = new Map();
+      const importLogs = new Map();
+      for (let [resource, log] of this._resources) {
+        resourceMap.set(resource.locale, resource);
+        importLogs.set(resource.locale, log || []);
+      }
+
+      const stringMap = new StringMap();
+      for (const [lang, langStrMap, encoding] of this._strings) {
+        // Integrate the string map
+        for (const entry of langStrMap) {
+          if (entry.length > 0) {
+            stringMap.add(...entry);
+          }
+        }
+        stringMap.setSourceEncoding(lang, encoding);
+      }
+
+      DialogResourceSetBuilder._verifyInvariants(resourceMap, stringMap, importLogs);
+      return new DialogResourceSet(resourceMap, stringMap, importLogs);
+    }
+
+    // Verifies that the dioalog resource set invariants are valid.
+    static _verifyInvariants(resourceMap, stringMap, importLogs) {
+      DialogResourceSetBuilder._verifyResourceInvariants(resourceMap);
+      DialogResourceSetBuilder._verifyStringInvariants(stringMap);
+      DialogResourceSetBuilder._verifyImportLogInvariants(importLogs);
+    }
+
+    static _verifyResourceInvariants(resourceMap) {
+      DialogResourceSetBuilder._verifyLinking(resourceMap);
+      DialogResourceSetBuilder._verifyDialogId(resourceMap);
+    }
+
+    static _verifyLinking(resourceMap) {
+      const numSupportedLangs = Array.from(cred.language).length;
+      const numResources = resourceMap.size;
+
+      if (resourceMap.has(cred.locale.any)) {
+        const numLangResources = numResources - 1;
+        const hasLinkedLanguageResources = numLangResources < numSupportedLangs;
+        if (!hasLinkedLanguageResources) {
+          throw new Error(
+            'DialogResourceSet with all languages unlinked should not have a master resource.'
+          );
+        }
+      } else {
+        const hasLinkedLanguageResources = numResources < numSupportedLangs;
+        if (hasLinkedLanguageResources) {
+          throw new Error(
+            'DialogResourceSet with linked languages has to have a master resource.'
+          );
+        }
+      }
+    }
+
+    static _verifyDialogId(resourceMap) {
+      let dlgId = undefined;
+      for (const resource of resourceMap.values()) {
+        if (typeof dlgId === 'undefined' || dlgId.length === 0) {
+          dlgId = resource.dialogId;
+        } else if (resource.dialogId !== dlgId) {
+          throw Error(
+            'DialogResourceSet cannot contain resources with different dialog names.'
+          );
+        }
+      }
+    }
+
+    static _verifyStringInvariants(/*stringMap*/) {
+      // Nothing.
+    }
+
+    static _verifyImportLogInvariants(/*importLogs*/) {
+      // Nothing.
     }
   }
 
@@ -715,7 +778,7 @@ cred.resource = (function() {
 
     _denormalizeStrings() {
       [this._denormalizedMap, this._idLookup] = this._stringMap.copyWithRegeneratedIds(
-        generatePersistentStringId(this._dlgResourceSet.dialogName)
+        generatePersistentStringId(this._dlgResourceSet.dialogId)
       );
     }
 
@@ -944,22 +1007,19 @@ cred.resource = (function() {
       return this._locale;
     }
 
-    get dialogName() {
-      const name = this.dialogPropertyValue(cred.spec.propertyLabel.id);
-      if (typeof name === 'undefined') {
+    get dialogId() {
+      const id = this.dialogPropertyValue(cred.spec.propertyLabel.id);
+      if (typeof id === 'undefined') {
         return '';
       }
-      return name;
+      return id;
     }
 
     // Returns the file name of the dialog string file for language resources or
     // undefined for the master resource.
     stringFileName() {
       if (this._locale !== cred.locale.any) {
-        return cred.stringFileName(
-          this.dialogName,
-          cred.languageFromLocale(this._locale)
-        );
+        return cred.stringFileName(this.dialogId, cred.languageFromLocale(this._locale));
       }
       return undefined;
     }
@@ -1686,7 +1746,7 @@ cred.resource = (function() {
     ControlDefinition: ControlDefinition,
     DialogDefinition: DialogDefinition,
     DialogResource: DialogResource,
-    DialogResourceSet: DialogResourceSet,
+    DialogResourceSetBuilder: DialogResourceSetBuilder,
     LayerDefinition: LayerDefinition,
     makePropertyDefinition: makePropertyDefinition,
     ResourceManager: ResourceManager,

@@ -163,20 +163,20 @@ Object.freeze(cred.fileExtension);
 
 // Returns the file name of a dialog resource file for a given dialog name and a given
 // locale.
-cred.dialogFileName = function(dialogName, locale) {
+cred.dialogFileName = function(dialogId, locale) {
   let langLabel = '';
   const lang = cred.languageFromLocale(locale);
   if (lang) {
     langLabel = '.' + cred.languageFileLabels.get(lang);
   }
-  return dialogName + langLabel + cred.fileExtension.dialogFile;
+  return dialogId + langLabel + cred.fileExtension.dialogFile;
 };
 
 // Returns the file name of a dialog string file for a given dialog name and a given
 // locale.
-cred.stringFileName = function(dialogName, language) {
+cred.stringFileName = function(dialogId, language) {
   const langLabel = '.' + cred.languageFileLabels.get(language);
-  return dialogName + langLabel + cred.fileExtension.stringFile;
+  return dialogId + langLabel + cred.fileExtension.stringFile;
 };
 
 ///////////////////

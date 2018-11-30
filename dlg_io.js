@@ -151,7 +151,7 @@ cred.io = (function() {
     // Builds a dialog resource set from the results of reading the individual
     // dialog files.
     _buildDialogResourceSet(readResults) {
-      let resourceSet = new cred.resource.DialogResourceSet();
+      const builder = new cred.resource.DialogResourceSetBuilder();
       for (let i = 0; i < readResults.length; ++i) {
         let result = readResults[i];
         // If a file does not exist, the result is 'undefined'.
@@ -160,11 +160,7 @@ cred.io = (function() {
         }
         // If the result is from reading a string file, process the strings.
         else if (result.strings) {
-          resourceSet.addStrings(
-            result.language,
-            result.strings,
-            result.resourceEncoding
-          );
+          builder.addStrings(result.language, result.strings, result.resourceEncoding);
         }
         // If the result is from reading a resource file, store the resource
         // definition based on its locale.
@@ -172,15 +168,15 @@ cred.io = (function() {
         // the 'resource' field is undefined. This happens when the resource file
         // is only including another resource file. Ignore those results.
         else if (result.resource) {
-          const resultLocale = result.resource.locale;
-          resourceSet.setDialogResource(resultLocale, result.resource);
-          resourceSet.setImportLog(resultLocale, result.log);
+          builder.addResource(result.resource, result.log);
         }
       }
+
+      const resSet = builder.build();
       // Normalize all localized string properties to hold identifiers with the string
       // text in the string map.
-      resourceSet.normalizeLocalizedStrings();
-      return resourceSet;
+      resSet.normalizeLocalizedStrings();
+      return resSet;
     }
   }
 
@@ -294,8 +290,8 @@ cred.io = (function() {
       this._dlgFiles.set(cred.locale.any, value);
     }
 
-    // Returns the name of the dialog represented by this file set.
-    get dialogName() {
+    // Returns the id of the dialog represented by this file set.
+    get dialogId() {
       if (!this.masterFile) {
         return undefined;
       }
@@ -341,16 +337,16 @@ cred.io = (function() {
 
     // Populates language-specific files from a given array of files.
     _populateLanguageFiles(files) {
-      const dlgName = this.dialogName;
+      const dlgid = this.dialogId;
 
       for (const lang of cred.language) {
         this._stringFiles.set(
           lang,
-          FileSet._findLanguageFile(files, cred.stringFileName(dlgName, lang))
+          FileSet._findLanguageFile(files, cred.stringFileName(dlgid, lang))
         );
         this._dlgFiles.set(
           cred.localeFromLanguage(lang),
-          FileSet._findLanguageFile(files, cred.dialogFileName(dlgName, lang))
+          FileSet._findLanguageFile(files, cred.dialogFileName(dlgid, lang))
         );
       }
     }

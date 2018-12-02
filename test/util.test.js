@@ -3,6 +3,7 @@
 //
 'use strict';
 
+const crypto = require('crypto');
 const util = require('.././util');
 
 ///////////////////
@@ -178,4 +179,90 @@ test('isHexDigit for non-char strings', () => {
   expect(util.isHexDigit('')).toBeFalsy();
   expect(util.isHexDigit('12')).toBeFalsy();
   expect(util.isHexDigit('abc')).toBeFalsy();
+});
+
+///////////////////
+
+function makeNodeCryptoAdapter() {
+  return {
+    getRandomValues(arr) {
+      return crypto.randomBytes(arr.length);
+    }
+  };
+}
+
+test('makeUuidV4 format', () => {
+  const cryptoAdapter = makeNodeCryptoAdapter();
+
+  let uuid = undefined;
+  for (let caseNum = 0; caseNum < 20; ++caseNum) {
+    uuid = util.makeUuidV4(cryptoAdapter);
+    expect(uuid.length).toBe(36);
+
+    const isValidUuidChar = function(char) {
+      return util.isHexDigit(char) || char === '-';
+    };
+    for (let i = 0; i < uuid.length; ++i) {
+      expect(isValidUuidChar(uuid[i])).toBeTruthy();
+    }
+
+    for (const idx of [8, 13, 18, 23]) {
+      expect(uuid[idx]).toEqual('-');
+    }
+    // 14th digit has to be '4' to indicate format version 4.
+    expect(uuid[14]).toEqual('4');
+  }
+});
+
+test('makeUuidV4 uniqueness', () => {
+  const cryptoAdapter = makeNodeCryptoAdapter();
+
+  let uuids = new Set();
+  for (let i = 0; i < 100; ++i) {
+    const uuid = util.makeUuidV4(cryptoAdapter);
+    expect(uuids.has(uuid)).toBeFalsy();
+    uuids.add(uuid);
+  }
+});
+
+///////////////////
+
+test('isUuid for valid UUIDs', () => {
+  expect(util.isUuid('11111111-1111-1111-1111-111111111111')).toBeTruthy();
+  expect(util.isUuid('12345678-90ab-cdef-ABCD-EF0000000000')).toBeTruthy();
+});
+
+test('isUuid for wrong length', () => {
+  expect(util.isUuid('12345678-1234-1234-1234-1234567890abc')).toBeFalsy;
+  expect(util.isUuid('12345678-1234-1234-1234-1234567890a')).toBeFalsy;
+});
+
+test('isUuid for illegal characters', () => {
+  expect(util.isUuid('g1111111-1111-1111-1111-111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-x111-1111-1111-111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-1111-1111-111111_11111')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-1111-1111-11111111111Z')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-11 1-1111-111111111111')).toBeFalsy;
+});
+
+test('isUuid for wrong dashes', () => {
+  expect(util.isUuid('1111111111111-1111-1111-111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-111111111-1111-111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-111111111-111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-1111-11111111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-1111-1111-111111-11111')).toBeFalsy;
+  expect(util.isUuid('-1111111-1111-1111-1111-111111111111')).toBeFalsy;
+  expect(util.isUuid('11111111-1111-1111-1111-11111111111-')).toBeFalsy;
+});
+
+///////////////////
+
+test('isUuidV4 for valid UUIDs', () => {
+  expect(util.isUuidV4('11111111-1111-4111-1111-111111111111')).toBeTruthy();
+  expect(util.isUuidV4('12345678-90ab-4def-ABCD-EF0000000000')).toBeTruthy();
+});
+
+test('isUuidV4 for missing 4', () => {
+  expect(util.isUuidV4('11111111-1111-1111-1111-111111111111')).toBeFalsy();
+  expect(util.isUuidV4('44444444-4444-1444-4444-444444444444')).toBeFalsy();
 });

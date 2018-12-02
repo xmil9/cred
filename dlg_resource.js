@@ -252,6 +252,17 @@ cred.resource = (function() {
           this._importLogs.set(locale, []);
         }
       }
+      // Crypto API that supports a getRandomValues() function with the same sematics as
+      // window.crypto.getRandomValues.
+      // Can be injected by calling setCrypto().
+      this._crypto = window.crypto;
+    }
+
+    // Inject a custom crypto API.
+    setCrypto(crypto) {
+      if (typeof crypto !== 'undefined') {
+        this._crypto = crypto;
+      }
     }
 
     // Returns the file name of the master resource file.
@@ -441,7 +452,11 @@ cred.resource = (function() {
 
     // Normalizes localized string properties to always store a string identifier.
     normalizeLocalizedStrings() {
-      let normalization = new LocalizedStringNormalization(this, this._stringMap);
+      let normalization = new LocalizedStringNormalization(
+        this,
+        this._stringMap,
+        this._crypto
+      );
       this._stringMap = normalization.normalize();
     }
 
@@ -494,6 +509,9 @@ cred.resource = (function() {
       // multi-language capability is needed. The string maps for each language will be
       // combined into one string map for the resource set.
       this._strings = [];
+      // Crypto API that supports a getRandomValues() function with the same sematics as
+      // window.crypto.getRandomValues.
+      this._crypto = undefined;
     }
 
     addResource(resource, importLog) {
@@ -502,6 +520,10 @@ cred.resource = (function() {
 
     addStrings(language, stringMap, encoding) {
       this._strings.push([language, stringMap, encoding]);
+    }
+
+    setCrypto(crypto) {
+      this._crypto = crypto;
     }
 
     // Builds a DialogResourceSet object from the collected data.
@@ -525,7 +547,12 @@ cred.resource = (function() {
       }
 
       DialogResourceSetBuilder._verifyInvariants(resourceMap, stringMap, importLogs);
-      return new DialogResourceSet(resourceMap, stringMap, importLogs);
+      const resSet = new DialogResourceSet(resourceMap, stringMap, importLogs);
+
+      if (typeof this._crypto !== 'undefined') {
+        resSet.setCrypto(this._crypto);
+      }
+      return resSet;
     }
 
     // Verifies that the dioalog resource set invariants are valid.
@@ -642,17 +669,20 @@ cred.resource = (function() {
   //   string value.
   // - Replace all strings ids with internal string ids.
   class LocalizedStringNormalization {
-    constructor(dlgResourceSet, stringMap) {
+    constructor(dlgResourceSet, stringMap, crypto) {
       this._dlgResourceSet = dlgResourceSet;
       // String map with the imported strings.
       this._stringMap = stringMap;
+      // Crypto API that needs to support a getRandomValues function with the semantics
+      // as window.crypto.getRandomValues().
+      this._crypto = crypto;
       // String map with the normalized strings.
       this._normalizedMap = undefined;
       // Mapping from imported to normalized ids.
       this._idLookup = undefined;
       // Repository that provides string ids for strings of properties that before
       // normalization held strings directly.
-      this._newIdRepos = new StringIdRepository(generateInternalStringId);
+      this._newIdRepos = new StringIdRepository(() => generateInternalStringId(crypto));
     }
 
     // Starts the normalization.
@@ -664,8 +694,9 @@ cred.resource = (function() {
 
     // Creates a copy of the string map with normalized strings ids.
     _normalizeStrings() {
-      [this._normalizedMap, this._idLookup] = this._stringMap.copyWithRegeneratedIds(
-        generateInternalStringId
+      const self = this;
+      [this._normalizedMap, this._idLookup] = this._stringMap.copyWithRegeneratedIds(() =>
+        generateInternalStringId(self._crypto)
       );
     }
 
@@ -864,8 +895,8 @@ cred.resource = (function() {
   // Generates an internal string id. The value is only used internally and can
   // therefore be any unique string. During export persistent string ids will
   // be created. Internal strings can be identified as internal.
-  function generateInternalStringId() {
-    return util.uuidv4() + internalStringIdMarker;
+  function generateInternalStringId(crypto) {
+    return util.makeUuidV4(crypto) + internalStringIdMarker;
   }
 
   // Returns a function that generates persistent string ids.
@@ -884,14 +915,10 @@ cred.resource = (function() {
       // Map that associates languages with their localized strings.
       // Each collection of strings is a map that associates string
       // identifiers with the string's text.
-      this._map = new Map();
+      this._map = StringMap.makeTopLevelMap_();
       // Map that associates languages with the encoding of their
       // string resource file.
       this._srcEncoding = new Map();
-
-      for (const lang of cred.language) {
-        this._map.set(lang, new Map());
-      }
     }
 
     // Adds a string to the map.
@@ -959,6 +986,16 @@ cred.resource = (function() {
       }
 
       return [duplicate, idMapping];
+    }
+
+    // Creates the top level map object that associates languages with their string maps.
+    // Initializes each inner string map to be empty.
+    static makeTopLevelMap_() {
+      const topMap = new Map();
+      for (const lang of cred.language) {
+        topMap.set(lang, new Map());
+      }
+      return topMap;
     }
   }
 

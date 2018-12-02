@@ -63,13 +63,40 @@ util = (function() {
   // there is a (small) chance of collisions.
   // Source:
   // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-  function uuidv4() {
+  //
+  // Needs to be supplied with an object that supports a getRandomValues() call
+  // with the same semantics as in the window.crypto API.
+  function makeUuidV4(crypto) {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-      (
-        c ^
-        (window.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-      ).toString(16)
+      (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
     );
+  }
+
+  // Checks if a given string is a valid UUID.
+  function isUuid(str) {
+    if (str.length !== 36) {
+      return false;
+    }
+
+    const dashPositions = [8, 13, 18, 23];
+    for (let i = 0; i < str.length; ++i) {
+      const char = str[i];
+      if (dashPositions.includes(i)) {
+        if (char !== '-') {
+          return false;
+        }
+      } else if (!isHexDigit(char)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Checks if a given string is a valid UUID version 4.
+  function isUuidV4(str) {
+    // 14th digit has to be '4' to indicate format version 4.
+    return isUuid(str) && str[14] === '4';
   }
 
   ///////////////////
@@ -81,8 +108,10 @@ util = (function() {
     insertAfter: insertAfter,
     isHexDigit: isHexDigit,
     isSurroundedBy: isSurroundedBy,
-    toNumber: toNumber,
-    uuidv4: uuidv4
+    isUuid: isUuid,
+    isUuidV4: isUuidV4,
+    makeUuidV4: makeUuidV4,
+    toNumber: toNumber
   };
 })();
 

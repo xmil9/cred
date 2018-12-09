@@ -5,11 +5,18 @@
 
 ///////////////////
 
-// Namespaces
-var cred = cred || {};
+// Attempts to require a given file. Returns undefined if 'require' is not available.
+// Helps to use the calling js file in both node.js and browser environments. In a
+// node.js environment the passed dependency will be loaded through the require
+// mechanism. In a browser environment this function will return undefined and the
+// dependency has to be loaded through a script tag.
+function tryRequire(file) {
+  return typeof require !== 'undefined' ? require(file) : undefined;
+}
+
 // Dependencies
-// These are provided through (ordered!) script tags in the HTML file.
-var util = util || {};
+var cred = tryRequire('./cred_types') || cred || {};
+var util = tryRequire('./util') || util || {};
 
 ///////////////////
 
@@ -87,7 +94,7 @@ cred.lexer = (function() {
           return this;
         }
         case '|': {
-          this._lexer.storeToken(cred.tokenKind.logicalOr, ch);
+          this._lexer.storeToken(cred.tokenKind.binaryOr, ch);
           return this;
         }
         case '(': {
@@ -108,6 +115,11 @@ cred.lexer = (function() {
 
       throw new Error(`Unexpected character ${ch}`);
     }
+
+    // Called when the the input text has ended while this state is active.
+    terminate() {
+      // Do nothing.
+    }
   }
 
   // Lexer state that processes C directives.
@@ -123,17 +135,20 @@ cred.lexer = (function() {
       // Check if the directive has ended and try to match it to a valid
       // directive keyword.
       if (isWhitespace(ch)) {
-        let matchedKeyword = DirectiveState._findMatch(this._value);
-        if (!matchedKeyword) {
-          throw new Error(`Illegal directive: ${this._value}`);
-        }
-        this._lexer.storeToken(cred.tokenKind.directive, matchedKeyword);
+        this._storeToken();
         return new UndecidedState(this._lexer);
       }
 
       // Keep on reading the directive.
       this._value += ch;
       return this;
+    }
+
+    // Called when the the input text has ended while this state is active.
+    terminate() {
+      if (this._value.length > 0) {
+        this._storeToken();
+      }
     }
 
     // Returns all supported keywords for directives.
@@ -160,6 +175,14 @@ cred.lexer = (function() {
         return elem === text;
       });
     }
+
+    _storeToken() {
+      let matchedKeyword = DirectiveState._findMatch(this._value);
+      if (!matchedKeyword) {
+        throw new Error(`Illegal directive: ${this._value}`);
+      }
+      this._lexer.storeToken(cred.tokenKind.directive, matchedKeyword);
+    }
   }
 
   // Lexer state that processes comments.
@@ -178,7 +201,7 @@ cred.lexer = (function() {
         if (!CommentState._isValidComment(comment)) {
           throw new Error(`Illegal comment: ${comment}`);
         }
-        this._lexer.storeToken(cred.tokenKind.comment, comment);
+        this._storeToken();
         return new UndecidedState(this._lexer);
       }
 
@@ -187,9 +210,20 @@ cred.lexer = (function() {
       return this;
     }
 
+    // Called when the the input text has ended while this state is active.
+    terminate() {
+      if (CommentState._isValidComment(this._value)) {
+        this._storeToken();
+      }
+    }
+
     // Checks if a given comment is valid.
     static _isValidComment(comment) {
       return comment.startsWith('//');
+    }
+
+    _storeToken() {
+      this._lexer.storeToken(cred.tokenKind.comment, this._value);
     }
   }
 
@@ -205,7 +239,7 @@ cred.lexer = (function() {
     next(ch) {
       // Check if the number has ended.
       if (!isValidNumberChar(ch)) {
-        this._lexer.storeToken(cred.tokenKind.number, util.toNumber(this._value));
+        this._storeToken();
         this._lexer.backUpBy(1);
         return new UndecidedState(this._lexer);
       }
@@ -213,6 +247,17 @@ cred.lexer = (function() {
       // Keep on reading the number.
       this._value += ch;
       return this;
+    }
+
+    // Called when the the input text has ended while this state is active.
+    terminate() {
+      if (this._value.length > 0) {
+        this._storeToken();
+      }
+    }
+
+    _storeToken() {
+      this._lexer.storeToken(cred.tokenKind.number, util.toNumber(this._value));
     }
   }
 
@@ -237,8 +282,9 @@ cred.lexer = (function() {
           this._value += ch;
           this._value += nextChar;
           this._lexer.skipAheadBy(1);
+          return this;
         } else {
-          this._lexer.storeToken(cred.tokenKind.string, this._value);
+          this._storeToken();
           return new UndecidedState(this._lexer);
         }
       }
@@ -246,6 +292,17 @@ cred.lexer = (function() {
       // Keep on reading the string.
       this._value += ch;
       return this;
+    }
+
+    // Called when the the input text has ended while this state is active.
+    terminate() {
+      if (this._value.length > 0) {
+        this._storeToken();
+      }
+    }
+
+    _storeToken() {
+      this._lexer.storeToken(cred.tokenKind.string, this._value);
     }
   }
 
@@ -261,10 +318,7 @@ cred.lexer = (function() {
     next(ch) {
       // Check if the identifier has ended.
       if (!isValidIdentifierChar(ch)) {
-        this._lexer.storeToken(
-          this.isKeyword() ? cred.tokenKind.keyword : cred.tokenKind.identifier,
-          this._value
-        );
+        this._storeToken();
         this._lexer.backUpBy(1);
         return new UndecidedState(this._lexer);
       }
@@ -272,6 +326,13 @@ cred.lexer = (function() {
       // Keep on reading the number.
       this._value += ch;
       return this;
+    }
+
+    // Called when the the input text has ended while this state is active.
+    terminate() {
+      if (this._value.length > 0) {
+        this._storeToken();
+      }
     }
 
     // Returns all supported keywords for cv dialog resources.
@@ -298,6 +359,13 @@ cred.lexer = (function() {
         return elem === text;
       });
     }
+
+    _storeToken() {
+      this._lexer.storeToken(
+        this.isKeyword() ? cred.tokenKind.keyword : cred.tokenKind.identifier,
+        this._value
+      );
+    }
   }
 
   // Lexer for processing CV dialogs.
@@ -316,6 +384,11 @@ cred.lexer = (function() {
       while (this._pos < this._text.length && typeof currentState !== 'undefined') {
         let ch = this._text.charAt(this._pos++);
         currentState = currentState.next(ch);
+      }
+
+      // Give state chance to store its token.
+      if (typeof currentState !== 'undefined') {
+        currentState.terminate();
       }
 
       return this._tokens;
@@ -419,3 +492,7 @@ cred.lexer = (function() {
     Token: Token
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = cred.lexer;

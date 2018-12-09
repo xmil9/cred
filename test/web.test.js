@@ -3,7 +3,7 @@
 //
 'use strict';
 
-//const web = require('.././web');
+//const web = require('../web');
 
 ///////////////////
 

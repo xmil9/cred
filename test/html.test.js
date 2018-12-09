@@ -4,7 +4,7 @@
 'use strict';
 
 const $ = require('jquery');
-const html = require('.././html');
+const html = require('../html');
 
 ///////////////////
 

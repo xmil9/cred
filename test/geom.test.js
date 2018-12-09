@@ -3,7 +3,7 @@
 //
 'use strict';
 
-const geom = require('.././geom');
+const geom = require('../geom');
 
 ///////////////////
 

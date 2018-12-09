@@ -80,7 +80,7 @@ cred.io = (function() {
             );
             let log = undefined;
             if (dlgResource) {
-              log = cred.resource.verifyDialog(dlgResource.dialogDefinition);
+              log = cred.resource.verifyDialog(dlgResource.dialog);
             }
             resolve({
               resource: dlgResource,

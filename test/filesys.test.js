@@ -3,7 +3,7 @@
 //
 'use strict';
 
-const filesys = require('.././filesys');
+const filesys = require('../filesys');
 
 ///////////////////
 

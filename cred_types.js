@@ -89,7 +89,7 @@ cred.languageFromLocale = function(locale, replaceAnyWith = undefined) {
 // Enum of supported token kinds.
 cred.tokenKind = {
   comma: 'comma',
-  logicalOr: 'or',
+  binaryOr: 'or',
   openParenthesis: 'open(',
   closeParenthesis: 'close)',
   number: 'num',
@@ -107,8 +107,8 @@ cred.tokenKindName = function(kind) {
     case cred.tokenKind.comma: {
       return 'comma';
     }
-    case cred.tokenKind.logicalOr: {
-      return 'logical-or';
+    case cred.tokenKind.binaryOr: {
+      return 'binary-or';
     }
     case cred.tokenKind.openParenthesis: {
       return 'opening parenthesis';

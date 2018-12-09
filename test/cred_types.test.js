@@ -3,7 +3,7 @@
 //
 'use strict';
 
-var cred = require('.././cred_types');
+var cred = require('../cred_types');
 
 ///////////////////
 
@@ -30,7 +30,7 @@ test('cred.tokenKindName', () => {
     cred.tokenKind.directive,
     cred.tokenKind.identifier,
     cred.tokenKind.keyword,
-    cred.tokenKind.logicalOr,
+    cred.tokenKind.binaryOr,
     cred.tokenKind.number,
     cred.tokenKind.openParenthesis,
     cred.tokenKind.string

@@ -3,7 +3,7 @@
 //
 'use strict';
 
-const svg = require('.././svg');
+const svg = require('../svg');
 
 ///////////////////
 

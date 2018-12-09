@@ -91,7 +91,7 @@ cred.gen = (function() {
     // Returns the content as string.
     _generateDialogContent(locale) {
       let resource = this._dlgResourceSet.dialogResource(locale);
-      let dlg = resource.dialogDefinition;
+      let dlg = resource.dialog;
       const indent = 0;
       const indented_1 = indentLevel(indent, 1);
 

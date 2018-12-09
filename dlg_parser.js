@@ -279,9 +279,7 @@ cred.parser = (function() {
       let controlId = parseIdentifier(this.nextToken());
       verifyToken(this.nextToken(), cred.tokenKind.closeParenthesis);
 
-      this._dlgResource.addControlDefinition(
-        new cred.resource.ControlDefinition(controlType, controlId)
-      );
+      this._dlgResource.addControl(new cred.resource.Control(controlType, controlId));
     }
 
     // Parses the control definitions of a dialog.
@@ -438,7 +436,7 @@ cred.parser = (function() {
       verifyToken(token, cred.tokenKind.identifier, 'BEGIN_LAYER');
 
       const name = parseString(this.nextToken());
-      let layerDef = new cred.resource.LayerDefinition(name);
+      let layerDef = new cred.resource.Layer(name);
       token = this.nextToken();
       while (token.isKind(cred.tokenKind.number)) {
         layerDef.addNumber(parseNumber(token));
@@ -516,7 +514,7 @@ cred.parser = (function() {
     let labeledValues = deserializeProperties(token.value);
     for (let labeledVal of labeledValues) {
       const type = typeOfSerializedPropertyValue(labeledVal.value);
-      let property = cred.resource.makePropertyDefinition(
+      let property = cred.resource.makeProperty(
         labeledVal.label,
         type,
         convertSerializedPropertyValueToType(labeledVal.value, type)
@@ -582,7 +580,7 @@ cred.parser = (function() {
     else if (valueAsStr.search(/[^\d.-]/) === -1) {
       return cred.spec.physicalPropertyType.number;
     }
-    // If it contains logical-or characters, it's a flag sequence.
+    // If it contains binary-or characters, it's a flag sequence.
     else if (valueAsStr.includes('|')) {
       return cred.spec.physicalPropertyType.flags;
     }
@@ -653,18 +651,14 @@ cred.parser = (function() {
       throw new Error('Unexpected property type.');
     }
 
-    let property = cred.resource.makePropertyDefinition(
-      propertySpec.label,
-      propType,
-      propValue
-    );
+    let property = cred.resource.makeProperty(propertySpec.label, propType, propValue);
     target.addPositionalProperty(propertySpec.label, property);
   }
 
   // Parses a sequence of flags starting with a given token and adds the flags
   // to a given target object.
   function parseFlags(parser, token, target, propertySpec) {
-    let property = cred.resource.makePropertyDefinition(
+    let property = cred.resource.makeProperty(
       propertySpec.label,
       cred.spec.physicalPropertyType.flags,
       0
@@ -672,7 +666,7 @@ cred.parser = (function() {
 
     while (token.isKind(cred.tokenKind.identifier)) {
       property.addFlag(parseIdentifier(token));
-      verifyToken(parser.nextToken(), cred.tokenKind.logicalOr);
+      verifyToken(parser.nextToken(), cred.tokenKind.binaryOr);
       token = parser.nextToken();
     }
     property.value = parseNumber(token);
@@ -685,7 +679,7 @@ cred.parser = (function() {
   // a string with serialized properties for the control.
   function parseControlCaption(parser, token, ctrl) {
     if (token.isKind(cred.tokenKind.identifier)) {
-      let property = cred.resource.makePropertyDefinition(
+      let property = cred.resource.makeProperty(
         cred.spec.propertyLabel.text,
         cred.spec.physicalPropertyType.identifier,
         token.value
@@ -710,7 +704,7 @@ cred.parser = (function() {
     let [value, type] = determinePropertyValueAndType(parser.nextToken());
     verifyToken(parser.nextToken(), cred.tokenKind.closeParenthesis);
 
-    let property = cred.resource.makePropertyDefinition(label, type, value);
+    let property = cred.resource.makeProperty(label, type, value);
     target.addLabeledProperty(label, property);
   }
 

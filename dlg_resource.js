@@ -156,15 +156,15 @@ cred.resource = (function() {
     // Updates the bounds stored in the resource of a given layout item.
     _updateItemBounds(layoutItem, bounds) {
       // The bounds of an item are specific to that item and can be different
-      // for each locale, so only the item's definition needs to be changed,
+      // for each locale, so only the item's resource needs to be changed,
       // the other locales remain untouched (in case they are linked the
-      // item definition will be the same!).
+      // item resource will be the same!).
       const propLabel = cred.spec.propertyLabel;
-      let resourceDef = layoutItem.resourceDefinition();
-      resourceDef.property(propLabel.left).value = bounds.left;
-      resourceDef.property(propLabel.top).value = bounds.top;
-      resourceDef.property(propLabel.width).value = bounds.width;
-      resourceDef.property(propLabel.height).value = bounds.height;
+      let resource = layoutItem.resource();
+      resource.property(propLabel.left).value = bounds.left;
+      resource.property(propLabel.top).value = bounds.top;
+      resource.property(propLabel.width).value = bounds.width;
+      resource.property(propLabel.height).value = bounds.height;
     }
 
     // Updates a given property of a given layout item.
@@ -480,16 +480,15 @@ cred.resource = (function() {
 
     // Returns a property of a given layout item for a given locale.
     _resourceProperty(layoutItem, propLabel, locale) {
-      let resourceDef = this._resourceDefinition(layoutItem, locale);
-      return resourceDef.property(propLabel);
+      let resource = this._resource(layoutItem, locale);
+      return resource.property(propLabel);
     }
 
-    // Returns the resource definition of a given layout item for a given
-    // locale.
-    _resourceDefinition(layoutItem, locale) {
+    // Returns the resource of a given layout item for a given locale.
+    _resource(layoutItem, locale) {
       let resource = this.dialogResource(locale);
       if (layoutItem.isDialog()) {
-        return resource.dialogDefinition;
+        return resource.dialog;
       }
       return resource.control(layoutItem.id);
     }
@@ -706,7 +705,7 @@ cred.resource = (function() {
       const dlgSpec = cred.spec.makeDialogSpec();
 
       for (let dlgRes of this._dlgResourceSet.unlinkedDialogResources()) {
-        let dlg = dlgRes.dialogDefinition;
+        let dlg = dlgRes.dialog;
         let locale = dlgRes.locale;
 
         // Normalize dialog properties.
@@ -735,7 +734,7 @@ cred.resource = (function() {
           // Replace the id.
           const currentStrId = prop.value;
 
-          let normedProp = new IdentifierPropertyDefinition(
+          let normedProp = new IdentifierProperty(
             prop.label,
             cred.spec.physicalPropertyType.identifier,
             this._idLookup.get(currentStrId)
@@ -749,7 +748,7 @@ cred.resource = (function() {
           // id property refering to the string.
           const strId = this._addString(item, prop, locale);
 
-          let normedProp = new IdentifierPropertyDefinition(
+          let normedProp = new IdentifierProperty(
             prop.label,
             cred.spec.physicalPropertyType.identifier,
             strId
@@ -817,7 +816,7 @@ cred.resource = (function() {
       const dlgSpec = cred.spec.makeDialogSpec();
 
       for (let dlgRes of this._dlgResourceSet.unlinkedDialogResources()) {
-        let dlg = dlgRes.dialogDefinition;
+        let dlg = dlgRes.dialog;
 
         // Denormalize dialog properties.
         for (let prop of dlg.properties()) {
@@ -849,7 +848,7 @@ cred.resource = (function() {
       if (this._isStringEmptyAcrossAllLanguages(internalStrId)) {
         // Replace the property with a string property that holds the empty string
         // directly.
-        let stringProp = new StringPropertyDefinition(
+        let stringProp = new StringProperty(
           prop.label,
           cred.spec.physicalPropertyType.string,
           ''
@@ -859,7 +858,7 @@ cred.resource = (function() {
         this._denormalizedMap.remove(denormedStrId);
       } else {
         // Replace the id with a persistent id.
-        let denormedProp = new IdentifierPropertyDefinition(
+        let denormedProp = new IdentifierProperty(
           prop.label,
           cred.spec.physicalPropertyType.identifier,
           denormedStrId
@@ -1004,7 +1003,7 @@ cred.resource = (function() {
   // Holds data read from a dialog resource file.
   class DialogResource {
     constructor(locale) {
-      // The locale that this definition applies to.
+      // The locale that this resource applies to.
       this._locale = locale;
       // Version of the resource format.
       this.version = '';
@@ -1013,10 +1012,9 @@ cred.resource = (function() {
       // Map that associates languages with a string file.
       this._stringFiles = new Map();
       // Definition of the dialog.
-      this._dlgDefinition = new DialogDefinition();
-      // Array of layer definitions. A layer definition has a name and an array of
-      // layer values.
-      this._layerDefinitions = [];
+      this._dlg = new Dialog();
+      // Array of layers. A layer has a name and an array of layer values.
+      this._layers = [];
 
       // When editing properties, also edit the copy function below!
     }
@@ -1030,10 +1028,10 @@ cred.resource = (function() {
       for (const [lang, strFile] of this._stringFiles) {
         copy._stringFiles.set(lang, strFile);
       }
-      copy._dlgDefinition = this._dlgDefinition.copy();
-      copy._layerDefinitions = [];
-      for (const layerDef of this._layerDefinitions) {
-        copy._layerDefinitions.push(layerDef.copy());
+      copy._dlg = this._dlg.copy();
+      copy._layers = [];
+      for (const layer of this._layers) {
+        copy._layers.push(layer.copy());
       }
       return copy;
     }
@@ -1066,13 +1064,13 @@ cred.resource = (function() {
       this._stringFiles.set(language, fileName);
     }
 
-    get dialogDefinition() {
-      return this._dlgDefinition;
+    get dialog() {
+      return this._dlg;
     }
 
     // Returns the value of a property with a given label.
     dialogPropertyValue(label) {
-      const prop = this._dlgDefinition.property(label);
+      const prop = this._dlg.property(label);
       if (prop) {
         return prop.value;
       }
@@ -1081,30 +1079,30 @@ cred.resource = (function() {
 
     // Polymorphic function that adds a positional property to the dialog.
     addPositionalProperty(label, property) {
-      this._dlgDefinition.addPositionalProperty(label, property);
+      this._dlg.addPositionalProperty(label, property);
     }
 
     // Polymorphic function that adds a labeled property to the dialog.
     addLabeledProperty(label, property) {
-      this._dlgDefinition.addLabeledProperty(label, property);
+      this._dlg.addLabeledProperty(label, property);
     }
 
     // Polymorphic function that adds a serialized property to the dialog.
     addSerializedProperty(label, property) {
-      this._dlgDefinition.addSerializedProperty(label, property);
+      this._dlg.addSerializedProperty(label, property);
     }
 
     control(id) {
-      return this._dlgDefinition.control(id);
+      return this._dlg.control(id);
     }
 
     *controls() {
-      yield* this._dlgDefinition.controls();
+      yield* this._dlg.controls();
     }
 
-    // Adds a control definition to the dialog.
-    addControlDefinition(ctrl) {
-      this._dlgDefinition.addControlDefinition(ctrl);
+    // Adds a control to the dialog.
+    addControl(ctrl) {
+      this._dlg.addControl(ctrl);
     }
 
     // Generator function for included headers.
@@ -1127,42 +1125,42 @@ cred.resource = (function() {
 
     // Generator function for layers of the resource.
     *layers() {
-      for (const layer of this._layerDefinitions) {
+      for (const layer of this._layers) {
         yield layer;
       }
     }
 
     // Adds a layer to the dialog resource.
     addLayer(layer) {
-      this._layerDefinitions.push(layer);
+      this._layers.push(layer);
     }
 
     // Updates the dialog's id.
     updateDialogId(id) {
-      this._dlgDefinition.id = id;
+      this._dlg.id = id;
     }
 
     // Updates a control's id.
     updateControlId(currentId, id) {
-      this._dlgDefinition.updateControlId(currentId, id);
+      this._dlg.updateControlId(currentId, id);
     }
   }
 
   ///////////////////
 
   // Dialog information read from the dialogs's resource for a particular locale.
-  class DialogDefinition {
+  class Dialog {
     constructor() {
-      // Map that associates property labels with property definitions.
+      // Map that associates property labels with properties.
       this._properties = new Map();
-      // Map that associates control ids with control definitions.
+      // Map that associates control ids with controls.
       this._controls = new Map();
       // When editing properties, also edit the copy function below!
     }
 
-    // Returns a deep copy of the dialog definition.
+    // Returns a deep copy of the dialog.
     copy() {
-      let copy = new DialogDefinition();
+      let copy = new Dialog();
       for (let [label, property] of this._properties) {
         copy._properties.set(label, property.copy());
       }
@@ -1172,7 +1170,7 @@ cred.resource = (function() {
       return copy;
     }
 
-    // Polymorphic function to return the definition's identifier.
+    // Polymorphic function to return the item's identifier.
     get id() {
       if (!this._properties.has(cred.spec.propertyLabel.id)) {
         throw new Error('Dialog id accessed before being defined.');
@@ -1180,7 +1178,7 @@ cred.resource = (function() {
       return this.property(cred.spec.propertyLabel.id).value;
     }
 
-    // Polymorphic function to set the definition's identifier.
+    // Polymorphic function to set the item's identifier.
     set id(value) {
       let idProp = this.property(cred.spec.propertyLabel.id);
       if (idProp) {
@@ -1189,7 +1187,7 @@ cred.resource = (function() {
         // Create a property for the id.
         this.setProperty(
           cred.spec.propertyLabel.id,
-          cred.resource.makePropertyDefinition(
+          cred.resource.makeProperty(
             cred.spec.propertyLabel.id,
             cred.spec.physicalPropertyType.identifier,
             value
@@ -1198,7 +1196,7 @@ cred.resource = (function() {
       }
     }
 
-    // Polymorphic function to check if this definition is for a dialog.
+    // Polymorphic function to check if this item is for a dialog.
     isDialog() {
       return true;
     }
@@ -1253,8 +1251,8 @@ cred.resource = (function() {
       }
     }
 
-    // Adds a control definition to the dialog.
-    addControlDefinition(ctrl) {
+    // Adds a control to the dialog.
+    addControl(ctrl) {
       if (!this._controls.has(ctrl.id)) {
         this._controls.set(ctrl.id, ctrl);
       } else {
@@ -1277,19 +1275,19 @@ cred.resource = (function() {
   ///////////////////
 
   // Control information read from the dialogs's resource.
-  class ControlDefinition {
+  class Control {
     constructor(type, id) {
       if (!type || !id) {
         throw new Error('Invalid arguments. Control must have a type and an identifier.');
       }
-      // Map that associates property labels with property definition objects.
+      // Map that associates property labels with property objects.
       this._properties = new Map();
       // When editing fields, also edit the copy function below!
 
       // Add properties for the given type and id.
       this.addLabeledProperty(
         cred.spec.propertyLabel.ctrlType,
-        makePropertyDefinition(
+        makeProperty(
           cred.spec.propertyLabel.ctrlType,
           cred.spec.physicalPropertyType.identifier,
           type
@@ -1297,7 +1295,7 @@ cred.resource = (function() {
       );
       this.addLabeledProperty(
         cred.spec.propertyLabel.id,
-        makePropertyDefinition(
+        makeProperty(
           cred.spec.propertyLabel.id,
           cred.spec.physicalPropertyType.identifier,
           id
@@ -1305,9 +1303,9 @@ cred.resource = (function() {
       );
     }
 
-    // Returns a deep copy of the control definition.
+    // Returns a deep copy of the control.
     copy() {
-      let copy = new ControlDefinition(this.type, this.id);
+      let copy = new Control(this.type, this.id);
       for (let [label, property] of this._properties) {
         copy._properties.set(label, property.copy());
       }
@@ -1323,12 +1321,12 @@ cred.resource = (function() {
       return this.property(cred.spec.propertyLabel.id).value;
     }
 
-    // Polymorphic function to set the definition's identifier.
+    // Polymorphic function to set the item's identifier.
     set id(value) {
       return (this.property(cred.spec.propertyLabel.id).value = value);
     }
 
-    // Polymorphic function to check if this definition is for a dialog.
+    // Polymorphic function to check if this item is for a dialog.
     isDialog() {
       return false;
     }
@@ -1397,7 +1395,7 @@ cred.resource = (function() {
   ///////////////////
 
   // A dialog or control property read from the dialogs's resource.
-  class PropertyDefinition {
+  class Property {
     constructor(label, physicalType, value) {
       this._label = label;
       // The type of the property as defined by cred.spec.physicalPropertyType.
@@ -1421,14 +1419,14 @@ cred.resource = (function() {
   }
 
   // Defintion for a number property.
-  class NumberPropertyDefinition extends PropertyDefinition {
+  class NumberProperty extends Property {
     constructor(label, physicalType, value) {
       super(label, physicalType, value);
     }
 
-    // Polymorthic function that returns a deep copy of the property definition.
+    // Polymorthic function that returns a deep copy of the property.
     copy() {
-      return new NumberPropertyDefinition(this.label, this.type, this.value);
+      return new NumberProperty(this.label, this.type, this.value);
     }
 
     // Polymorphic function to check if the property has a non-empty value.
@@ -1438,14 +1436,14 @@ cred.resource = (function() {
   }
 
   // Defintion for a string property.
-  class StringPropertyDefinition extends PropertyDefinition {
+  class StringProperty extends Property {
     constructor(label, physicalType, value) {
       super(label, physicalType, value);
     }
 
-    // Polymorthic function that returns a deep copy of the property definition.
+    // Polymorthic function that returns a deep copy of the property.
     copy() {
-      return new StringPropertyDefinition(this.label, this.type, this.value);
+      return new StringProperty(this.label, this.type, this.value);
     }
 
     // Polymorphic function to check if the property has a non-empty value.
@@ -1460,14 +1458,14 @@ cred.resource = (function() {
   }
 
   // Defintion for an identifier property.
-  class IdentifierPropertyDefinition extends PropertyDefinition {
+  class IdentifierProperty extends Property {
     constructor(label, physicalType, value) {
       super(label, physicalType, value);
     }
 
-    // Polymorthic function that returns a deep copy of the property definition.
+    // Polymorthic function that returns a deep copy of the property.
     copy() {
-      return new IdentifierPropertyDefinition(this.label, this.type, this.value);
+      return new IdentifierProperty(this.label, this.type, this.value);
     }
 
     // Polymorphic function to check if the property has a non-empty value.
@@ -1478,7 +1476,7 @@ cred.resource = (function() {
 
   // Defintion for a property that consists of bit flags. The value field represents
   // the total value of the flags.
-  class FlagsPropertyDefinition extends PropertyDefinition {
+  class FlagsProperty extends Property {
     constructor(label, physicalType, value) {
       super(label, physicalType, value);
       // Array of strings for the flags.
@@ -1490,9 +1488,9 @@ cred.resource = (function() {
       // When editing properties, also edit the copy function below!
     }
 
-    // Polymorthic function that returns a deep copy of the property definition.
+    // Polymorthic function that returns a deep copy of the property.
     copy() {
-      let copy = new FlagsPropertyDefinition(this.label, this.type, this.value);
+      let copy = new FlagsProperty(this.label, this.type, this.value);
       copy._flags = util.copyArrayShallow(this._flags);
       return copy;
     }
@@ -1541,20 +1539,20 @@ cred.resource = (function() {
     }
   }
 
-  // Factory function for property definition objects.
-  function makePropertyDefinition(label, type, value) {
+  // Factory function for property objects.
+  function makeProperty(label, type, value) {
     switch (type) {
       case cred.spec.physicalPropertyType.number: {
-        return new NumberPropertyDefinition(label, type, value);
+        return new NumberProperty(label, type, value);
       }
       case cred.spec.physicalPropertyType.string: {
-        return new StringPropertyDefinition(label, type, value);
+        return new StringProperty(label, type, value);
       }
       case cred.spec.physicalPropertyType.identifier: {
-        return new IdentifierPropertyDefinition(label, type, value);
+        return new IdentifierProperty(label, type, value);
       }
       case cred.spec.physicalPropertyType.flags: {
-        return new FlagsPropertyDefinition(label, type, value);
+        return new FlagsProperty(label, type, value);
       }
       default: {
         throw new Error('Unexpected physical property type.');
@@ -1566,7 +1564,7 @@ cred.resource = (function() {
 
   // There are three ways of how properties might be defined in the resource file:
   // - Positional properties: Properties that are identified by their position in the
-  //                          target object's resource definition.
+  //                          target object's resource.
   // - Labeled properties:    Properties that are defined through specific keywords
   //                          as label-value pairs in the target object's resource.
   //                          They are identfied by their label.
@@ -1607,7 +1605,7 @@ cred.resource = (function() {
   ///////////////////
 
   // Definition of a layer in a dialog resource.
-  class LayerDefinition {
+  class Layer {
     constructor(name, numbers) {
       this._name = name;
       // Array of integer numbers.
@@ -1616,7 +1614,7 @@ cred.resource = (function() {
 
     // Returns a deep copy of the object.
     copy() {
-      let copy = new LayerDefinition(this._name);
+      let copy = new Layer(this._name);
       // Since array is only holding primitive values we can make a shallow copy of
       // it.
       copy._numbers = util.copyArrayShallow(this._numbers);
@@ -1653,8 +1651,8 @@ cred.resource = (function() {
 
   // Verifies the definition of a dialog against a dialog specification.
   class DialogVerifier {
-    constructor(dlgDefinition) {
-      this._dlgDefinition = dlgDefinition;
+    constructor(dlg) {
+      this._dlg = dlg;
       this._dlgSpec = cred.spec.makeDialogSpec();
       // Log of detected issues.
       this._log = [];
@@ -1676,7 +1674,7 @@ cred.resource = (function() {
     // Verifies that the properties defined in the dialog resource follow the
     // dialog specification.
     _verifyDefinedDialogProperties() {
-      for (let prop of this._dlgDefinition.properties()) {
+      for (let prop of this._dlg.properties()) {
         this._verifyDefinedProperty(
           prop,
           this._dlgSpec.propertySpec(prop.label),
@@ -1692,7 +1690,7 @@ cred.resource = (function() {
       for (let propSpec of this._dlgSpec.propertySpecs()) {
         const label = propSpec.label;
         this._verifySpecifiedProperty(
-          this._dlgDefinition.property(label),
+          this._dlg.property(label),
           propSpec,
           'dialog',
           label
@@ -1702,15 +1700,14 @@ cred.resource = (function() {
 
     // Verifies the properties of each of the dialog's controls.
     _verifyControlProperties() {
-      for (let ctrl of this._dlgDefinition.controls()) {
+      for (let ctrl of this._dlg.controls()) {
         let ctrlSpec = cred.spec.makeControlSpec(ctrl.type);
         this._verifyDefinedControlProperties(ctrl, ctrlSpec);
         this._verifySpecifiedControlProperties(ctrl, ctrlSpec);
       }
     }
 
-    // Verifies that the properties defined in a control definition follow the
-    // control's specification.
+    // Verifies that the properties defined in a control follow the control's specification.
     _verifyDefinedControlProperties(ctrl, ctrlSpec) {
       for (let prop of ctrl.properties()) {
         this._verifyDefinedProperty(
@@ -1770,9 +1767,9 @@ cred.resource = (function() {
     }
   }
 
-  // Verifies a given dialog definition and returns a log of issues.
-  function verifyDialog(dlgDefinition) {
-    let verifier = new DialogVerifier(dlgDefinition);
+  // Verifies a given dialog and returns a log of issues.
+  function verifyDialog(dlg) {
+    let verifier = new DialogVerifier(dlg);
     return verifier.verify();
   }
 
@@ -1780,12 +1777,12 @@ cred.resource = (function() {
 
   // Exports
   return {
-    ControlDefinition: ControlDefinition,
-    DialogDefinition: DialogDefinition,
+    Control: Control,
+    Dialog: Dialog,
     DialogResource: DialogResource,
     DialogResourceSetBuilder: DialogResourceSetBuilder,
-    LayerDefinition: LayerDefinition,
-    makePropertyDefinition: makePropertyDefinition,
+    Layer: Layer,
+    makeProperty: makeProperty,
     ResourceManager: ResourceManager,
     StringMap: StringMap,
     verifyDialog: verifyDialog

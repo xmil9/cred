@@ -580,8 +580,8 @@ cred.layout = (function() {
     }
 
     // Polymorphic function to return the resource definition for the dialog.
-    resourceDefinition() {
-      return this._dlgResource.dialogDefinition;
+    resource() {
+      return this._dlgResource.dialog;
     }
 
     // Polymorphic function to return the specification for the dialog.
@@ -591,12 +591,12 @@ cred.layout = (function() {
 
     // Polymorphic function to return the resource id of the item.
     get id() {
-      return this.resourceDefinition().id;
+      return this.resource().id;
     }
 
     // Polymorphic function to return whether the item represents a dialog.
     isDialog() {
-      return this.resourceDefinition().isDialog();
+      return this.resource().isDialog();
     }
 
     // Builds the SVG items for the controls of the dialog.
@@ -660,7 +660,7 @@ cred.layout = (function() {
     }
 
     // Polymorphic function to return the resource definition for the control.
-    resourceDefinition() {
+    resource() {
       return this._ctrlDefinition;
     }
 
@@ -671,12 +671,12 @@ cred.layout = (function() {
 
     // Polymorphic function to return the resource id of the item.
     get id() {
-      return this.resourceDefinition().id;
+      return this.resource().id;
     }
 
     // Polymorphic function to return whether the item represents a dialog.
     isDialog() {
-      return this.resourceDefinition().isDialog();
+      return this.resource().isDialog();
     }
 
     // Returns the bounds of the control as they are defined in the resource.

@@ -460,7 +460,7 @@ cred.ui = (function() {
     // item.
     _buildProperties(item) {
       const spec = item.itemSpec();
-      const definition = item.resourceDefinition();
+      const definition = item.resource();
       let $containerElem = $('#property-list');
 
       for (const label of spec.propertyDisplayOrder()) {

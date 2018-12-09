@@ -5,23 +5,22 @@
 
 const crypto = require('crypto');
 var cred = cred || {};
-cred = require('.././cred_types');
-cred.resource = require('.././dlg_resource');
-cred.spec = require('.././dlg_spec');
-const util = require('.././util');
+cred = require('../cred_types');
+cred.resource = require('../dlg_resource');
+cred.spec = require('../dlg_spec');
 
 ///////////////////
 
-test('LayerDefinition.copy for layer without numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test');
+test('Layer.copy for layer without numbers', () => {
+  const layer = new cred.resource.Layer('test');
   const copy = layer.copy();
   expect(copy).not.toBe(layer);
   expect(copy.name).toBe('test');
   expect(copy.countNumbers()).toBe(0);
 });
 
-test('LayerDefinition.copy for layer with numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test', [1, 2, 3]);
+test('Layer.copy for layer with numbers', () => {
+  const layer = new cred.resource.Layer('test', [1, 2, 3]);
   const copy = layer.copy();
   expect(copy).not.toBe(layer);
   expect(copy.name).toBe('test');
@@ -31,8 +30,8 @@ test('LayerDefinition.copy for layer with numbers', () => {
   expect(copy.hasNumber(3)).toBeTruthy();
 });
 
-test('LayerDefinition.copy for layer with one numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test', [10]);
+test('Layer.copy for layer with one numbers', () => {
+  const layer = new cred.resource.Layer('test', [10]);
   const copy = layer.copy();
   expect(copy).not.toBe(layer);
   expect(copy.name).toBe('test');
@@ -40,46 +39,46 @@ test('LayerDefinition.copy for layer with one numbers', () => {
   expect(copy.hasNumber(10)).toBeTruthy();
 });
 
-test('LayerDefinition.name', () => {
-  expect(new cred.resource.LayerDefinition('test').name).toBe('test');
-  expect(new cred.resource.LayerDefinition('test', [1, 2, 3]).name).toBe('test');
+test('Layer.name', () => {
+  expect(new cred.resource.Layer('test').name).toBe('test');
+  expect(new cred.resource.Layer('test', [1, 2, 3]).name).toBe('test');
 });
 
-test('LayerDefinition.countNumbers', () => {
-  expect(new cred.resource.LayerDefinition('test').countNumbers()).toBe(0);
-  expect(new cred.resource.LayerDefinition('test', [1, 2, 3]).countNumbers()).toBe(3);
-  expect(new cred.resource.LayerDefinition('test', []).countNumbers()).toBe(0);
-  expect(new cred.resource.LayerDefinition('test', [10]).countNumbers()).toBe(1);
+test('Layer.countNumbers', () => {
+  expect(new cred.resource.Layer('test').countNumbers()).toBe(0);
+  expect(new cred.resource.Layer('test', [1, 2, 3]).countNumbers()).toBe(3);
+  expect(new cred.resource.Layer('test', []).countNumbers()).toBe(0);
+  expect(new cred.resource.Layer('test', [10]).countNumbers()).toBe(1);
 });
 
-test('LayerDefinition.numbers with no numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test');
+test('Layer.numbers with no numbers', () => {
+  const layer = new cred.resource.Layer('test');
   expect(Array.from(layer.numbers())).toEqual([]);
 });
 
-test('LayerDefinition.numbers with numbers', () => {
-  let layer = new cred.resource.LayerDefinition('test', [1, 2, 3]);
+test('Layer.numbers with numbers', () => {
+  let layer = new cred.resource.Layer('test', [1, 2, 3]);
   expect(Array.from(layer.numbers())).toEqual([1, 2, 3]);
 
-  layer = new cred.resource.LayerDefinition('test', [1]);
+  layer = new cred.resource.Layer('test', [1]);
   expect(Array.from(layer.numbers())).toEqual([1]);
 });
 
-test('LayerDefinition.hasNumber', () => {
-  const layer = new cred.resource.LayerDefinition('test', [1, 2, 3]);
+test('Layer.hasNumber', () => {
+  const layer = new cred.resource.Layer('test', [1, 2, 3]);
   expect(layer.hasNumber(1)).toBeTruthy();
   expect(layer.hasNumber(2)).toBeTruthy();
   expect(layer.hasNumber(3)).toBeTruthy();
   expect(layer.hasNumber(4)).toBeFalsy();
 });
 
-test('LayerDefinition.hasNumber with no numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test');
+test('Layer.hasNumber with no numbers', () => {
+  const layer = new cred.resource.Layer('test');
   expect(layer.hasNumber(1)).toBeFalsy();
 });
 
-test('LayerDefinition.addNumber without existing numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test');
+test('Layer.addNumber without existing numbers', () => {
+  const layer = new cred.resource.Layer('test');
   layer.addNumber(1);
   expect(layer.countNumbers()).toBe(1);
   expect(layer.hasNumber(1)).toBeTruthy();
@@ -89,8 +88,8 @@ test('LayerDefinition.addNumber without existing numbers', () => {
   expect(layer.hasNumber(2)).toBeTruthy();
 });
 
-test('LayerDefinition.addNumber with existing numbers', () => {
-  const layer = new cred.resource.LayerDefinition('test', [1, 2]);
+test('Layer.addNumber with existing numbers', () => {
+  const layer = new cred.resource.Layer('test', [1, 2]);
   layer.addNumber(3);
   expect(layer.countNumbers()).toBe(3);
   expect(layer.hasNumber(3)).toBeTruthy();
@@ -100,8 +99,8 @@ test('LayerDefinition.addNumber with existing numbers', () => {
   expect(layer.hasNumber(4)).toBeTruthy();
 });
 
-test('LayerDefinition.addNumber same number again', () => {
-  const layer = new cred.resource.LayerDefinition('test', [1, 2]);
+test('Layer.addNumber same number again', () => {
+  const layer = new cred.resource.Layer('test', [1, 2]);
   layer.addNumber(1);
   expect(layer.countNumbers()).toBe(2);
   layer.addNumber(2);
@@ -404,8 +403,8 @@ test('StringMap.copyWithRegeneratedIds', () => {
 
 ///////////////////
 
-test('makePropertyDefinition for number property', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('makeProperty for number property', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -414,8 +413,8 @@ test('makePropertyDefinition for number property', () => {
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.number);
 });
 
-test('makePropertyDefinition for string property', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('makeProperty for string property', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.string,
     'something'
@@ -424,8 +423,8 @@ test('makePropertyDefinition for string property', () => {
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.string);
 });
 
-test('makePropertyDefinition for identifier property', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('makeProperty for identifier property', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.identifier,
     'MY_ID'
@@ -434,8 +433,8 @@ test('makePropertyDefinition for identifier property', () => {
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.identifier);
 });
 
-test('makePropertyDefinition for flags property', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('makeProperty for flags property', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     15
@@ -444,8 +443,8 @@ test('makePropertyDefinition for flags property', () => {
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.flags);
 });
 
-test('PropertyDefinition.label', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('Property.label', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -453,8 +452,8 @@ test('PropertyDefinition.label', () => {
   expect(prop.label).toEqual('test');
 });
 
-test('PropertyDefinition.type', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('Property.type', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -462,8 +461,8 @@ test('PropertyDefinition.type', () => {
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.number);
 });
 
-test('PropertyDefinition.value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('Property.value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -471,8 +470,8 @@ test('PropertyDefinition.value', () => {
   expect(prop.value).toEqual(1);
 });
 
-test('PropertyDefinition.valueAsString', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('Property.valueAsString', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -481,7 +480,7 @@ test('PropertyDefinition.valueAsString', () => {
 });
 
 test('NumericPropertyDefinition.copy', () => {
-  const prop = cred.resource.makePropertyDefinition(
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -495,7 +494,7 @@ test('NumericPropertyDefinition.copy', () => {
 });
 
 test('NumericPropertyDefinition.hasValue with value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     1
@@ -504,7 +503,7 @@ test('NumericPropertyDefinition.hasValue with value', () => {
 });
 
 test('NumericPropertyDefinition.hasValue with no value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.number,
     undefined
@@ -512,8 +511,8 @@ test('NumericPropertyDefinition.hasValue with no value', () => {
   expect(prop.hasValue()).toBeFalsy();
 });
 
-test('StringPropertyDefinition.copy', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('StringProperty.copy', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.string,
     'str'
@@ -526,8 +525,8 @@ test('StringPropertyDefinition.copy', () => {
   expect(copy.value).toEqual(prop.value);
 });
 
-test('StringPropertyDefinition.hasValue with value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('StringProperty.hasValue with value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.string,
     'str'
@@ -535,8 +534,8 @@ test('StringPropertyDefinition.hasValue with value', () => {
   expect(prop.hasValue()).toBeTruthy();
 });
 
-test('StringPropertyDefinition.hasValue with no value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('StringProperty.hasValue with no value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.string,
     undefined
@@ -544,8 +543,8 @@ test('StringPropertyDefinition.hasValue with no value', () => {
   expect(prop.hasValue()).toBeFalsy();
 });
 
-test('StringPropertyDefinition.valueAsString', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('StringProperty.valueAsString', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.string,
     'str'
@@ -553,8 +552,8 @@ test('StringPropertyDefinition.valueAsString', () => {
   expect(prop.valueAsString()).toEqual('"str"');
 });
 
-test('IdentifierPropertyDefinition.copy', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('IdentifierProperty.copy', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.identifier,
     'ID'
@@ -567,8 +566,8 @@ test('IdentifierPropertyDefinition.copy', () => {
   expect(copy.value).toEqual(prop.value);
 });
 
-test('IdentifierPropertyDefinition.hasValue with value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('IdentifierProperty.hasValue with value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.identifier,
     'ID'
@@ -576,8 +575,8 @@ test('IdentifierPropertyDefinition.hasValue with value', () => {
   expect(prop.hasValue()).toBeTruthy();
 });
 
-test('IdentifierPropertyDefinition.hasValue with no value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('IdentifierProperty.hasValue with no value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.identifier,
     undefined
@@ -585,8 +584,8 @@ test('IdentifierPropertyDefinition.hasValue with no value', () => {
   expect(prop.hasValue()).toBeFalsy();
 });
 
-test('FlagsPropertyDefinition.value for undefined value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.value for undefined value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     undefined
@@ -594,8 +593,8 @@ test('FlagsPropertyDefinition.value for undefined value', () => {
   expect(prop.value).toEqual(0);
 });
 
-test('FlagsPropertyDefinition.value for string value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.value for string value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     'str'
@@ -603,8 +602,8 @@ test('FlagsPropertyDefinition.value for string value', () => {
   expect(prop.value).toEqual(0);
 });
 
-test('FlagsPropertyDefinition.copy', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.copy', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -622,8 +621,8 @@ test('FlagsPropertyDefinition.copy', () => {
   expect(copy.valueAsString()).toEqual(prop.valueAsString());
 });
 
-test('FlagsPropertyDefinition.hasValue with flags', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.hasValue with flags', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -633,8 +632,8 @@ test('FlagsPropertyDefinition.hasValue with flags', () => {
   expect(prop.hasValue()).toBeTruthy();
 });
 
-test('FlagsPropertyDefinition.hasValue without flags', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.hasValue without flags', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -643,8 +642,8 @@ test('FlagsPropertyDefinition.hasValue without flags', () => {
   expect(prop.hasValue()).toBeFalsy();
 });
 
-test('FlagsPropertyDefinition.hasValue with no value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.hasValue with no value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     undefined
@@ -652,8 +651,8 @@ test('FlagsPropertyDefinition.hasValue with no value', () => {
   expect(prop.hasValue()).toBeFalsy();
 });
 
-test('FlagsPropertyDefinition.valueAsString without flags', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.valueAsString without flags', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -661,8 +660,8 @@ test('FlagsPropertyDefinition.valueAsString without flags', () => {
   expect(prop.valueAsString()).toEqual('0');
 });
 
-test('FlagsPropertyDefinition.valueAsString with one flag', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.valueAsString with one flag', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -672,8 +671,8 @@ test('FlagsPropertyDefinition.valueAsString with one flag', () => {
   expect(prop.valueAsString()).toEqual('A | 1');
 });
 
-test('FlagsPropertyDefinition.valueAsString with multiple flags', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.valueAsString with multiple flags', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -686,8 +685,8 @@ test('FlagsPropertyDefinition.valueAsString with multiple flags', () => {
   expect(prop.valueAsString()).toEqual('A | B | C | D | 15');
 });
 
-test('FlagsPropertyDefinition.valueAsString with flags and other value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.valueAsString with flags and other value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     64
@@ -698,8 +697,8 @@ test('FlagsPropertyDefinition.valueAsString with flags and other value', () => {
   expect(prop.valueAsString()).toEqual('A | B | 67');
 });
 
-test('FlagsPropertyDefinition.addFlag to no flags', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.addFlag to no flags', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -709,8 +708,8 @@ test('FlagsPropertyDefinition.addFlag to no flags', () => {
   expect(prop.valueAsString()).toEqual('A | 1');
 });
 
-test('FlagsPropertyDefinition.addFlag to existing flags', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.addFlag to existing flags', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     32
@@ -721,8 +720,8 @@ test('FlagsPropertyDefinition.addFlag to existing flags', () => {
   expect(prop.valueAsString()).toEqual('A | B | 35');
 });
 
-test('FlagsPropertyDefinition.removeFlag for existing flag', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.removeFlag for existing flag', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     32
@@ -734,8 +733,8 @@ test('FlagsPropertyDefinition.removeFlag for existing flag', () => {
   expect(prop.valueAsString()).toEqual('B | 34');
 });
 
-test('FlagsPropertyDefinition.removeFlag for not existing flag', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.removeFlag for not existing flag', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     32
@@ -747,8 +746,8 @@ test('FlagsPropertyDefinition.removeFlag for not existing flag', () => {
   expect(prop.valueAsString()).toEqual('A | B | 35');
 });
 
-test('FlagsPropertyDefinition.removeFlag for single flag', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.removeFlag for single flag', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -759,8 +758,8 @@ test('FlagsPropertyDefinition.removeFlag for single flag', () => {
   expect(prop.valueAsString()).toEqual('0');
 });
 
-test('FlagsPropertyDefinition.removeFlag for flag but not bit value', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.removeFlag for flag but not bit value', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -771,8 +770,8 @@ test('FlagsPropertyDefinition.removeFlag for flag but not bit value', () => {
   expect(prop.valueAsString()).toEqual('2');
 });
 
-test('FlagsPropertyDefinition.isSet for existing flag', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.isSet for existing flag', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -782,8 +781,8 @@ test('FlagsPropertyDefinition.isSet for existing flag', () => {
   expect(prop.isSet('B')).toBeTruthy();
 });
 
-test('FlagsPropertyDefinition.isSet for not existing flag', () => {
-  const prop = cred.resource.makePropertyDefinition(
+test('FlagsProperty.isSet for not existing flag', () => {
+  const prop = cred.resource.makeProperty(
     'test',
     cred.spec.physicalPropertyType.flags,
     0
@@ -795,38 +794,28 @@ test('FlagsPropertyDefinition.isSet for not existing flag', () => {
 
 ///////////////////
 
-test('ControlDefinition construction', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control construction', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl).toBeDefined();
   expect(ctrl.type).toEqual(cred.spec.controlType.imagePushButton);
   expect(ctrl.id).toEqual('myid');
 });
 
-test('ControlDefinition construction without type', () => {
-  expect(() => new cred.resource.ControlDefinition(undefined, 'myid')).toThrow();
+test('Control construction without type', () => {
+  expect(() => new cred.resource.Control(undefined, 'myid')).toThrow();
 });
 
-test('ControlDefinition construction without id', () => {
+test('Control construction without id', () => {
   expect(
-    () =>
-      new cred.resource.ControlDefinition(
-        cred.spec.controlType.imagePushButton,
-        undefined
-      )
+    () => new cred.resource.Control(cred.spec.controlType.imagePushButton, undefined)
   ).toThrow();
 });
 
-test('ControlDefinition.copy', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.copy', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -841,47 +830,32 @@ test('ControlDefinition.copy', () => {
   expect(copy.haveProperty(cred.spec.propertyLabel.enabled)).toBeTruthy();
 });
 
-test('ControlDefinition.type', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.type', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl.type).toEqual(cred.spec.controlType.imagePushButton);
 });
 
-test('ControlDefinition.id getter', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.id getter', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl.id).toEqual('myid');
 });
 
-test('ControlDefinition.id setter', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.id setter', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.id = 'changed_id';
   expect(ctrl.id).toEqual('changed_id');
 });
 
-test('ControlDefinition.isDialog', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.isDialog', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl.isDialog()).toBeFalsy();
 });
 
-test('ControlDefinition.haveProperty for existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.haveProperty for existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -891,14 +865,11 @@ test('ControlDefinition.haveProperty for existing property', () => {
   expect(ctrl.haveProperty(cred.spec.propertyLabel.enabled)).toBeTruthy();
 });
 
-test('ControlDefinition.haveProperty for not existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.haveProperty for not existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -908,23 +879,17 @@ test('ControlDefinition.haveProperty for not existing property', () => {
   expect(ctrl.haveProperty(cred.spec.propertyLabel.font)).toBeFalsy();
 });
 
-test('ControlDefinition.haveProperty for pre-defined property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.haveProperty for pre-defined property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
 
   expect(ctrl.haveProperty(cred.spec.propertyLabel.ctrlType)).toBeTruthy();
 });
 
-test('ControlDefinition.property for existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.property for existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -936,14 +901,11 @@ test('ControlDefinition.property for existing property', () => {
   expect(prop.value).toEqual(1);
 });
 
-test('ControlDefinition.property for not existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.property for not existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -953,29 +915,19 @@ test('ControlDefinition.property for not existing property', () => {
   expect(ctrl.property(cred.spec.propertyLabel.font)).toBeUndefined();
 });
 
-test('ControlDefinition.property for pre-defined property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.property for pre-defined property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
 
   const prop = ctrl.property(cred.spec.propertyLabel.ctrlType);
   expect(prop).toBeDefined();
   expect(prop.value).toEqual(cred.spec.controlType.imagePushButton);
 });
 
-test('ControlDefinition.setProperty for new property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.setProperty for new property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.setProperty(
     'my_prop',
-    cred.resource.makePropertyDefinition(
-      'my_prop',
-      cred.spec.physicalPropertyType.string,
-      'test'
-    )
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.string, 'test')
   );
 
   const prop = ctrl.property('my_prop');
@@ -983,27 +935,16 @@ test('ControlDefinition.setProperty for new property', () => {
   expect(prop.value).toEqual('test');
 });
 
-test('ControlDefinition.setProperty for existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.setProperty for existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     'my_prop',
-    cred.resource.makePropertyDefinition(
-      'my_prop',
-      cred.spec.physicalPropertyType.number,
-      1
-    )
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.number, 1)
   );
 
   ctrl.setProperty(
     'my_prop',
-    cred.resource.makePropertyDefinition(
-      'my_prop',
-      cred.spec.physicalPropertyType.string,
-      'test'
-    )
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.string, 'test')
   );
 
   const prop = ctrl.property('my_prop');
@@ -1012,14 +953,11 @@ test('ControlDefinition.setProperty for existing property', () => {
   expect(prop.value).toEqual('test');
 });
 
-test('ControlDefinition.properties', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.properties', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1027,7 +965,7 @@ test('ControlDefinition.properties', () => {
   );
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.font,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.font,
       cred.spec.physicalPropertyType.string,
       'Arial'
@@ -1050,15 +988,12 @@ test('ControlDefinition.properties', () => {
   ).not.toEqual(-1);
 });
 
-test('ControlDefinition.addPositionalProperty for new property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.addPositionalProperty for new property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
 
   ctrl.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1067,14 +1002,11 @@ test('ControlDefinition.addPositionalProperty for new property', () => {
   expect(ctrl.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('ControlDefinition.addPositionalProperty for existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.addPositionalProperty for existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1084,7 +1016,7 @@ test('ControlDefinition.addPositionalProperty for existing property', () => {
   // Should replace the existing property.
   ctrl.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1093,15 +1025,12 @@ test('ControlDefinition.addPositionalProperty for existing property', () => {
   expect(ctrl.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('ControlDefinition.addLabeledProperty for new property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.addLabeledProperty for new property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
 
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1110,14 +1039,11 @@ test('ControlDefinition.addLabeledProperty for new property', () => {
   expect(ctrl.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('ControlDefinition.addLabeledProperty for existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.addLabeledProperty for existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1127,7 +1053,7 @@ test('ControlDefinition.addLabeledProperty for existing property', () => {
   // Should not replace the existing property.
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1136,15 +1062,12 @@ test('ControlDefinition.addLabeledProperty for existing property', () => {
   expect(ctrl.property(cred.spec.propertyLabel.enabled).value).toEqual(1);
 });
 
-test('ControlDefinition.addSerializedProperty for new property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.addSerializedProperty for new property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
 
   ctrl.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1153,14 +1076,11 @@ test('ControlDefinition.addSerializedProperty for new property', () => {
   expect(ctrl.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('ControlDefinition.addSerializedProperty for existing property', () => {
-  const ctrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.imagePushButton,
-    'myid'
-  );
+test('Control.addSerializedProperty for existing property', () => {
+  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1170,7 +1090,7 @@ test('ControlDefinition.addSerializedProperty for existing property', () => {
   // Should replace the existing property.
   ctrl.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1181,15 +1101,15 @@ test('ControlDefinition.addSerializedProperty for existing property', () => {
 
 ///////////////////
 
-test('DialogDefinition construction', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog construction', () => {
+  const dlg = new cred.resource.Dialog();
   expect(dlg).toBeDefined();
   expect(Array.from(dlg.properties()).length).toEqual(0);
   expect(Array.from(dlg.controls()).length).toEqual(0);
 });
 
-test('DialogDefinition.copy when empty', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.copy when empty', () => {
+  const dlg = new cred.resource.Dialog();
   const copy = dlg.copy();
   expect(copy).toBeDefined();
   expect(copy).not.toBe(dlg);
@@ -1197,20 +1117,18 @@ test('DialogDefinition.copy when empty', () => {
   expect(Array.from(copy.controls()).length).toEqual(0);
 });
 
-test('DialogDefinition.copy when populated', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.copy when populated', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.id = 'myid';
   dlg.setProperty(
     'test',
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       'test',
       cred.spec.physicalPropertyType.string,
       'test-value'
     )
   );
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
 
   const copy = dlg.copy();
   expect(copy).toBeDefined();
@@ -1221,41 +1139,41 @@ test('DialogDefinition.copy when populated', () => {
   expect(copiedCtrl.id).toEqual('label-id');
 });
 
-test('DialogDefinition.id getter when id is undefined', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.id getter when id is undefined', () => {
+  const dlg = new cred.resource.Dialog();
   expect(() => dlg.id).toThrow();
 });
 
-test('DialogDefinition.id getter when id is defined', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.id getter when id is defined', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.id = 'myid';
   expect(dlg.id).toEqual('myid');
 });
 
-test('DialogDefinition.id setter when id is undefined', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.id setter when id is undefined', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.id = 'myid';
   expect(dlg.id).toEqual('myid');
 });
 
-test('DialogDefinition.id setter when id is defined', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.id setter when id is defined', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.id = 'myid';
 
   dlg.id = 'new-id';
   expect(dlg.id).toEqual('new-id');
 });
 
-test('DialogDefinition.isDialog', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.isDialog', () => {
+  const dlg = new cred.resource.Dialog();
   expect(dlg.isDialog()).toBeTruthy();
 });
 
-test('DialogDefinition.haveProperty for existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.haveProperty for existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'myid'
@@ -1265,11 +1183,11 @@ test('DialogDefinition.haveProperty for existing property', () => {
   expect(dlg.haveProperty(cred.spec.propertyLabel.id)).toBeTruthy();
 });
 
-test('DialogDefinition.haveProperty for not existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.haveProperty for not existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'myid'
@@ -1279,11 +1197,11 @@ test('DialogDefinition.haveProperty for not existing property', () => {
   expect(dlg.haveProperty(cred.spec.propertyLabel.font)).toBeFalsy();
 });
 
-test('DialogDefinition.property for existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.property for existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'myid'
@@ -1295,11 +1213,11 @@ test('DialogDefinition.property for existing property', () => {
   expect(prop.value).toEqual('myid');
 });
 
-test('DialogDefinition.property for not existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.property for not existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'myid'
@@ -1309,15 +1227,11 @@ test('DialogDefinition.property for not existing property', () => {
   expect(dlg.property(cred.spec.propertyLabel.font)).toBeUndefined();
 });
 
-test('DialogDefinition.setProperty for new property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.setProperty for new property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.setProperty(
     'my_prop',
-    cred.resource.makePropertyDefinition(
-      'my_prop',
-      cred.spec.physicalPropertyType.string,
-      'test'
-    )
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.string, 'test')
   );
 
   const prop = dlg.property('my_prop');
@@ -1325,24 +1239,16 @@ test('DialogDefinition.setProperty for new property', () => {
   expect(prop.value).toEqual('test');
 });
 
-test('DialogDefinition.setProperty for existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.setProperty for existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     'my_prop',
-    cred.resource.makePropertyDefinition(
-      'my_prop',
-      cred.spec.physicalPropertyType.number,
-      1
-    )
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.number, 1)
   );
 
   dlg.setProperty(
     'my_prop',
-    cred.resource.makePropertyDefinition(
-      'my_prop',
-      cred.spec.physicalPropertyType.string,
-      'test'
-    )
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.string, 'test')
   );
 
   const prop = dlg.property('my_prop');
@@ -1351,11 +1257,11 @@ test('DialogDefinition.setProperty for existing property', () => {
   expect(prop.value).toEqual('test');
 });
 
-test('DialogDefinition.properties', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.properties', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1363,7 +1269,7 @@ test('DialogDefinition.properties', () => {
   );
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.font,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.font,
       cred.spec.physicalPropertyType.string,
       'Arial'
@@ -1380,12 +1286,12 @@ test('DialogDefinition.properties', () => {
   ).not.toEqual(-1);
 });
 
-test('DialogDefinition.addPositionalProperty for new property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.addPositionalProperty for new property', () => {
+  const dlg = new cred.resource.Dialog();
 
   dlg.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1394,11 +1300,11 @@ test('DialogDefinition.addPositionalProperty for new property', () => {
   expect(dlg.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('DialogDefinition.addPositionalProperty for existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.addPositionalProperty for existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1408,7 +1314,7 @@ test('DialogDefinition.addPositionalProperty for existing property', () => {
   // Should replace the existing property.
   dlg.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1417,12 +1323,12 @@ test('DialogDefinition.addPositionalProperty for existing property', () => {
   expect(dlg.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('DialogDefinition.addLabeledProperty for new property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.addLabeledProperty for new property', () => {
+  const dlg = new cred.resource.Dialog();
 
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1431,11 +1337,11 @@ test('DialogDefinition.addLabeledProperty for new property', () => {
   expect(dlg.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('DialogDefinition.addLabeledProperty for existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.addLabeledProperty for existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1445,7 +1351,7 @@ test('DialogDefinition.addLabeledProperty for existing property', () => {
   // Should not replace the existing property.
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1454,12 +1360,12 @@ test('DialogDefinition.addLabeledProperty for existing property', () => {
   expect(dlg.property(cred.spec.propertyLabel.enabled).value).toEqual(1);
 });
 
-test('DialogDefinition.addSerializedProperty for new property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.addSerializedProperty for new property', () => {
+  const dlg = new cred.resource.Dialog();
 
   dlg.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1468,11 +1374,11 @@ test('DialogDefinition.addSerializedProperty for new property', () => {
   expect(dlg.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('DialogDefinition.addSerializedProperty for existing property', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.addSerializedProperty for existing property', () => {
+  const dlg = new cred.resource.Dialog();
   dlg.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1482,7 +1388,7 @@ test('DialogDefinition.addSerializedProperty for existing property', () => {
   // Should replace the existing property.
   dlg.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1491,29 +1397,25 @@ test('DialogDefinition.addSerializedProperty for existing property', () => {
   expect(dlg.property(cred.spec.propertyLabel.enabled).value).toEqual(0);
 });
 
-test('DialogDefinition.control for existing control', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+test('Dialog.control for existing control', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
 
   const ctrl = dlg.control('label-id');
   expect(ctrl).toBeDefined();
   expect(ctrl.id).toEqual('label-id');
 });
 
-test('DialogDefinition.control for not existing control', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.control for not existing control', () => {
+  const dlg = new cred.resource.Dialog();
   expect(dlg.control('label-id')).toBeUndefined();
 });
 
-test('DialogDefinition.controls', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.pushButton, 'button-id')
+test('Dialog.controls', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(
+    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
   );
 
   const ctrlArray = Array.from(dlg.controls());
@@ -1522,61 +1424,49 @@ test('DialogDefinition.controls', () => {
   expect(ctrlArray.findIndex(elem => elem.id === 'button-id')).not.toEqual(-1);
 });
 
-test('DialogDefinition.controls for no controls', () => {
-  const dlg = new cred.resource.DialogDefinition();
+test('Dialog.controls for no controls', () => {
+  const dlg = new cred.resource.Dialog();
   const ctrlArray = Array.from(dlg.controls());
   expect(ctrlArray.length).toEqual(0);
 });
 
-test('DialogDefinition.addControlDefinition for first control', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+test('Dialog.addControl for first control', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
   expect(dlg.control('label-id')).toBeDefined();
 });
 
-test('DialogDefinition.addControlDefinition for multiple controls', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.pushButton, 'button-id')
+test('Dialog.addControl for multiple controls', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(
+    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
   );
 
   expect(dlg.control('label-id')).toBeDefined();
   expect(dlg.control('button-id')).toBeDefined();
 });
 
-test('DialogDefinition.addControlDefinition for existing control', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+test('Dialog.addControl for existing control', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
   expect(() =>
-    dlg.addControlDefinition(
-      new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-    )
+    dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'))
   ).toThrow();
 });
 
-test('DialogDefinition.updateControlId', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+test('Dialog.updateControlId', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
 
   dlg.updateControlId('label-id', 'new-id');
   expect(dlg.control('label-id')).toBeUndefined();
   expect(dlg.control('new-id')).toBeDefined();
 });
 
-test('DialogDefinition.updateControlId for not existing control', () => {
-  const dlg = new cred.resource.DialogDefinition();
-  dlg.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+test('Dialog.updateControlId for not existing control', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
 
   dlg.updateControlId('other-id', 'new-id');
   expect(dlg.control('other-id')).toBeUndefined();
@@ -1591,7 +1481,7 @@ test('DialogResource construction', () => {
   expect(dlgRes.locale).toEqual(cred.locale.german);
   expect(dlgRes.version).toEqual('');
   expect(Array.from(dlgRes.includedHeaders()).length).toEqual(0);
-  expect(dlgRes.dialogDefinition).toBeDefined();
+  expect(dlgRes.dialog).toBeDefined();
   expect(dlgRes.dialogId).toEqual('');
   expect(Array.from(dlgRes.controls()).length).toEqual(0);
 });
@@ -1600,16 +1490,14 @@ test('DialogResource.copyAs', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.english);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'myid'
     )
   );
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
-  dlgRes.addLayer(new cred.resource.LayerDefinition('test-layer', [1, 2]));
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addLayer(new cred.resource.Layer('test-layer', [1, 2]));
   dlgRes.addIncludedHeader('test-header.h');
 
   const copy = dlgRes.copyAs(cred.locale.german);
@@ -1617,7 +1505,7 @@ test('DialogResource.copyAs', () => {
   expect(copy).not.toBe(dlgRes);
   expect(copy.locale).toEqual(cred.locale.german);
   expect(copy.version).toEqual('');
-  expect(copy.dialogDefinition).not.toBe(dlgRes.dialogDefinition);
+  expect(copy.dialog).not.toBe(dlgRes.dialog);
   const dlgId = copy.dialogPropertyValue(cred.spec.propertyLabel.id);
   expect(dlgId).toEqual('myid');
   const copiedCtrl = copy.control('label-id');
@@ -1641,7 +1529,7 @@ test('DialogResource.dialogId', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'mydlg'
@@ -1667,7 +1555,7 @@ test('DialogResource.stringFileName for language locales', () => {
     const dlgRes = new cred.resource.DialogResource(lang);
     dlgRes.addLabeledProperty(
       cred.spec.propertyLabel.id,
-      cred.resource.makePropertyDefinition(
+      cred.resource.makeProperty(
         cred.spec.propertyLabel.id,
         cred.spec.physicalPropertyType.identifier,
         'mydlg'
@@ -1681,7 +1569,7 @@ test('DialogResource.stringFileName for master locale', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'mydlg'
@@ -1690,16 +1578,16 @@ test('DialogResource.stringFileName for master locale', () => {
   expect(dlgRes.stringFileName()).toBeUndefined();
 });
 
-test('DialogResource.dialogDefinition', () => {
+test('DialogResource.dialog', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  expect(dlgRes.dialogDefinition).toBeDefined();
+  expect(dlgRes.dialog).toBeDefined();
 });
 
 test('DialogResource.dialogPropertyValue', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'mydlg'
@@ -1707,7 +1595,7 @@ test('DialogResource.dialogPropertyValue', () => {
   );
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       10
@@ -1722,7 +1610,7 @@ test('DialogResource.addPositionalProperty for new property', () => {
 
   dlgRes.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1735,7 +1623,7 @@ test('DialogResource.addPositionalProperty for existing property', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1745,7 +1633,7 @@ test('DialogResource.addPositionalProperty for existing property', () => {
   // Should replace the existing property.
   dlgRes.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1759,7 +1647,7 @@ test('DialogResource.addLabeledProperty for new property', () => {
 
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1772,7 +1660,7 @@ test('DialogResource.addLabeledProperty for existing property', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1782,7 +1670,7 @@ test('DialogResource.addLabeledProperty for existing property', () => {
   // Should not replace the existing property.
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1796,7 +1684,7 @@ test('DialogResource.addSerializedProperty for new property', () => {
 
   dlgRes.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1809,7 +1697,7 @@ test('DialogResource.addSerializedProperty for existing property', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       1
@@ -1819,7 +1707,7 @@ test('DialogResource.addSerializedProperty for existing property', () => {
   // Should replace the existing property.
   dlgRes.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.enabled,
       cred.spec.physicalPropertyType.number,
       0
@@ -1830,9 +1718,7 @@ test('DialogResource.addSerializedProperty for existing property', () => {
 
 test('DialogResource.control for existing control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
   expect(dlgRes.control('label-id')).toBeDefined();
 });
 
@@ -1843,11 +1729,9 @@ test('DialogResource.control for not existing control', () => {
 
 test('DialogResource.controls', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.pushButton, 'button-id')
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(
+    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
   );
 
   const ctrlArray = Array.from(dlgRes.controls());
@@ -1862,36 +1746,28 @@ test('DialogResource.controls for no controls', () => {
   expect(ctrlArray.length).toEqual(0);
 });
 
-test('DialogResource.addControlDefinition for first control', () => {
+test('DialogResource.addControl for first control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
   expect(dlgRes.control('label-id')).toBeDefined();
 });
 
-test('DialogResource.addControlDefinition for multiple controls', () => {
+test('DialogResource.addControl for multiple controls', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.pushButton, 'button-id')
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(
+    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
   );
 
   expect(dlgRes.control('label-id')).toBeDefined();
   expect(dlgRes.control('button-id')).toBeDefined();
 });
 
-test('DialogResource.addControlDefinition for existing control', () => {
+test('DialogResource.addControl for existing control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
   expect(() =>
-    dlgRes.addControlDefinition(
-      new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-    )
+    dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'))
   ).toThrow();
 });
 
@@ -1950,8 +1826,8 @@ test('DialogResource.addIncludedHeader for case insensitive header', () => {
 
 test('DialogResource.layers', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 2'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 1'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 2'));
 
   const layerArray = Array.from(dlgRes.layers());
   expect(layerArray.length).toEqual(2);
@@ -1967,7 +1843,7 @@ test('DialogResource.layers for no layers', () => {
 
 test('DialogResource.addLayer for first layer', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 1'));
   expect(
     Array.from(dlgRes.layers()).findIndex(elem => elem.name === 'layer 1')
   ).not.toEqual(-1);
@@ -1975,8 +1851,8 @@ test('DialogResource.addLayer for first layer', () => {
 
 test('DialogResource.addLayer for multiple layers', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 2'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 1'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 2'));
 
   const layerArray = Array.from(dlgRes.layers());
   expect(layerArray.findIndex(elem => elem.name === 'layer 1')).not.toEqual(-1);
@@ -1985,8 +1861,8 @@ test('DialogResource.addLayer for multiple layers', () => {
 
 test('DialogResource.addLayer for existing layer', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
-  dlgRes.addLayer(new cred.resource.LayerDefinition('layer 1'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 1'));
+  dlgRes.addLayer(new cred.resource.Layer('layer 1'));
 
   // No duplicate
   const layerArray = Array.from(dlgRes.layers());
@@ -1997,7 +1873,7 @@ test('DialogResource.updateDialogId', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.english);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       'myid'
@@ -2017,9 +1893,7 @@ test('DialogResource.updateDialogId for not existing id', () => {
 
 test('DialogResource.updateControlId', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
-  );
+  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
 
   dlgRes.updateControlId('label-id', 'other-id');
   expect(dlgRes.control('other-id')).toBeDefined();
@@ -2037,7 +1911,7 @@ function makeDialogResource(locale, id) {
   const dlgRes = new cred.resource.DialogResource(locale);
   dlgRes.addLabeledProperty(
     cred.spec.propertyLabel.id,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.id,
       cred.spec.physicalPropertyType.identifier,
       id
@@ -2675,8 +2549,8 @@ test('DialogResourceSet.updateDialogId', () => {
 
 test('DialogResourceSet.updateControlId', () => {
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(
-    new cred.resource.ControlDefinition(cred.spec.controlType.label, 'label-id')
+  masterRes.addControl(
+    new cred.resource.Control(cred.spec.controlType.label, 'label-id')
   );
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -2701,7 +2575,7 @@ test('DialogResourceSet.updateProperty for dialog property in master resource', 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       300
@@ -2732,7 +2606,7 @@ test('DialogResourceSet.updateProperty for dialog property in multiple resources
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       300
@@ -2741,7 +2615,7 @@ test('DialogResourceSet.updateProperty for dialog property in multiple resources
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
@@ -2774,7 +2648,7 @@ test('DialogResourceSet.updateProperty for dialog property in some resources', (
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       300
@@ -2783,7 +2657,7 @@ test('DialogResourceSet.updateProperty for dialog property in some resources', (
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
@@ -2818,20 +2692,17 @@ test('DialogResourceSet.updateProperty for dialog property in some resources', (
 });
 
 test('DialogResourceSet.updateProperty for control property in master resource', () => {
-  const labelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const labelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   labelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
     )
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(labelCtrl);
+  masterRes.addControl(labelCtrl);
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
@@ -2857,35 +2728,32 @@ test('DialogResourceSet.updateProperty for control property in master resource',
 });
 
 test('DialogResourceSet.updateProperty for control property in multiple resources', () => {
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
     )
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const deLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const deLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   deLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
     )
   );
   const deRes = new cred.resource.DialogResource(cred.locale.german);
-  deRes.addControlDefinition(deLabelCtrl);
+  deRes.addControl(deLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -2914,35 +2782,32 @@ test('DialogResourceSet.updateProperty for control property in multiple resource
 });
 
 test('DialogResourceSet.updateProperty for control property in some resources', () => {
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
     )
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const deLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const deLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   deLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.left,
       cred.spec.physicalPropertyType.number,
       200
     )
   );
   const deRes = new cred.resource.DialogResource(cred.locale.german);
-  deRes.addControlDefinition(deLabelCtrl);
+  deRes.addControl(deLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -2980,7 +2845,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in res
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
@@ -3015,7 +2880,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in unl
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
@@ -3024,7 +2889,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in unl
   const jpRes = new cred.resource.DialogResource(cred.locale.japanese);
   jpRes.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
@@ -3060,7 +2925,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in mas
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
@@ -3096,7 +2961,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for non-identifier dialog 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       // String instead of identifier property!
       cred.spec.physicalPropertyType.string,
@@ -3125,20 +2990,20 @@ test('DialogResourceSet.updateLocalizedStringProperty for non-identifier dialog 
 });
 
 test('DialogResourceSet.updateLocalizedStringProperty for control property in resource linked to master', () => {
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
     )
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3166,35 +3031,32 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in re
 });
 
 test('DialogResourceSet.updateLocalizedStringProperty for control property in unlinked resource', () => {
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
     )
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const enLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
     )
   );
   const enRes = new cred.resource.DialogResource(cred.locale.english);
-  enRes.addControlDefinition(enLabelCtrl);
+  enRes.addControl(enLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3223,20 +3085,20 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in un
 });
 
 test('DialogResourceSet.updateLocalizedStringProperty for control property in master resource', () => {
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
-    cred.resource.makePropertyDefinition(
+    cred.resource.makeProperty(
       cred.spec.propertyLabel.text,
       cred.spec.physicalPropertyType.identifier,
       'str-id'
     )
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3265,7 +3127,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in ma
 });
 
 test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in master resource', () => {
-  const flagsProp = cred.resource.makePropertyDefinition(
+  const flagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3305,7 +3167,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in m
 });
 
 test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property in master resource', () => {
-  const flagsProp = cred.resource.makePropertyDefinition(
+  const flagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3345,7 +3207,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property
 });
 
 test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in multiple resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3356,7 +3218,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in m
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3401,7 +3263,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in m
 });
 
 test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property in multiple resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3412,7 +3274,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3457,7 +3319,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property
 });
 
 test('DialogResourceSet.updateFlagProperty to add a flag to a dialog property in some resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3468,7 +3330,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a dialog property in
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3513,7 +3375,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a dialog property in
 });
 
 test('DialogResourceSet.updateFlagProperty to remove a flag from a dialog property in some resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3524,7 +3386,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a dialog proper
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3569,7 +3431,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a dialog proper
 });
 
 test('DialogResourceSet.updateFlagProperty to add a flag to a control property in master resource', () => {
-  const flagsProp = cred.resource.makePropertyDefinition(
+  const flagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3577,14 +3439,11 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a control property i
   flagsProp.addFlag('A', 1);
   flagsProp.addFlag('B', 2);
 
-  const labelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const labelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   labelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, flagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(labelCtrl);
+  masterRes.addControl(labelCtrl);
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
@@ -3615,7 +3474,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a control property i
 });
 
 test('DialogResourceSet.updateFlagProperty to remove a flag from a control property in master resource', () => {
-  const flagsProp = cred.resource.makePropertyDefinition(
+  const flagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3623,14 +3482,11 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a control prope
   flagsProp.addFlag('A', 1);
   flagsProp.addFlag('B', 2);
 
-  const labelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const labelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   labelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, flagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(labelCtrl);
+  masterRes.addControl(labelCtrl);
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
@@ -3661,7 +3517,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a control prope
 });
 
 test('DialogResourceSet.updateFlagProperty to add a flag to control property in multiple resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3669,30 +3525,27 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
   );
   enFlagsProp.addFlag('D', 8);
 
-  const enLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
-  enRes.addControlDefinition(enLabelCtrl);
+  enRes.addControl(enLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3731,7 +3584,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
 });
 
 test('DialogResourceSet.updateFlagProperty to remove a flag from control property in multiple resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3739,30 +3592,27 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
   );
   enFlagsProp.addFlag('B', 2);
 
-  const enLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
-  enRes.addControlDefinition(enLabelCtrl);
+  enRes.addControl(enLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3801,7 +3651,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
 });
 
 test('DialogResourceSet.updateFlagProperty to add a flag to control property in some resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3809,30 +3659,27 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
   );
   enFlagsProp.addFlag('D', 8);
 
-  const enLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
-  enRes.addControlDefinition(enLabelCtrl);
+  enRes.addControl(enLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3871,7 +3718,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
 });
 
 test('DialogResourceSet.updateFlagProperty to remove a flag from control property in some resources', () => {
-  const masterFlagsProp = cred.resource.makePropertyDefinition(
+  const masterFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
@@ -3879,30 +3726,27 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const enFlagsProp = cred.resource.makePropertyDefinition(
+  const enFlagsProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.styleFlags,
     cred.spec.physicalPropertyType.flags,
     0
   );
   enFlagsProp.addFlag('B', 2);
 
-  const enLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
-  enRes.addControlDefinition(enLabelCtrl);
+  enRes.addControl(enLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -3941,7 +3785,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
 });
 
 test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empty in all resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
@@ -3970,14 +3814,14 @@ test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empt
 
     const textProp = resSet
       .dialogResource(cred.localeFromLanguage(lang))
-      .dialogDefinition.property(cred.spec.propertyLabel.text);
+      .dialog.property(cred.spec.propertyLabel.text);
     expect(textProp.type).toEqual(cred.spec.physicalPropertyType.identifier);
     expect(textProp.value).toEqual(idStrPairs[0][0]);
   }
 });
 
 test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empty in some resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
@@ -3985,7 +3829,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empt
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
-  const enTextProp = cred.resource.makePropertyDefinition(
+  const enTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.identifier,
     'enId'
@@ -4012,7 +3856,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empt
   expect(idStrPairs.length).toEqual(2);
   let textProp = resSet
     .dialogResource(cred.localeFromLanguage(cred.language.english))
-    .dialogDefinition.property(cred.spec.propertyLabel.text);
+    .dialog.property(cred.spec.propertyLabel.text);
   expect(resSet.lookupString(textProp.value, cred.language.english)).toEqual('something');
 
   for (const lang of [cred.language.german, cred.language.japanese]) {
@@ -4022,26 +3866,26 @@ test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empt
 
     textProp = resSet
       .dialogResource(cred.localeFromLanguage(lang))
-      .dialogDefinition.property(cred.spec.propertyLabel.text);
+      .dialog.property(cred.spec.propertyLabel.text);
     expect(textProp.type).toEqual(cred.spec.physicalPropertyType.identifier);
     expect(textProp.value).toEqual(idStrPairs[0][0]);
   }
 });
 
 test('DialogResourceSet.normalizeLocalizedStrings for control string that is empty in all resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -4072,33 +3916,30 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
 });
 
 test('DialogResourceSet.normalizeLocalizedStrings for control string that is empty in some resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
-  const enTextProp = cred.resource.makePropertyDefinition(
+  const enTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.identifier,
     'enId'
   );
-  const enLabelCtrl = new cred.resource.ControlDefinition(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, enTextProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
-  enRes.addControlDefinition(enLabelCtrl);
+  enRes.addControl(enLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -4138,7 +3979,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
 });
 
 test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is some in all resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
@@ -4166,14 +4007,14 @@ test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is so
 
     const textProp = resSet
       .dialogResource(cred.localeFromLanguage(lang))
-      .dialogDefinition.property(cred.spec.propertyLabel.text);
+      .dialog.property(cred.spec.propertyLabel.text);
     expect(textProp.type).toEqual(cred.spec.physicalPropertyType.string);
     expect(textProp.value).toEqual('');
   }
 });
 
 test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is empty in some resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
@@ -4213,7 +4054,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is em
   expect(idStrPairs[0][1]).toEqual('changed');
   let textProp = resSet
     .dialogResource(cred.localeFromLanguage(cred.language.english))
-    .dialogDefinition.property(cred.spec.propertyLabel.text);
+    .dialog.property(cred.spec.propertyLabel.text);
   expect(textProp.type).toEqual(cred.spec.physicalPropertyType.identifier);
 
   // The empty strings of the other languages will be in the string map because to be
@@ -4225,25 +4066,25 @@ test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is em
 
     textProp = resSet
       .dialogResource(cred.localeFromLanguage(lang))
-      .dialogDefinition.property(cred.spec.propertyLabel.text);
+      .dialog.property(cred.spec.propertyLabel.text);
     expect(textProp.type).toEqual(cred.spec.physicalPropertyType.identifier);
   }
 });
 
 test('DialogResourceSet.denormalizeLocalizedStrings for control string that is empty in all resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
@@ -4273,19 +4114,19 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
 });
 
 test('DialogResourceSet.denormalizeLocalizedStrings for control string that is empty in some resources', () => {
-  const masterTextProp = cred.resource.makePropertyDefinition(
+  const masterTextProp = cred.resource.makeProperty(
     cred.spec.propertyLabel.text,
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.ControlDefinition(
+  const masterLabelCtrl = new cred.resource.Control(
     cred.spec.controlType.label,
     'label-id'
   );
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControlDefinition(masterLabelCtrl);
+  masterRes.addControl(masterLabelCtrl);
 
   const builder = makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);

@@ -1,0 +1,23 @@
+{
+  "name": "cvresourceeditor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cred_app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Michael Lindner",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-plugin-jest": "^22.0.0",
+    "eslint-plugin-prettier": "^3.0.0",
+    "jest": "^23.6.0",
+    "jquery": "^3.3.1",
+    "prettier": "^1.14.3"
+  }
+}

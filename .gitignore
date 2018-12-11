@@ -1,7 +1,2 @@
 .vscode/**
 node_modules/**
-.eslintrc.json
-.prettierrc
-jest.config.js
-package.json
-package-lock.json

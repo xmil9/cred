@@ -5,12 +5,20 @@
 
 ///////////////////
 
-// Namespaces
-var cred = cred || {};
+// Attempts to require a given file. Returns undefined if 'require' is not available.
+// Helps to use the calling js file in both node.js and browser environments. In a
+// node.js environment the passed dependency will be loaded through the require
+// mechanism. In a browser environment this function will return undefined and the
+// dependency has to be loaded through a script tag.
+function tryRequire(file) {
+  return typeof require !== 'undefined' ? require(file) : undefined;
+}
+
 // Dependencies
-// These are provided through (ordered!) script tags in the HTML file.
-var filesys = filesys || {};
-var util = util || {};
+var cred = tryRequire('./cred_types') || cred || {};
+cred.resource = tryRequire('./dlg_resource') || cred.resource || {};
+var filesys = tryRequire('./filesys') || filesys || {};
+var util = tryRequire('./util') || util || {};
 
 ///////////////////
 
@@ -21,7 +29,8 @@ cred.parser = (function() {
   // Parser base class.
   class Parser {
     constructor(tokens) {
-      this._tokens = tokens;
+      // Array of tokens.
+      this._tokens = tokens || [];
       // Index of next token to process.
       this._tokenIdx = 0;
     }
@@ -79,6 +88,9 @@ cred.parser = (function() {
 
     // Starts the parsing process.
     parse() {
+      if (!this.haveToken()) {
+        return undefined;
+      }
       if (this._isIncludingOtherDlgFile()) {
         return undefined;
       }
@@ -451,9 +463,6 @@ cred.parser = (function() {
   // Parses given tokens of a dialog resource file.
   // Returns a dialog resource object generated from tokens.
   function parseDialog(tokens, locale) {
-    if (typeof tokens === 'undefined') {
-      throw new Error('Invalid arguments. Tokens expected.');
-    }
     let parser = new DialogParser(tokens, locale);
     return parser.parse();
   }
@@ -530,6 +539,7 @@ cred.parser = (function() {
   // If a value is a string it is enclosed in two double-quotes, e.g.
   //      [label=""strval""].
   function deserializeProperties(serialized) {
+    serialized = serialized.trim();
     let len = serialized.length;
     if (len === 0) {
       return [];
@@ -539,23 +549,24 @@ cred.parser = (function() {
       throw new Error('Invalid serialized properties.');
     }
 
-    // Trim off the enclosing braces.
     return (
       serialized
+        // Trim off the enclosing braces.
         .substring(1, len - 1)
         // Split properties into array at '['s.
         .split('[')
         // Transform into array of property objects.
         .map(elem => {
+          elem = elem.trim();
           if (elem === '') {
             return undefined;
           }
-          // For each element, trim off the left over ']' and then split the
+          // For each element, trim off whitespace and the left over ']'. Then split the
           // label and value.
           let [label, value] = elem.substring(0, elem.length - 1).split('=');
           // Strings are enclosed in double-double-quotes. Trim those off.
           if (value.startsWith('""') && value.endsWith('""')) {
-            value = value.substring(3, value.length - 3);
+            value = value.substring(2, value.length - 2);
           }
           // Return an object for the element.
           return {
@@ -885,3 +896,7 @@ cred.parser = (function() {
     parseStrings: parseStrings
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = cred.parser;

@@ -1,0 +1,20 @@
+#include "ResourceDefines.h" // Version [1.1] //"
+#ifdef RES_US
+  #include "kSymbolConvert.English.str"
+#elif defined RES_GERMAN
+  #include "kSymbolConvert.German.str"
+#elif defined RES_JAPAN
+  #include "kSymbolConvert.Japan.str"
+#else
+  #error "Translation"
+#endif
+begin_dialog_definition_ex_(dlgId,"",0,0,10,20,strId,"className",0,"",0)
+  begin_dialog_properties()
+  end_dialog_properties()
+  begin_control_definitions()
+  end_control_definitions()
+end_dialog_definition_ex_()
+#if 0
+BEGIN_LAYERS
+END_LAYERS
+#endif

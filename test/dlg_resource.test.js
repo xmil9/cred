@@ -2131,9 +2131,11 @@ function makeDialogResourceSetWithStrings(resources, strings) {
   }
   for (const lang of cred.language) {
     const langStrMap = new cred.resource.StringMap();
-    strings.filter(elem => elem[2] === lang).forEach(elem => {
-      langStrMap.add(...elem);
-    });
+    strings
+      .filter(elem => elem[2] === lang)
+      .forEach(elem => {
+        langStrMap.add(...elem);
+      });
     builder.addStrings(lang, langStrMap, 'TEXT');
   }
   return builder.build();

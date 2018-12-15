@@ -5,17 +5,143 @@
 
 ///////////////////
 
-// Namespaces
-var cred = cred || {};
+// Attempts to require a given file. Returns undefined if 'require' is not available.
+// Helps to use the calling js file in both node.js and browser environments. In a
+// node.js environment the passed dependency will be loaded through the require
+// mechanism. In a browser environment this function will return undefined and the
+// dependency has to be loaded through a script tag.
+function tryRequire(file) {
+  return typeof require !== 'undefined' ? require(file) : undefined;
+}
+
 // Dependencies
-// These are provided through (ordered!) script tags in the HTML file.
-var Encoding = Encoding || {};
-var filesys = filesys || {};
+var cred = tryRequire('./cred_types') || cred || {};
+cred.lexer = tryRequire('./dlg_lexer') || cred.lexer || {};
+cred.parser = tryRequire('./dlg_parser') || cred.parser || {};
+cred.gen = tryRequire('./dlg_generator') || cred.gen || {};
+cred.resource = tryRequire('./dlg_resource') || cred.resource || {};
+var encoding = tryRequire('./encoding.min.js') || encoding || {};
+var filesys = tryRequire('./filesys') || filesys || {};
 
 ///////////////////
 
 // I/O module.
 cred.io = (function() {
+  ///////////////////
+
+  // Represents a set of files that make up a dialog resource.
+  class FileSet {
+    // Takes a Web API FileList object.
+    constructor(files) {
+      // Map that associates locales with their dialog files. Each file is a Web API
+      // File object.
+      this._dlgFiles = new Map();
+      // Map that associates languages with their string files. Each file is a Web API
+      // File object.
+      this._stringFiles = new Map();
+
+      this._populate(files);
+    }
+
+    // Returns the master .dlg file of the set. Returns 'undefined' if
+    // the file does not exist (which means the set is invalid).
+    get masterFile() {
+      return this._dlgFiles.get(cred.locale.any);
+    }
+
+    // Sets the master file of the set.
+    set masterFile(value) {
+      if (!value) {
+        throw new Error('Master file cannot be null or empty.');
+      }
+      this._dlgFiles.set(cred.locale.any, value);
+    }
+
+    // Returns the id of the dialog represented by this file set.
+    get dialogId() {
+      let fileName = this.masterFile.name;
+      return fileName.substring(0, fileName.length - 4);
+    }
+
+    // Returns a locale-specific .dlg file. Returns 'undefined' if
+    // the file does not exist.
+    dialogFile(locale) {
+      return this._dlgFiles.get(locale);
+    }
+
+    // Returns a language-specific string file. Returns 'undefined'
+    // if the file does not exist (which means the set is invalid).
+    stringFile(language) {
+      return this._stringFiles.get(language);
+    }
+
+    // Checks if the set is valid.
+    isValid() {
+      return !!this.masterFile && this.haveAllLanguageStringFiles();
+    }
+
+    // Checks if all language-specific string files are available.
+    haveAllLanguageStringFiles() {
+      return (
+        this.stringFile(cred.language.english) &&
+        this.stringFile(cred.language.japanese) &&
+        this.stringFile(cred.language.german)
+      );
+    }
+
+    // Populates this object with an array of files. The files that belong together
+    // to define a dialog are identified and stored.
+    _populate(files) {
+      this.masterFile = FileSet._findMasterFile(files);
+      if (!this.masterFile) {
+        throw new Error('No master dialog file found in file set.');
+      }
+      this._populateLanguageFiles(files);
+    }
+
+    // Populates language-specific files from a given array of files.
+    _populateLanguageFiles(files) {
+      const dlgid = this.dialogId;
+
+      for (const lang of cred.language) {
+        this._stringFiles.set(
+          lang,
+          FileSet._findLanguageFile(files, cred.stringFileName(dlgid, lang))
+        );
+        this._dlgFiles.set(
+          cred.localeFromLanguage(lang),
+          FileSet._findLanguageFile(files, cred.dialogFileName(dlgid, lang))
+        );
+      }
+    }
+
+    // Finds the master dialog file in an array of files.
+    // Returns the master file or 'undefined', if not found.
+    static _findMasterFile(files) {
+      // Use the first encountered file that has a .dlg extension and no language
+      // id in its name.
+      for (let i = 0; i < files.length; ++i) {
+        let fileName = files[i].name;
+        const numPeriods = (fileName.match(/\./g) || []).length;
+        if (numPeriods == 1 && fileName.endsWith(cred.fileExtension.dialogFile)) {
+          return files[i];
+        }
+      }
+      return undefined;
+    }
+
+    // Finds a language-specific file for a given dialog in an array of files.
+    // Returns the file object or 'undefined'.
+    static _findLanguageFile(files, fileName) {
+      for (let i = 0; i < files.length; ++i) {
+        if (files[i].name === fileName) {
+          return files[i];
+        }
+      }
+      return undefined;
+    }
+  }
+
   ///////////////////
 
   // Reader for cv dialog resource files.
@@ -240,13 +366,13 @@ cred.io = (function() {
   ///////////////////
 
   // Encodes given text for a given encoding.
-  function encodeText(text, encoding) {
-    if (encoding === 'ASCII') {
-      encoding = 'UTF8';
+  function encodeText(text, targetEncoding) {
+    if (targetEncoding === 'ASCII') {
+      targetEncoding = 'UTF8';
     }
     //let binary = new Uint8Array(text);
-    let converted = Encoding.convert(text, {
-      to: encoding,
+    let converted = encoding.convert(text, {
+      to: targetEncoding,
       from: 'UNICODE',
       type: 'string'
     });
@@ -257,125 +383,13 @@ cred.io = (function() {
   // Returns the converted text and the detected encoding.
   function decodeFileContent(fileContent) {
     let binary = new Uint8Array(fileContent);
-    let detectedEncoding = Encoding.detect(binary);
-    let converted = Encoding.convert(binary, {
+    let detectedEncoding = encoding.detect(binary);
+    let converted = encoding.convert(binary, {
       to: 'UNICODE',
       from: detectedEncoding,
       type: 'string'
     });
     return [converted, detectedEncoding];
-  }
-
-  ///////////////////
-
-  // Represents a set of files that make up a dialog resource.
-  class FileSet {
-    constructor(files) {
-      // Map that associates locales with their dialog files.
-      this._dlgFiles = new Map();
-      // Map that associates languages with their string files.
-      this._stringFiles = new Map();
-
-      this._populate(files);
-    }
-
-    // Returns the master .dlg file of the set. Returns 'undefined' if
-    // the file does not exist (which means the set is invalid).
-    get masterFile() {
-      return this._dlgFiles.get(cred.locale.any);
-    }
-
-    // Sets the master file of the set.
-    set masterFile(value) {
-      this._dlgFiles.set(cred.locale.any, value);
-    }
-
-    // Returns the id of the dialog represented by this file set.
-    get dialogId() {
-      if (!this.masterFile) {
-        return undefined;
-      }
-      let fileName = this.masterFile.name;
-      return fileName.substring(0, fileName.length - 4);
-    }
-
-    // Returns a locale-specific .dlg file. Returns 'undefined' if
-    // the file does not exist.
-    dialogFile(locale) {
-      return this._dlgFiles.get(locale);
-    }
-
-    // Returns a language-specific string file. Returns 'undefined'
-    // if the file does not exist (which means the set is invalid).
-    stringFile(language) {
-      return this._stringFiles.get(language);
-    }
-
-    // Checks if the set is valid.
-    isValid() {
-      return !!this.masterFile && this.haveAllLanguageStringFiles();
-    }
-
-    // Checks if all language-specific string files are available.
-    haveAllLanguageStringFiles() {
-      return (
-        this.stringFile(cred.language.english) &&
-        this.stringFile(cred.language.japanese) &&
-        this.stringFile(cred.language.german)
-      );
-    }
-
-    // Populates this object with an array of files. The files that belong together
-    // to define a dialog are identified and stored.
-    _populate(files) {
-      this.masterFile = FileSet._findMasterFile(files);
-      if (!this.masterFile) {
-        throw new Error('No master dialog file found in file set.');
-      }
-      this._populateLanguageFiles(files);
-    }
-
-    // Populates language-specific files from a given array of files.
-    _populateLanguageFiles(files) {
-      const dlgid = this.dialogId;
-
-      for (const lang of cred.language) {
-        this._stringFiles.set(
-          lang,
-          FileSet._findLanguageFile(files, cred.stringFileName(dlgid, lang))
-        );
-        this._dlgFiles.set(
-          cred.localeFromLanguage(lang),
-          FileSet._findLanguageFile(files, cred.dialogFileName(dlgid, lang))
-        );
-      }
-    }
-
-    // Finds the master dialog file in an array of files.
-    // Returns the master file or 'undefined', if not found.
-    static _findMasterFile(files) {
-      // Use the first encountered file that has a .dlg extension and no language
-      // id in its name.
-      for (let i = 0; i < files.length; ++i) {
-        let fileName = files[i].name;
-        const numPeriods = (fileName.match(/\./g) || []).length;
-        if (numPeriods == 1 && fileName.endsWith(cred.fileExtension.dialogFile)) {
-          return files[i];
-        }
-      }
-      return undefined;
-    }
-
-    // Finds a language-specific file for a given dialog in an array of files.
-    // Returns the file object or 'undefined'.
-    static _findLanguageFile(files, fileName) {
-      for (let i = 0; i < files.length; ++i) {
-        if (files[i].name === fileName) {
-          return files[i];
-        }
-      }
-      return undefined;
-    }
   }
 
   ///////////////////
@@ -387,3 +401,7 @@ cred.io = (function() {
     Writer: Writer
   };
 })();
+
+// Exports for CommonJS environments.
+var module = module || {};
+module.exports = cred.io;

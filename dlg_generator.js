@@ -70,6 +70,7 @@ cred.gen = (function() {
       let dlgContent = undefined;
       if (this._dlgResourceSet.isLinkedToMaster(locale)) {
         // Skip the dlg files when all languages are linked to the master resource.
+        // Only the master dlg file will be generated.
         if (!this._dlgResourceSet.areAllLanguagesLinked()) {
           dlgContent = this._generateLinkedDialogContent();
         }

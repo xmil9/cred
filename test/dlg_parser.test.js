@@ -2423,3 +2423,91 @@ test('cred.parser.parseDialog for missing #endif in layer section', () => {
   const tokens = cred.lexer.analyse(content);
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
+
+///////////////////
+
+test('cred.parser.parseStrings for undefined tokens', () => {
+  expect(() => cred.parser.parseStrings(undefined, cred.language.english)).toThrow();
+});
+
+test('cred.parser.parseStrings for no tokens', () => {
+  const strMap = cred.parser.parseStrings([], cred.language.english);
+  expect(Array.from(strMap).length).toEqual(0);
+});
+
+test('cred.parser.parseStrings for one string', () => {
+  const content = '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"';
+  const tokens = cred.lexer.analyse(content);
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(1);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    'Cancel',
+    cred.language.english
+  ]);
+});
+
+test('cred.parser.parseStrings for empty string', () => {
+  const content = '#define	DLGPROP_kChooseSymbolDlg_1_Text	""';
+  const tokens = cred.lexer.analyse(content);
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(1);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    '',
+    cred.language.english
+  ]);
+});
+
+test('cred.parser.parseStrings for multiple strings', () => {
+  const content =
+    '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"                          ' +
+    '#define	DLGPROP_kChooseSymbolDlg_2_Text	"OK"                              ' +
+    '#define	DLGPROP_kChooseSymbolDlg_3_Text	"PlaceHolder"                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(3);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    'Cancel',
+    cred.language.english
+  ]);
+  expect(strArray[1]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_2_Text',
+    'OK',
+    cred.language.english
+  ]);
+  expect(strArray[2]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_3_Text',
+    'PlaceHolder',
+    cred.language.english
+  ]);
+});
+
+test('cred.parser.parseStrings for misspelled #define keyword', () => {
+  const content = 'define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"';
+  const tokens = cred.lexer.analyse(content);
+  expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
+});
+
+test('cred.parser.parseStrings for missing string identifier', () => {
+  const content = '#define	"Cancel"';
+  const tokens = cred.lexer.analyse(content);
+  expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
+});
+
+test('cred.parser.parseStrings for missing string text', () => {
+  const content = '#define	id';
+  const tokens = cred.lexer.analyse(content);
+  expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
+});
+
+test('cred.parser.parseStrings for non-string text', () => {
+  const content = '#define	id text';
+  const tokens = cred.lexer.analyse(content);
+  expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
+});

@@ -914,7 +914,7 @@ cred.resource = (function() {
       // Map that associates languages with their localized strings.
       // Each collection of strings is a map that associates string
       // identifiers with the string's text.
-      this._map = StringMap.makeTopLevelMap_();
+      this._map = StringMap._makeTopLevelMap();
       // Map that associates languages with the encoding of their
       // string resource file.
       this._srcEncoding = new Map();
@@ -989,7 +989,7 @@ cred.resource = (function() {
 
     // Creates the top level map object that associates languages with their string maps.
     // Initializes each inner string map to be empty.
-    static makeTopLevelMap_() {
+    static _makeTopLevelMap() {
       const topMap = new Map();
       for (const lang of cred.language) {
         topMap.set(lang, new Map());

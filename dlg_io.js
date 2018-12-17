@@ -146,8 +146,20 @@ cred.io = (function() {
 
   // Reader for cv dialog resource files.
   class Reader {
-    constructor(dlgFileSet) {
+    constructor(
+      // cred.io.FileSet object holding the dialog files to read.
+      dlgFileSet,
+      // Allow to inject file reader object to read individual files.
+      fileReader = new FileReader(),
+      // Allow to inject decoder function to decode text, e.g. from Shift-JIS.
+      textDecoder = decodeFileContent,
+      // Allow to inject crypto API.
+      crypto = window.crypto
+    ) {
       this._dlgFileSet = dlgFileSet;
+      this._fileReader = fileReader;
+      this._textDecoder = textDecoder;
+      this._crypto = crypto;
     }
 
     // Starts processing the files in the dialog file set.
@@ -233,7 +245,7 @@ cred.io = (function() {
           ._readFile(strFile, false)
           // Parse its contents.
           .then(fileContent => {
-            let [convertedContent, resourceEncoding] = decodeFileContent(fileContent);
+            let [convertedContent, resourceEncoding] = self._textDecoder(fileContent);
             let stringMap = cred.parser.parseStrings(
               cred.lexer.analyse(convertedContent),
               language
@@ -251,25 +263,25 @@ cred.io = (function() {
     // Reads a given file asynchronously.
     // Returns a promise that receives the file's content.
     _readFile(file, asText = true) {
+      let self = this;
       // Wrap FileReader in promise.
       return new Promise((resolve, reject) => {
-        let reader = new FileReader();
         // Set up callbacks.
-        reader.onload = event => {
+        self._fileReader.onload = event => {
           let content = event.target.result;
           resolve(content);
         };
-        reader.onerror = () => {
+        self._fileReader.onerror = () => {
           reject('Error loading file.');
         };
-        reader.onabort = () => {
+        self._fileReader.onabort = () => {
           reject('File loading aborted.');
         };
         // Start reading.
         if (asText) {
-          reader.readAsText(file);
+          self._fileReader.readAsText(file);
         } else {
-          reader.readAsArrayBuffer(file);
+          self._fileReader.readAsArrayBuffer(file);
         }
       });
     }
@@ -278,6 +290,8 @@ cred.io = (function() {
     // dialog files.
     _buildDialogResourceSet(readResults) {
       const builder = new cred.resource.DialogResourceSetBuilder();
+      builder.setCrypto(this._crypto);
+
       for (let i = 0; i < readResults.length; ++i) {
         let result = readResults[i];
         // If a file does not exist, the result is 'undefined'.

@@ -252,7 +252,7 @@ cred.resource = (function() {
           this._importLogs.set(locale, []);
         }
       }
-      // Crypto API that supports a getRandomValues() function with the same sematics as
+      // Crypto API that supports a getRandomValues() function with the same semantics as
       // window.crypto.getRandomValues.
       // Can be injected by calling setCrypto().
       this._crypto = window.crypto;

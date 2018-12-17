@@ -3,11 +3,11 @@
 //
 'use strict';
 
-const crypto = require('crypto');
 var cred = cred || {};
 cred = require('../cred_types');
 cred.resource = require('../dlg_resource');
 cred.spec = require('../dlg_spec');
+const crypto = require('crypto');
 
 ///////////////////
 

@@ -106,15 +106,30 @@ cred.parser = (function() {
       if (this.countTokens() < 2) {
         return false;
       }
+      // Check for only one .dlg include. Occurrs when language .dlg file includes the
+      // master .dlg file.
       let firstToken = this.token(0);
       let secondToken = this.token(1);
       if (
-        !firstToken.isMatch(cred.tokenKind.directive, '#include') ||
-        !secondToken.isKind(cred.tokenKind.string)
+        firstToken.isMatch(cred.tokenKind.directive, '#include') &&
+        secondToken.isKind(cred.tokenKind.string) &&
+        filesys.extractExtension(secondToken.value).toLowerCase() === 'dlg'
       ) {
-        return false;
+        return true;
       }
-      return filesys.extractExtension(secondToken.value).toLowerCase() === 'dlg';
+      // Check for multiple .dlg includes for different languages. Occurrs when the
+      // master .dlg file includes .dlg files for all unlinked languages.
+      let thirdToken = this.token(2);
+      let fourthToken = this.token(3);
+      if (
+        firstToken.isMatch(cred.tokenKind.directive, '#ifdef') &&
+        thirdToken.isMatch(cred.tokenKind.directive, '#include') &&
+        fourthToken.isKind(cred.tokenKind.string) &&
+        filesys.extractExtension(fourthToken.value).toLowerCase() === 'dlg'
+      ) {
+        return true;
+      }
+      return false;
     }
 
     // Parses the 'include' section of the resource.

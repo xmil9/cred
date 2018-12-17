@@ -25,6 +25,22 @@ test('cred.parser.parseDialog for including other dialog file', () => {
   expect(dlgRes).toBeUndefined();
 });
 
+test('cred.parser.parseDialog for including multiple other dialog files', () => {
+  const content =
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.dlg"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.dlg"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.dlg"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ';
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.any);
+  expect(dlgRes).toBeUndefined();
+});
+
 test('cred.parser.parseDialog for minimal dialog', () => {
   const content =
     '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +

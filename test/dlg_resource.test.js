@@ -4180,3 +4180,195 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
     expect(textProp.type).toEqual(cred.spec.physicalPropertyType.identifier);
   }
 });
+
+///////////////////
+
+// Checks whether a log has entries for a given category and with an optional topic.
+function hasEntries(log, category, topic) {
+  for (const entry of log) {
+    if (entry.startsWith(category)) {
+      return typeof topic === 'undefined' || entry.includes(topic);
+    }
+  }
+  return false;
+}
+
+function hasErrors(log, topic) {
+  return hasEntries(log, '[Error]', topic);
+}
+
+function hasWarnings(log, topic) {
+  return hasEntries(log, '[Warning]', topic);
+}
+
+function makeMinimalDialog(skipProp) {
+  const propLabel = cred.spec.propertyLabel;
+  const propType = cred.spec.physicalPropertyType;
+  const propDescriptions = [
+    [propLabel.id, propType.identifier, 'kDlgId'],
+    [propLabel.left, propType.number, 0],
+    [propLabel.top, propType.number, 0],
+    [propLabel.width, propType.number, 100],
+    [propLabel.height, propType.number, 50],
+    [propLabel.text, propType.string, 'my text'],
+    [propLabel.resourceClass, propType.string, 'Dialog'],
+    [propLabel.font, propType.string, ''],
+    [propLabel.fontSize, propType.number, 0],
+    [propLabel.killPopup, propType.number, 0],
+    [propLabel.paddingType, propType.number, 0],
+    [propLabel.styleFlags, propType.flags, 31]
+  ];
+
+  const dlg = new cred.resource.Dialog();
+  for (const descr of propDescriptions) {
+    const skip = typeof skipProp !== 'undefined' && descr[0] === skipProp;
+    if (!skip) {
+      dlg.addLabeledProperty(
+        descr[0],
+        cred.resource.makeProperty(descr[0], descr[1], descr[2])
+      );
+    }
+  }
+  return dlg;
+}
+
+function makeMinimalDialogWithControl(skipControlProp) {
+  const propLabel = cred.spec.propertyLabel;
+  const propType = cred.spec.physicalPropertyType;
+  const propDescriptions = [
+    [propLabel.ctrlType, propType.identifier, cred.spec.controlType.pushButton],
+    [propLabel.left, propType.number, 10],
+    [propLabel.top, propType.number, 20],
+    [propLabel.width, propType.number, 100],
+    [propLabel.height, propType.number, 50],
+    [propLabel.resourceClass, propType.string, 'Button'],
+    [propLabel.text, propType.string, 'Press'],
+    [propLabel.styleFlags, propType.flags, 31],
+    [propLabel.extStyleFlags, propType.flags, 5],
+    [propLabel.anchorLeft, propType.number, 1],
+    [propLabel.anchorTop, propType.number, 1],
+    [propLabel.anchorRight, propType.number, 1],
+    [propLabel.anchorBottom, propType.number, 1],
+    [propLabel.enabled, propType.number, 1],
+    [propLabel.group, propType.number, 0],
+    [propLabel.killPopup, propType.number, 0],
+    [propLabel.tabStop, propType.number, 1],
+    [propLabel.visible, propType.number, 1],
+    [propLabel.tooltip, propType.string, 'a tip']
+  ];
+
+  const ctrl = new cred.resource.Control(cred.spec.controlType.pushButton, 'kCtrlId');
+  for (const descr of propDescriptions) {
+    const skip = typeof skipControlProp !== 'undefined' && descr[0] === skipControlProp;
+    if (!skip) {
+      ctrl.addLabeledProperty(
+        descr[0],
+        cred.resource.makeProperty(descr[0], descr[1], descr[2])
+      );
+    }
+  }
+
+  const dlg = makeMinimalDialog();
+  dlg.addControl(ctrl);
+
+  return dlg;
+}
+
+test('verifyDialog for empty dialog', () => {
+  const dlg = new cred.resource.Dialog();
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log)).toBeTruthy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for minimal dialog', () => {
+  const dlg = makeMinimalDialog();
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log)).toBeFalsy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for missing required dialog property', () => {
+  const dlg = makeMinimalDialog(cred.spec.propertyLabel.left);
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log, cred.spec.propertyLabel.left)).toBeTruthy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for non-nullable dialog property that is null', () => {
+  const dlg = makeMinimalDialog();
+  dlg.addPositionalProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makeProperty(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      ''
+    )
+  );
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log, cred.spec.propertyLabel.id)).toBeTruthy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for unknown dialog property', () => {
+  const dlg = makeMinimalDialog();
+  dlg.addPositionalProperty(
+    'UnknownProperty',
+    cred.resource.makeProperty(
+      'UnknownProperty',
+      cred.spec.physicalPropertyType.string,
+      'bla'
+    )
+  );
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log)).toBeFalsy();
+  expect(hasWarnings(log, 'UnknownProperty')).toBeTruthy();
+});
+
+test('verifyDialog for minimal dialog with a control', () => {
+  const dlg = makeMinimalDialogWithControl();
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log)).toBeFalsy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for missing required control property', () => {
+  const dlg = makeMinimalDialogWithControl(cred.spec.propertyLabel.left);
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log, cred.spec.propertyLabel.left)).toBeTruthy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for non-nullable control property that is null', () => {
+  const dlg = makeMinimalDialogWithControl();
+  dlg
+    .control('kCtrlId')
+    .addPositionalProperty(
+      cred.spec.propertyLabel.resourceClass,
+      cred.resource.makeProperty(
+        cred.spec.propertyLabel.resourceClass,
+        cred.spec.physicalPropertyType.identifier,
+        ''
+      )
+    );
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log, cred.spec.propertyLabel.resourceClass)).toBeTruthy();
+  expect(hasWarnings(log)).toBeFalsy();
+});
+
+test('verifyDialog for unknown control property', () => {
+  const dlg = makeMinimalDialogWithControl();
+  dlg
+    .control('kCtrlId')
+    .addPositionalProperty(
+      'UnknownProperty',
+      cred.resource.makeProperty(
+        'UnknownProperty',
+        cred.spec.physicalPropertyType.string,
+        'bla'
+      )
+    );
+  const log = cred.resource.verifyDialog(dlg);
+  expect(hasErrors(log)).toBeFalsy();
+  expect(hasWarnings(log, 'UnknownProperty')).toBeTruthy();
+});

@@ -1433,6 +1433,16 @@ cred.resource = (function() {
     hasValue() {
       return typeof this.value !== 'undefined';
     }
+
+    // Polymorphic function that returns the value as string.
+    valueAsString() {
+      if (typeof value === 'number' && !this.value.isInteger()) {
+        // Floating point.
+        const NumDecimals = 4;
+        return this.value.toFixed(NumDecimals);
+      }
+      return `${this.value}`;
+    }
   }
 
   // Defintion for a string property.

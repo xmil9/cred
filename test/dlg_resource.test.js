@@ -7,7 +7,7 @@ var cred = cred || {};
 cred = require('../cred_types');
 cred.resource = require('../dlg_resource');
 cred.spec = require('../dlg_spec');
-const crypto = require('crypto');
+const testutil = require('./test_util');
 
 ///////////////////
 
@@ -1923,13 +1923,8 @@ function makeDialogResource(locale, id) {
 // Creates a dialog resource set builder object whose crypto API is redirected to use
 // node's crypto module.
 function makeDialogResourceSetBuilderForNode() {
-  const cryptoNodeAdapter = {
-    getRandomValues(arr) {
-      return crypto.randomBytes(arr.length);
-    }
-  };
   const builder = new cred.resource.DialogResourceSetBuilder();
-  builder.setCrypto(cryptoNodeAdapter);
+  builder.setCrypto(testutil.makeCryptoNodeAdapter());
   return builder;
 }
 

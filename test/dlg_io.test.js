@@ -6,64 +6,19 @@
 var cred = cred || {};
 cred = require('../cred_types');
 cred.io = require('../dlg_io');
-const crypto = require('crypto');
-
-///////////////////
-
-// Makes a fake Web API File object.
-function makeFileStub(fileName, content = '') {
-  return {
-    name: fileName,
-    content: content
-  };
-}
-
-// Makes a fake Web API FileList object from a given array of file names.
-function makeFileListStub(files) {
-  return files;
-}
-
-// Mock for Web API FileReader.
-class FileReaderMock {
-  constructor() {
-    this.onload = undefined;
-    this.onerror = undefined;
-    this.onabort = undefined;
-    this.wasReadAsTextCalled = false;
-    this.wasReadAsArrayBufferCalled = false;
-  }
-
-  readAsText(file) {
-    this.wasReadAsTextCalled = true;
-    this.onload({ target: { result: file.content } });
-  }
-
-  readAsArrayBuffer(file) {
-    this.wasReadAsArrayBufferCalled = true;
-    this.onload({ target: { result: file.content } });
-  }
-}
-
-// Makes an adapter to map node's crypto module to window.crypto functionality.
-function makeCryptoNodeAdapter() {
-  return {
-    getRandomValues(arr) {
-      return crypto.randomBytes(arr.length);
-    }
-  };
-}
+const testutil = require('./test_util');
 
 ///////////////////
 
 test('FileSet constructor for full set of files', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -71,11 +26,11 @@ test('FileSet constructor for full set of files', () => {
 });
 
 test('FileSet constructor for minimal set of files', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -83,58 +38,58 @@ test('FileSet constructor for minimal set of files', () => {
 });
 
 test('FileSet constructor for set of files without master file', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   expect(() => new cred.io.FileSet(files));
 });
 
 test('FileSet.masterFile getter', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
-  expect(fileSet.masterFile).toEqual(makeFileStub('kTestDlg.dlg'));
+  expect(fileSet.masterFile).toEqual(testutil.makeFileStub('kTestDlg.dlg'));
 });
 
 test('FileSet.masterFile setter', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
-  fileSet.masterFile = makeFileStub('kOtherTestDlg.dlg');
-  expect(fileSet.masterFile).toEqual(makeFileStub('kOtherTestDlg.dlg'));
+  fileSet.masterFile = testutil.makeFileStub('kOtherTestDlg.dlg');
+  expect(fileSet.masterFile).toEqual(testutil.makeFileStub('kOtherTestDlg.dlg'));
 });
 
 test('FileSet.masterFile setter for undefined file', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -144,14 +99,14 @@ test('FileSet.masterFile setter for undefined file', () => {
 });
 
 test('FileSet.dialogId', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -159,61 +114,63 @@ test('FileSet.dialogId', () => {
 });
 
 test('FileSet.dialogFile', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
-  expect(fileSet.dialogFile(cred.locale.any)).toEqual(makeFileStub('kTestDlg.dlg'));
+  expect(fileSet.dialogFile(cred.locale.any)).toEqual(
+    testutil.makeFileStub('kTestDlg.dlg')
+  );
   expect(fileSet.dialogFile(cred.locale.english)).toEqual(
-    makeFileStub('kTestDlg.English.dlg')
+    testutil.makeFileStub('kTestDlg.English.dlg')
   );
   expect(fileSet.dialogFile(cred.locale.german)).toEqual(
-    makeFileStub('kTestDlg.German.dlg')
+    testutil.makeFileStub('kTestDlg.German.dlg')
   );
   expect(fileSet.dialogFile(cred.locale.japanese)).toEqual(
-    makeFileStub('kTestDlg.Japan.dlg')
+    testutil.makeFileStub('kTestDlg.Japan.dlg')
   );
 });
 
 test('FileSet.dialogFile', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
   expect(fileSet.stringFile(cred.language.english)).toEqual(
-    makeFileStub('kTestDlg.English.str')
+    testutil.makeFileStub('kTestDlg.English.str')
   );
   expect(fileSet.stringFile(cred.language.german)).toEqual(
-    makeFileStub('kTestDlg.German.str')
+    testutil.makeFileStub('kTestDlg.German.str')
   );
   expect(fileSet.stringFile(cred.language.japanese)).toEqual(
-    makeFileStub('kTestDlg.Japan.str')
+    testutil.makeFileStub('kTestDlg.Japan.str')
   );
 });
 
 test('FileSet.isValid for full file set', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.dlg'),
-    makeFileStub('kTestDlg.German.dlg'),
-    makeFileStub('kTestDlg.Japan.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.dlg'),
+    testutil.makeFileStub('kTestDlg.German.dlg'),
+    testutil.makeFileStub('kTestDlg.Japan.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -221,11 +178,11 @@ test('FileSet.isValid for full file set', () => {
 });
 
 test('FileSet.isValid for minimal file set', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -233,10 +190,10 @@ test('FileSet.isValid for minimal file set', () => {
 });
 
 test('FileSet.isValid for missing string file', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -244,11 +201,11 @@ test('FileSet.isValid for missing string file', () => {
 });
 
 test('FileSet.haveAllLanguageStringFiles', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.German.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.German.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -256,10 +213,10 @@ test('FileSet.haveAllLanguageStringFiles', () => {
 });
 
 test('FileSet.haveAllLanguageStringFiles for missing string file', () => {
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg'),
-    makeFileStub('kTestDlg.English.str'),
-    makeFileStub('kTestDlg.Japan.str')
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg'),
+    testutil.makeFileStub('kTestDlg.English.str'),
+    testutil.makeFileStub('kTestDlg.Japan.str')
   ]);
 
   const fileSet = new cred.io.FileSet(files);
@@ -293,20 +250,20 @@ test('Reader for dialog with linked languages', () => {
   const enStrContent = '#define	strId	"Title"';
   const deStrContent = '#define	strId	"Ueberschrift"';
   const jpStrContent = '#define	strId	"jp-word"';
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg', masterContent),
-    makeFileStub('kTestDlg.English.str', enStrContent),
-    makeFileStub('kTestDlg.German.str', deStrContent),
-    makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
   ]);
   const fileSet = new cred.io.FileSet(files);
-  const fileReaderMock = new FileReaderMock();
+  const fileReaderMock = new testutil.FileReaderMock();
   const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
     textDecodeMock,
-    makeCryptoNodeAdapter()
+    testutil.makeCryptoNodeAdapter()
   );
   reader
     .read()
@@ -412,23 +369,23 @@ test('Reader for dialog with unlinked languages', () => {
   const enStrContent = '#define	strId	"Title"';
   const deStrContent = '#define	strId	"Ueberschrift"';
   const jpStrContent = '#define	strId	"jp-word"';
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg', masterContent),
-    makeFileStub('kTestDlg.English.dlg', enContent),
-    makeFileStub('kTestDlg.German.dlg', deContent),
-    makeFileStub('kTestDlg.Japan.dlg', jpContent),
-    makeFileStub('kTestDlg.English.str', enStrContent),
-    makeFileStub('kTestDlg.German.str', deStrContent),
-    makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.dlg', enContent),
+    testutil.makeFileStub('kTestDlg.German.dlg', deContent),
+    testutil.makeFileStub('kTestDlg.Japan.dlg', jpContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
   ]);
   const fileSet = new cred.io.FileSet(files);
-  const fileReaderMock = new FileReaderMock();
+  const fileReaderMock = new testutil.FileReaderMock();
   const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
     textDecodeMock,
-    makeCryptoNodeAdapter()
+    testutil.makeCryptoNodeAdapter()
   );
   reader
     .read()
@@ -493,20 +450,20 @@ test('Reader for invalid dialog', () => {
   const enStrContent = '#define	strId	"Title"';
   const deStrContent = '#define	strId	"Ueberschrift"';
   const jpStrContent = '#define	strId	"jp-word"';
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg', masterContent),
-    makeFileStub('kTestDlg.English.str', enStrContent),
-    makeFileStub('kTestDlg.German.str', deStrContent),
-    makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
   ]);
   const fileSet = new cred.io.FileSet(files);
-  const fileReaderMock = new FileReaderMock();
+  const fileReaderMock = new testutil.FileReaderMock();
   const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
     textDecodeMock,
-    makeCryptoNodeAdapter()
+    testutil.makeCryptoNodeAdapter()
   );
   reader
     .read()
@@ -544,20 +501,20 @@ test('Reader for dialog with invalid string file', () => {
   const enStrContent = '#define	strId	"Title"';
   const deStrContent = 'invalid';
   const jpStrContent = '#define	strId	"jp-word"';
-  const files = makeFileListStub([
-    makeFileStub('kTestDlg.dlg', masterContent),
-    makeFileStub('kTestDlg.English.str', enStrContent),
-    makeFileStub('kTestDlg.German.str', deStrContent),
-    makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
   ]);
   const fileSet = new cred.io.FileSet(files);
-  const fileReaderMock = new FileReaderMock();
+  const fileReaderMock = new testutil.FileReaderMock();
   const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
     textDecodeMock,
-    makeCryptoNodeAdapter()
+    testutil.makeCryptoNodeAdapter()
   );
   reader
     .read()

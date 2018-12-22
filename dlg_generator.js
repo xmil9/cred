@@ -252,7 +252,8 @@ cred.gen = (function() {
   function generatePositionalDialogProperties(dlg) {
     let text = '';
     text += dlg.id + ',';
-    text += generateSerializedItemProperties(dlg, cred.spec.makeDialogSpec()) + ',';
+    text +=
+      `"${generateSerializedItemProperties(dlg, cred.spec.makeDialogSpec())}"` + ',';
     text += generatePropertyValue(dlg, cred.spec.propertyLabel.left) + ',';
     text += generatePropertyValue(dlg, cred.spec.propertyLabel.top) + ',';
     text += generatePropertyValue(dlg, cred.spec.propertyLabel.width) + ',';
@@ -311,7 +312,7 @@ cred.gen = (function() {
   function generateControlDefintionBeginning(ctrl, indent) {
     return makeLine(
       indent,
-      'begin_control_definitions(' + generatePositionalControlProperties(ctrl) + ')'
+      'begin_control_ex(' + generatePositionalControlProperties(ctrl) + ')'
     );
   }
 
@@ -332,7 +333,7 @@ cred.gen = (function() {
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.width) + ',';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.height) + ',';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.styleFlags) + ',';
-    text += generatePropertyValue(ctrl, cred.spec.propertyLabel.extStyleFlags) + ',';
+    text += generatePropertyValue(ctrl, cred.spec.propertyLabel.extStyleFlags);
     return text;
   }
 

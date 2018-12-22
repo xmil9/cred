@@ -3,7 +3,7 @@
 //
 'use strict';
 
-const crypto = require('crypto');
+const testutil = require('./test_util');
 const util = require('../util');
 
 ///////////////////
@@ -183,16 +183,8 @@ test('isHexDigit for non-char strings', () => {
 
 ///////////////////
 
-function makeNodeCryptoAdapter() {
-  return {
-    getRandomValues(arr) {
-      return crypto.randomBytes(arr.length);
-    }
-  };
-}
-
 test('makeUuidV4 format', () => {
-  const cryptoAdapter = makeNodeCryptoAdapter();
+  const cryptoAdapter = testutil.makeCryptoNodeAdapter();
 
   let uuid = undefined;
   for (let caseNum = 0; caseNum < 20; ++caseNum) {
@@ -215,7 +207,7 @@ test('makeUuidV4 format', () => {
 });
 
 test('makeUuidV4 uniqueness', () => {
-  const cryptoAdapter = makeNodeCryptoAdapter();
+  const cryptoAdapter = testutil.makeCryptoNodeAdapter();
 
   let uuids = new Set();
   for (let i = 0; i < 100; ++i) {

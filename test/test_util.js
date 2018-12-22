@@ -63,10 +63,16 @@ var testutil = (function() {
     return new Promise((resolve, reject) => {
       const files = makeFileListStub([
         makeFileStub(`${dlgName}.dlg`, contentMap.get(cred.locale.any).dialog),
-        makeFileStub(`${dlgName}.English.dlg`, contentMap.get(cred.locale.english).dialog),
+        makeFileStub(
+          `${dlgName}.English.dlg`,
+          contentMap.get(cred.locale.english).dialog
+        ),
         makeFileStub(`${dlgName}.German.dlg`, contentMap.get(cred.locale.german).dialog),
         makeFileStub(`${dlgName}.Japan.dlg`, contentMap.get(cred.locale.japanese).dialog),
-        makeFileStub(`${dlgName}.English.str`, contentMap.get(cred.locale.english).strings),
+        makeFileStub(
+          `${dlgName}.English.str`,
+          contentMap.get(cred.locale.english).strings
+        ),
         makeFileStub(`${dlgName}.German.str`, contentMap.get(cred.locale.german).strings),
         makeFileStub(`${dlgName}.Japan.str`, contentMap.get(cred.locale.japanese).strings)
       ]);

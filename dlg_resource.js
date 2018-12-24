@@ -18,6 +18,7 @@ function tryRequire(file) {
 var cred = tryRequire('./cred_types') || cred || {};
 cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
 var util = tryRequire('./util') || util || {};
+var web = tryRequire('./web') || web || {};
 
 ///////////////////
 
@@ -136,9 +137,14 @@ cred.resource = (function() {
     // Stores the current dialog resources.
     _storeDialog() {
       if (this._resourceSet) {
-        let writer = new cred.io.Writer(this._resourceSet);
+        let writer = new cred.io.Writer(this._resourceSet, this._writeFile);
         writer.write();
       }
+    }
+
+    // Write given text to a file with a given name.
+    _writeTextFile(fileName, text) {
+      web.saveTextFile(fileName, text, $('#save-download-link')[0]);
     }
 
     // Updates the id of a given layout item.

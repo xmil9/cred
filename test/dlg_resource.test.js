@@ -1920,16 +1920,8 @@ function makeDialogResource(locale, id) {
   return dlgRes;
 }
 
-// Creates a dialog resource set builder object whose crypto API is redirected to use
-// node's crypto module.
-function makeDialogResourceSetBuilderForNode() {
-  const builder = new cred.resource.DialogResourceSetBuilder();
-  builder.setCrypto(testutil.makeCryptoNodeAdapter());
-  return builder;
-}
-
 test('DialogResourceSetBuilder.addResource for linked resources', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource);
   const resSet = builder.build();
@@ -1947,7 +1939,7 @@ test('DialogResourceSetBuilder.addResource for linked resources', () => {
 });
 
 test('DialogResourceSetBuilder.addResource for linked and unlinked resources', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource);
   const deResource = makeDialogResource(cred.locale.german, 'myid');
@@ -1966,7 +1958,7 @@ test('DialogResourceSetBuilder.addResource for linked and unlinked resources', (
 });
 
 test('DialogResourceSetBuilder.addResource with import logs', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource, ['entry 1', 'entry 2']);
   const deResource = makeDialogResource(cred.locale.german, 'myid');
@@ -1979,7 +1971,7 @@ test('DialogResourceSetBuilder.addResource with import logs', () => {
 });
 
 test('DialogResourceSetBuilder.addStrings for all languages', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource);
   const deResource = makeDialogResource(cred.locale.german, 'myid');
@@ -2001,7 +1993,7 @@ test('DialogResourceSetBuilder.addStrings for all languages', () => {
 });
 
 test('DialogResourceSetBuilder.addStrings for one language', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource);
   const deResource = makeDialogResource(cred.locale.german, 'myid');
@@ -2017,7 +2009,7 @@ test('DialogResourceSetBuilder.addStrings for one language', () => {
 });
 
 test('DialogResourceSetBuilder.build', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource, ['master 1', 'master 2']);
   const enResource = makeDialogResource(cred.locale.english, 'myid');
@@ -2049,7 +2041,7 @@ test('DialogResourceSetBuilder.build', () => {
 });
 
 test('DialogResourceSetBuilder detect unnecessary master resource for fully unlinked language resources', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource);
   const enResource = makeDialogResource(cred.locale.english, 'myid');
@@ -2063,7 +2055,7 @@ test('DialogResourceSetBuilder detect unnecessary master resource for fully unli
 });
 
 test('DialogResourceSetBuilder detect missing master resource for linked language resources', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const enResource = makeDialogResource(cred.locale.english, 'myid');
   builder.addResource(enResource);
   const deResource = makeDialogResource(cred.locale.german, 'myid');
@@ -2073,7 +2065,7 @@ test('DialogResourceSetBuilder detect missing master resource for linked languag
 });
 
 test('DialogResourceSetBuilder detect mismatched dialog id', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   const masterResource = makeDialogResource(cred.locale.any, 'myid');
   builder.addResource(masterResource);
   const enResource = makeDialogResource(cred.locale.english, 'myid');
@@ -2085,7 +2077,7 @@ test('DialogResourceSetBuilder detect mismatched dialog id', () => {
 });
 
 test('DialogResourceSetBuilder detect unpopulated builder object', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   expect(() => builder.build()).toThrow();
 });
 
@@ -2094,7 +2086,7 @@ test('DialogResourceSetBuilder detect unpopulated builder object', () => {
 // Helper function that creates a dialog resource set from a given array of resources.
 // The resouce set does not have any strings or import logs.
 function makeDialogResourceSet(resources) {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   for (const resource of resources) {
     builder.addResource(resource, []);
   }
@@ -2107,7 +2099,7 @@ function makeDialogResourceSet(resources) {
 // Helper function that creates a dialog resource set from a given array of resources
 // and import logs.
 function makeDialogResourceSetWithLogs(resourceAndLogArray) {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   for (const [res, log] of resourceAndLogArray) {
     builder.addResource(res, log);
   }
@@ -2120,7 +2112,7 @@ function makeDialogResourceSetWithLogs(resourceAndLogArray) {
 // Helper function that creates a dialog resource set from a given array of resources
 // and an array of arrays of id, text, language tuples.
 function makeDialogResourceSetWithStrings(resources, strings) {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   for (const resource of resources) {
     builder.addResource(resource, []);
   }
@@ -2521,7 +2513,7 @@ test('DialogResourceSet.languageStrings for no strings', () => {
 });
 
 test('DialogResourceSet.sourceStringEncoding', () => {
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(makeDialogResource(cred.locale.any, 'myid'), []);
   builder.addStrings(cred.language.english, new cred.resource.StringMap(), 'ANSI');
   builder.addStrings(cred.language.german, new cred.resource.StringMap(), 'UNICODE');
@@ -2549,7 +2541,7 @@ test('DialogResourceSet.updateControlId', () => {
   masterRes.addControl(
     new cred.resource.Control(cred.spec.controlType.label, 'label-id')
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
   resSet.unlinkFromMaster(cred.locale.german);
@@ -2578,7 +2570,7 @@ test('DialogResourceSet.updateProperty for dialog property in master resource', 
       300
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -2618,7 +2610,7 @@ test('DialogResourceSet.updateProperty for dialog property in multiple resources
       200
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -2660,7 +2652,7 @@ test('DialogResourceSet.updateProperty for dialog property in some resources', (
       200
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -2700,7 +2692,7 @@ test('DialogResourceSet.updateProperty for control property in master resource',
   );
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(labelCtrl);
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -2752,7 +2744,7 @@ test('DialogResourceSet.updateProperty for control property in multiple resource
   const deRes = new cred.resource.DialogResource(cred.locale.german);
   deRes.addControl(deLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(deRes, []);
   const resSet = builder.build();
@@ -2806,7 +2798,7 @@ test('DialogResourceSet.updateProperty for control property in some resources', 
   const deRes = new cred.resource.DialogResource(cred.locale.german);
   deRes.addControl(deLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(deRes, []);
   const resSet = builder.build();
@@ -2848,7 +2840,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in res
       'str-id'
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
   resSet.addString('str-id', 'initial', cred.language.english);
@@ -2892,7 +2884,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in unl
       'str-id'
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(jpRes, []);
   const resSet = builder.build();
@@ -2928,7 +2920,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for dialog property in mas
       'str-id'
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
   resSet.addString('str-id', 'initial', cred.language.english);
@@ -2965,7 +2957,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for non-identifier dialog 
       'str'
     )
   );
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -3002,7 +2994,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in re
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
   resSet.addString('str-id', 'initial', cred.language.english);
@@ -3055,7 +3047,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in un
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addControl(enLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3097,7 +3089,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in ma
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
   resSet.addString('str-id', 'initial', cred.language.english);
@@ -3135,7 +3127,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in m
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, flagsProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -3175,7 +3167,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, flagsProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -3225,7 +3217,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to dialog property in m
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3281,7 +3273,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from dialog property
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3337,7 +3329,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a dialog property in
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3393,7 +3385,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a dialog proper
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3441,7 +3433,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a control property i
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(labelCtrl);
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -3484,7 +3476,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a control prope
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(labelCtrl);
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
 
@@ -3544,7 +3536,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addControl(enLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3611,7 +3603,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addControl(enLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3678,7 +3670,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addControl(enLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3745,7 +3737,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addControl(enLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const resSet = builder.build();
@@ -3790,7 +3782,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empt
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const enMap = new cred.resource.StringMap();
   builder.addStrings(cred.language.english, enMap);
@@ -3834,7 +3826,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for dialog string that is empt
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addLabeledProperty(cred.spec.propertyLabel.text, enTextProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const enMap = new cred.resource.StringMap();
@@ -3884,7 +3876,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const enMap = new cred.resource.StringMap();
   builder.addStrings(cred.language.english, enMap);
@@ -3938,7 +3930,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
   const enRes = new cred.resource.DialogResource(cred.locale.english);
   enRes.addControl(enLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   builder.addResource(enRes, []);
   const enMap = new cred.resource.StringMap();
@@ -3984,7 +3976,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is so
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const enMap = new cred.resource.StringMap();
   builder.addStrings(cred.language.english, enMap);
@@ -4019,7 +4011,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for dialog string that is em
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const enMap = new cred.resource.StringMap();
   builder.addStrings(cred.language.english, enMap);
@@ -4083,7 +4075,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const enMap = new cred.resource.StringMap();
   builder.addStrings(cred.language.english, enMap);
@@ -4125,7 +4117,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const builder = makeDialogResourceSetBuilderForNode();
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const enMap = new cred.resource.StringMap();
   builder.addStrings(cred.language.english, enMap);

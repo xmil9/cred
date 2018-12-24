@@ -21,7 +21,6 @@ cred.parser = tryRequire('./dlg_parser') || cred.parser || {};
 cred.gen = tryRequire('./dlg_generator') || cred.gen || {};
 cred.resource = tryRequire('./dlg_resource') || cred.resource || {};
 var encoding = tryRequire('./encoding.min.js') || encoding || {};
-var filesys = tryRequire('./filesys') || filesys || {};
 
 ///////////////////
 
@@ -151,14 +150,14 @@ cred.io = (function() {
       dlgFileSet,
       // Allow to inject file reader object to read individual files.
       fileReader = new FileReader(),
-      // Allow to inject decoder function to decode text, e.g. from Shift-JIS.
-      textDecoder = decodeFileContent,
+      // Allow to inject function to decode text, e.g. from Shift-JIS.
+      decodeText = decodeFileContent,
       // Allow to inject crypto API.
       crypto = window.crypto
     ) {
       this._dlgFileSet = dlgFileSet;
       this._fileReader = fileReader;
-      this._textDecoder = textDecoder;
+      this._decodeText = decodeText;
       this._crypto = crypto;
     }
 
@@ -173,7 +172,7 @@ cred.io = (function() {
             const resourceSet = self._buildDialogResourceSet(readResults);
             resolve(resourceSet);
           })
-          .catch(err => reject(err));
+          .catch(err => reject(err)); 
       });
     }
 
@@ -245,7 +244,7 @@ cred.io = (function() {
           ._readFile(strFile, false)
           // Parse its contents.
           .then(fileContent => {
-            let [convertedContent, resourceEncoding] = self._textDecoder(fileContent);
+            let [convertedContent, resourceEncoding] = self._decodeText(fileContent);
             let stringMap = cred.parser.parseStrings(
               cred.lexer.analyse(convertedContent),
               language
@@ -324,9 +323,18 @@ cred.io = (function() {
 
   // Writer for cv dialog resource files.
   class Writer {
-    constructor(dlgResourceSet) {
+    constructor(
+      dlgResourceSet,
+      // Allow to inject function to write a text file. Will be passed two arguments, the
+      // file name and the text content.
+      writeTextFile,
+      // Allow to inject function to encode text, e.g. to Shift-JIS.
+      encode = encodeText
+    ) {
       this._dlgResourceSet = dlgResourceSet;
       this._contentGen = new cred.gen.ResourceGenerator(dlgResourceSet);
+      this._writeTextFile = writeTextFile;
+      this._encodeText = encode;
     }
 
     // Starts the write process.
@@ -345,7 +353,7 @@ cred.io = (function() {
     _writeMasterFile() {
       let fileName = this._dlgResourceSet.masterFileName;
       let content = this._contentGen.generateContent(cred.locale.any);
-      this._writeFile(fileName, content);
+      this._writeTextFile(fileName, content);
     }
 
     // Writes the dialog and string files of a given language.
@@ -355,25 +363,20 @@ cred.io = (function() {
 
       const haveDlgContent = typeof dlgContent !== 'undefined';
       if (haveDlgContent) {
-        this._writeFile(
+        this._writeTextFile(
           this._dlgResourceSet.languageDialogFileName(language),
           dlgContent
         );
       }
 
-      const encodedStrContent = encodeText(
+      const encodedStrContent = this._encodeText(
         strContent,
         this._dlgResourceSet.sourceStringEncoding(language)
       );
-      this._writeFile(
+      this._writeTextFile(
         this._dlgResourceSet.languageStringFileName(language),
         encodedStrContent
       );
-    }
-
-    // Write given text to a file with a given name.
-    _writeFile(fileName, text) {
-      filesys.saveTextFile(fileName, text, $('#save-download-link')[0]);
     }
   }
 

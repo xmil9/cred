@@ -46,6 +46,21 @@ var testutil = (function() {
     }
   }
 
+  // Mock for writing text content to a file.
+  class FileWriterMock {
+    constructor() {
+      this._filesWritten = new Map();
+    }
+
+    get writtenFiles() {
+      return this._filesWritten;
+    }
+
+    writeFile(fileName, text) {
+      this._filesWritten.set(fileName, text);
+    }
+  }
+
   // Makes an adapter to map node's crypto module to window.crypto functionality.
   function makeCryptoNodeAdapter() {
     return {
@@ -94,12 +109,22 @@ var testutil = (function() {
     });
   }
 
+  // Creates a dialog resource set builder object whose crypto API is redirected to use
+  // node's crypto module.
+  function makeDialogResourceSetBuilderForNode() {
+    const builder = new cred.resource.DialogResourceSetBuilder();
+    builder.setCrypto(testutil.makeCryptoNodeAdapter());
+    return builder;
+  }
+
   ///////////////////
 
   // Exports for testutil module.
   return {
     FileReaderMock: FileReaderMock,
+    FileWriterMock: FileWriterMock,
     makeCryptoNodeAdapter: makeCryptoNodeAdapter,
+    makeDialogResourceSetBuilderForNode: makeDialogResourceSetBuilderForNode,
     makeFileListStub: makeFileListStub,
     makeFileStub: makeFileStub,
     readDialogResourceSetAsyncStub: readDialogResourceSetAsyncStub

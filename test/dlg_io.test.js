@@ -6,6 +6,7 @@
 var cred = cred || {};
 cred = require('../cred_types');
 cred.io = require('../dlg_io');
+cred.resource = require('../dlg_resource');
 const testutil = require('./test_util');
 
 ///////////////////
@@ -258,11 +259,11 @@ test('Reader for dialog with linked languages', () => {
   ]);
   const fileSet = new cred.io.FileSet(files);
   const fileReaderMock = new testutil.FileReaderMock();
-  const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
+  const textDecodeStub = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
-    textDecodeMock,
+    textDecodeStub,
     testutil.makeCryptoNodeAdapter()
   );
   reader
@@ -271,7 +272,7 @@ test('Reader for dialog with linked languages', () => {
       expect(dlgResSet).toBeDefined();
       expect(fileReaderMock.wasReadAsTextCalled).toBeTruthy();
       expect(fileReaderMock.wasReadAsArrayBufferCalled).toBeTruthy();
-      expect(textDecodeMock).toBeCalled();
+      expect(textDecodeStub).toBeCalled();
       expect(
         dlgResSet
           .dialogResource(cred.locale.any)
@@ -380,11 +381,11 @@ test('Reader for dialog with unlinked languages', () => {
   ]);
   const fileSet = new cred.io.FileSet(files);
   const fileReaderMock = new testutil.FileReaderMock();
-  const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
+  const textDecodeStub = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
-    textDecodeMock,
+    textDecodeStub,
     testutil.makeCryptoNodeAdapter()
   );
   reader
@@ -393,7 +394,7 @@ test('Reader for dialog with unlinked languages', () => {
       expect(dlgResSet).toBeDefined();
       expect(fileReaderMock.wasReadAsTextCalled).toBeTruthy();
       expect(fileReaderMock.wasReadAsArrayBufferCalled).toBeTruthy();
-      expect(textDecodeMock).toBeCalled();
+      expect(textDecodeStub).toBeCalled();
       expect(dlgResSet.dialogResource(cred.locale.any)).toBeUndefined();
       expect(
         dlgResSet
@@ -458,11 +459,11 @@ test('Reader for invalid dialog', () => {
   ]);
   const fileSet = new cred.io.FileSet(files);
   const fileReaderMock = new testutil.FileReaderMock();
-  const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
+  const textDecodeStub = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
-    textDecodeMock,
+    textDecodeStub,
     testutil.makeCryptoNodeAdapter()
   );
   reader
@@ -509,11 +510,11 @@ test('Reader for dialog with invalid string file', () => {
   ]);
   const fileSet = new cred.io.FileSet(files);
   const fileReaderMock = new testutil.FileReaderMock();
-  const textDecodeMock = jest.fn(fileContent => [fileContent, 'UTF-8']);
+  const textDecodeStub = jest.fn(fileContent => [fileContent, 'UTF-8']);
   const reader = new cred.io.Reader(
     fileSet,
     fileReaderMock,
-    textDecodeMock,
+    textDecodeStub,
     testutil.makeCryptoNodeAdapter()
   );
   reader
@@ -524,5 +525,349 @@ test('Reader for dialog with invalid string file', () => {
     })
     .catch(err => {
       expect(err).toBeDefined();
+    });
+});
+
+///////////////////
+
+// Helper function that takes a file list (as file list stub object) and processes
+// the content into a dialog resource set.
+// Returns a promise resolving to the dialog resource set.
+function makeDialogResourceSetFromFileListStubAsync(fileListStub) {
+  return new Promise((resolve, reject) => {
+    const fileSet = new cred.io.FileSet(fileListStub);
+    const fileReaderMock = new testutil.FileReaderMock();
+    const textDecodeStub = jest.fn(fileContent => [fileContent, 'UTF-8']);
+    const reader = new cred.io.Reader(
+      fileSet,
+      fileReaderMock,
+      textDecodeStub,
+      testutil.makeCryptoNodeAdapter()
+    );
+    reader
+      .read()
+      .then(dlgResSet => resolve(dlgResSet))
+      .catch(err => reject(err));
+  });
+}
+
+test('Writer for dialog with linked languages', done => {
+  const masterContent =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,10,20,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,20)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,10)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const enStrContent = '#define DLGPROP_kTestDlg_0_Text "Title"\n';
+  const deStrContent = '#define DLGPROP_kTestDlg_0_Text "Ueberschrift"\n';
+  const jpStrContent = '#define DLGPROP_kTestDlg_0_Text "jp-word"\n';
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  ]);
+
+  makeDialogResourceSetFromFileListStubAsync(files)
+    .then(dlgResSet => {
+      const fileWriterMock = new testutil.FileWriterMock();
+      const textEncodeStub = jest.fn(text => text);
+      const writer = new cred.io.Writer(
+        dlgResSet,
+        (fileName, text) => fileWriterMock.writeFile(fileName, text),
+        textEncodeStub
+      );
+      writer.write();
+
+      expect(fileWriterMock.writtenFiles.size).toEqual(4);
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.English.str')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.German.str')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.Japan.str')).toBeTruthy();
+      done();
+    })
+    .catch(err => {
+      // Will fail.
+      expect(err).toBeUndefined();
+    });
+});
+
+test('Writer for dialog with linked and unlinked languages', done => {
+  const masterContent =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,10,20,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,20)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,10)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const enContent = '#include "kTestDlg.dlg"\n';
+  const deContent =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,30,40,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,40)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,30)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const jpContent = '#include "kTestDlg.dlg"\n';
+  const enStrContent = '#define DLGPROP_kTestDlg_0_Text "Title"\n';
+  const deStrContent = '#define DLGPROP_kTestDlg_0_Text "Ueberschrift"\n';
+  const jpStrContent = '#define DLGPROP_kTestDlg_0_Text "jp-word"\n';
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.dlg', enContent),
+    testutil.makeFileStub('kTestDlg.German.dlg', deContent),
+    testutil.makeFileStub('kTestDlg.Japane.dlg', jpContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  ]);
+
+  makeDialogResourceSetFromFileListStubAsync(files)
+    .then(dlgResSet => {
+      const fileWriterMock = new testutil.FileWriterMock();
+      const textEncodeStub = jest.fn(text => text);
+      const writer = new cred.io.Writer(
+        dlgResSet,
+        (fileName, text) => fileWriterMock.writeFile(fileName, text),
+        textEncodeStub
+      );
+      writer.write();
+
+      expect(fileWriterMock.writtenFiles.size).toEqual(7);
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.English.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.German.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.Japan.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.English.str')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.German.str')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.Japan.str')).toBeTruthy();
+      done();
+    })
+    .catch(err => {
+      // Will fail.
+      expect(err).toBeUndefined();
+    });
+});
+
+test('Writer for dialog with unlinked languages', done => {
+  const masterContent =
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.dlg"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.dlg"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.dlg"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n';
+  const enContent =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,10,20,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,20)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,10)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const deContent =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,30,40,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,40)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,30)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const jpContent =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,50,60,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,60)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,50)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const enStrContent = '#define DLGPROP_kTestDlg_0_Text "Title"\n';
+  const deStrContent = '#define DLGPROP_kTestDlg_0_Text "Ueberschrift"\n';
+  const jpStrContent = '#define DLGPROP_kTestDlg_0_Text "jp-word"\n';
+  const files = testutil.makeFileListStub([
+    testutil.makeFileStub('kTestDlg.dlg', masterContent),
+    testutil.makeFileStub('kTestDlg.English.dlg', enContent),
+    testutil.makeFileStub('kTestDlg.German.dlg', deContent),
+    testutil.makeFileStub('kTestDlg.Japan.dlg', jpContent),
+    testutil.makeFileStub('kTestDlg.English.str', enStrContent),
+    testutil.makeFileStub('kTestDlg.German.str', deStrContent),
+    testutil.makeFileStub('kTestDlg.Japan.str', jpStrContent)
+  ]);
+
+  makeDialogResourceSetFromFileListStubAsync(files)
+    .then(dlgResSet => {
+      const fileWriterMock = new testutil.FileWriterMock();
+      const textEncodeStub = jest.fn(text => text);
+      const writer = new cred.io.Writer(
+        dlgResSet,
+        (fileName, text) => fileWriterMock.writeFile(fileName, text),
+        textEncodeStub
+      );
+      writer.write();
+
+      expect(fileWriterMock.writtenFiles.size).toEqual(7);
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.English.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.German.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.Japan.dlg')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.English.str')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.German.str')).toBeTruthy();
+      expect(fileWriterMock.writtenFiles.has('kTestDlg.Japan.str')).toBeTruthy();
+      done();
+    })
+    .catch(err => {
+      // Will fail.
+      expect(err).toBeUndefined();
     });
 });

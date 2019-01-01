@@ -20,7 +20,9 @@ cred.lexer = tryRequire('./dlg_lexer') || cred.lexer || {};
 cred.parser = tryRequire('./dlg_parser') || cred.parser || {};
 cred.gen = tryRequire('./dlg_generator') || cred.gen || {};
 cred.resource = tryRequire('./dlg_resource') || cred.resource || {};
-var encoding = tryRequire('./encoding.min.js') || encoding || {};
+// Acquire Encoding library and make accessible as 'encoding' for naming consistency.
+var Encoding = tryRequire('./encoding.min.js') || Encoding || {};
+var encoding = Encoding;
 
 ///////////////////
 
@@ -149,7 +151,7 @@ cred.io = (function() {
       // cred.io.FileSet object holding the dialog files to read.
       dlgFileSet,
       // Allow to inject file reader object to read individual files.
-      fileReader = new FileReader(),
+      fileReader = undefined,
       // Allow to inject function to decode text, e.g. from Shift-JIS.
       decodeText = decodeFileContent,
       // Allow to inject crypto API.
@@ -172,7 +174,7 @@ cred.io = (function() {
             const resourceSet = self._buildDialogResourceSet(readResults);
             resolve(resourceSet);
           })
-          .catch(err => reject(err)); 
+          .catch(err => reject(err));
       });
     }
 
@@ -265,22 +267,27 @@ cred.io = (function() {
       let self = this;
       // Wrap FileReader in promise.
       return new Promise((resolve, reject) => {
+        // If available use supplied file reader, otherwise instantiate one.
+        let reader = self._fileReader;
+        if (typeof reader === 'undefined') {
+          reader = new FileReader();
+        }
         // Set up callbacks.
-        self._fileReader.onload = event => {
+        reader.onload = event => {
           let content = event.target.result;
           resolve(content);
         };
-        self._fileReader.onerror = () => {
+        reader.onerror = () => {
           reject('Error loading file.');
         };
-        self._fileReader.onabort = () => {
+        reader.onabort = () => {
           reject('File loading aborted.');
         };
         // Start reading.
         if (asText) {
-          self._fileReader.readAsText(file);
+          reader.readAsText(file);
         } else {
-          self._fileReader.readAsArrayBuffer(file);
+          reader.readAsArrayBuffer(file);
         }
       });
     }

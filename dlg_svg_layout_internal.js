@@ -16,6 +16,7 @@ function tryRequire(file) {
 }
 
 // Dependencies
+var $ = tryRequire('jquery') || $ || {};
 var cred = tryRequire('./cred_types') || cred || {};
 cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
 var geom = tryRequire('./geom') || geom || {};
@@ -42,8 +43,6 @@ cred.svglayout_internal = (function() {
 
       this._registerEvents();
     }
-
-    // --- External interface ---
 
     get htmlElement() {
       return this._htmlElem;
@@ -108,8 +107,6 @@ cred.svglayout_internal = (function() {
       });
     }
 
-    // --- Event handlers ---
-
     // Handles mouse down events in the display area.
     _onMouseDown(event) {
       event.preventDefault();
@@ -117,8 +114,6 @@ cred.svglayout_internal = (function() {
       // the selection.
       this.clearSelection();
     }
-
-    // --- Internal functions ---
 
     // Registers for events that the display processes.
     _registerEvents() {
@@ -145,8 +140,6 @@ cred.svglayout_internal = (function() {
       this._registerEvents();
     }
 
-    // --- External interface ---
-
     get svgDisplay() {
       return this._svgDisplay;
     }
@@ -169,15 +162,9 @@ cred.svglayout_internal = (function() {
 
     // Sets the left-top point of the HTML element for this item.
     setPosition(pos, withNotification) {
-      $(this._htmlElem).attr('x', pos.x);
-      $(this._htmlElem).attr('y', pos.y);
-
-      if (this._isSelected) {
-        this.svgDisplay.updateSelection();
-      }
-      if (withNotification) {
-        this.controller.notifyItemBoundsModified(this.bounds);
-      }
+      const w = util.toNumber($(this._htmlElem).attr('width'));
+      const h = util.toNumber($(this._htmlElem).attr('height'));
+      this.setBounds(new geom.Rect(pos.x, pos.y, w, h), withNotification);
     }
 
     // Returns the bounding rectangle of the HTML element for this item.
@@ -217,11 +204,12 @@ cred.svglayout_internal = (function() {
       );
     }
 
+    // Returns whether the item is resizable in a given direction.
     isResizable(direction) {
       return (this._editFlags & direction) === direction;
     }
 
-    // Polymorphic property of SVG items to handles mouse moves for the item.
+    // Polymorphic property of SVG items to handle mouse moves for the item.
     // Implemented to move the item to the position of the mouse (represented
     // by a mouse event). The second parameter is the offset of the original
     // mouse down event from the left-top corner of the item.
@@ -244,6 +232,10 @@ cred.svglayout_internal = (function() {
       return false;
     }
 
+    isSelected() {
+      return this.isSelectable && this._isSelected;
+    }
+
     // Polymorphic property of SVG items to select the item.
     select() {
       if (this.isSelectable) {
@@ -260,8 +252,6 @@ cred.svglayout_internal = (function() {
         this.svgDisplay.deselectItem(this);
       }
     }
-
-    // --- Event handlers ---
 
     // Handles mouse down events.
     _onMouseDown(event) {
@@ -301,8 +291,6 @@ cred.svglayout_internal = (function() {
       this._isDragged = false;
       this._stopMouseTracking();
     }
-
-    // --- Internal functions ---
 
     // Registers for events that the item processes.
     _registerEvents() {
@@ -593,7 +581,7 @@ cred.svglayout_internal = (function() {
       return this._selectedSvgItem;
     }
 
-    // Polymorphic property of SVG items to handles mouse moves for the item.
+    // Polymorphic property of SVG items to handle mouse moves for the item.
     // Implemented to edit the attached dialog item when the marker is moved.
     // Returns whether the item is dragged.
     drag(mouseEvent, mouseDownOffset) {
@@ -944,18 +932,25 @@ cred.svglayout_internal = (function() {
 
   ///////////////////
 
-  // Returns position of mouse relative to the top-left corner of the document.
+  // Returns the position of the mouse pointer as geom.Point given a mouse event.
   function mousePosition(mouseEvent) {
+    if (
+      typeof mouseEvent.clientX === 'undefined' ||
+      typeof mouseEvent.clientY === 'undefined'
+    ) {
+      throw new Error(
+        'Unsupported mouse event. "clientX" and "clientY" properties expected.'
+      );
+    }
     return new geom.Point(mouseEvent.clientX, mouseEvent.clientY);
   }
 
   // Checks whether a given current mouse position is far enough from a given
   // original mouse position to qualify as a drag operation.
-  function isDragMove(currentPos, originalPos) {
-    const minDragDelta = 3;
+  function isDragMove(currentPos, originalPos, dragTolerance = 3) {
     return (
-      Math.abs(currentPos.x - originalPos.x) >= minDragDelta ||
-      Math.abs(currentPos.y - originalPos.y) >= minDragDelta
+      Math.abs(currentPos.x - originalPos.x) >= dragTolerance ||
+      Math.abs(currentPos.y - originalPos.y) >= dragTolerance
     );
   }
 
@@ -973,14 +968,21 @@ cred.svglayout_internal = (function() {
     const type = typeof coord;
     switch (type) {
       case 'object': {
-        // Assume the object has a 'round' function, e.g. geom.Point.
-        return coord.round();
+        // Check if the object has a 'round' function, e.g. geom.Point.
+        if (typeof coord.round !== 'undefined') {
+          return coord.round();
+        }
+        return coord;
       }
       case 'number': {
         return Math.round(coord);
       }
       case 'string': {
-        return Math.round(geom.toNumber(coord));
+        const num = util.toNumber(coord);
+        if (isNaN(num)) {
+          throw new Error('Cannot convert non-number string to dialog coordinate.');
+        }
+        return Math.round(num);
       }
       default: {
         throw new Error('Unexpected type to convert to dialog coordinate.');

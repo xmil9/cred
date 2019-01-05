@@ -17,7 +17,7 @@ geom = (function() {
   // Represents a rectangle.
   // Rect instances are immutable.
   class Rect {
-    constructor(left, top, width, height) {
+    constructor(left = 0, top = 0, width = 0, height = 0) {
       if (width < 0 || height < 0) {
         throw new Error('Negative Rect dimensions are not valid.');
       }
@@ -105,7 +105,7 @@ geom = (function() {
   // Represents a point.
   // Point instances are immutable.
   class Point {
-    constructor(x, y) {
+    constructor(x = 0, y = 0) {
       this._x = x;
       this._y = y;
     }
@@ -149,7 +149,7 @@ geom = (function() {
   // Represents a size.
   // Size instances are immutable.
   class Size {
-    constructor(width, height) {
+    constructor(width = 0, height = 0) {
       this._w = width;
       this._h = height;
     }

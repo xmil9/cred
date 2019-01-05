@@ -31,6 +31,14 @@ test('geom.Rect left, top, width, height for empty rectangle', () => {
   expect(r.height).toEqual(0);
 });
 
+test('geom.Rect left, top, width, height for default values', () => {
+  const r = new geom.Rect();
+  expect(r.left).toEqual(0);
+  expect(r.top).toEqual(0);
+  expect(r.width).toEqual(0);
+  expect(r.height).toEqual(0);
+});
+
 test('geom.Rect negative width, height', () => {
   expect(() => new geom.Rect(1, 1, -1, 10)).toThrow();
   expect(() => new geom.Rect(1, 1, 10, -10)).toThrow();
@@ -224,6 +232,12 @@ test('geom.Point x, y for zero point', () => {
   expect(p.y).toEqual(0);
 });
 
+test('geom.Point x, y for default values', () => {
+  const p = new geom.Point();
+  expect(p.x).toEqual(0);
+  expect(p.y).toEqual(0);
+});
+
 test('geom.Point.equals with other point', () => {
   const p1 = new geom.Point(2.1, 10.5);
   const p2 = new geom.Point(2.1, 10.5);
@@ -381,8 +395,14 @@ test('geom.Size w, h for negative coordinates', () => {
   expect(s.h).toEqual(-2);
 });
 
-test('geom.Size w, h for zero point', () => {
+test('geom.Size w, h for zero dimensions', () => {
   const s = new geom.Size(0, 0);
+  expect(s.w).toEqual(0);
+  expect(s.h).toEqual(0);
+});
+
+test('geom.Size w, h for default dimensions', () => {
+  const s = new geom.Size();
   expect(s.w).toEqual(0);
   expect(s.h).toEqual(0);
 });

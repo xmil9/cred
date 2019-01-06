@@ -18,6 +18,9 @@ const svg = require('../svg');
 jest.mock('../svg', () => ({
   svgFromScreenPoint: function(pt) {
     return pt;
+  },
+  screenFromSvgPoint: function(pt) {
+    return pt;
   }
 }));
 
@@ -60,6 +63,35 @@ class SvgDisplayMock {
   deselectItem() {
     this.deselectItemCalled = true;
   }
+}
+
+// Creates a jQuery mouse event at a given client position.
+function makeMouseEvent(type, at) {
+  const event = new $.Event(type);
+  event.clientX = at.x;
+  event.clientY = at.y;
+  return event;
+}
+
+// Simulates a mouse drag by triggering mouse-down, -move, and -up events.
+function simulateMouseDrag($elem, from, distance) {
+  $elem.trigger(makeMouseEvent('mousedown', from));
+
+  for (let offset = 1; offset <= distance; ++offset) {
+    $elem.trigger(
+      makeMouseEvent('mousemove', {
+        x: from.x + offset,
+        y: from.y + offset
+      })
+    );
+  }
+
+  $elem.trigger(
+    makeMouseEvent('mouseup', {
+      x: from.x + distance,
+      y: from.y + distance
+    })
+  );
 }
 
 ///////////////////
@@ -269,13 +301,16 @@ test('toDialogCoord for other type', () => {
 
 ///////////////////
 
+// HTML body used for most test cases.
+const htmlBodyWithSvgItem =
+  'div' +
+  '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
+  '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
+  '  </svg>' +
+  '</div>';
+
 test('SvgItem.svgDisplay', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -283,24 +318,14 @@ test('SvgItem.svgDisplay', () => {
 });
 
 test('SvgItem.htmlElement', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem);
   expect(svgItem.htmlElement).toBe(svgElem);
 });
 
 test('SvgItem.controller', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -308,12 +333,7 @@ test('SvgItem.controller', () => {
 });
 
 test('SvgItem.position', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -321,12 +341,7 @@ test('SvgItem.position', () => {
 });
 
 test('SvgItem.setPosition without notification', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -336,12 +351,7 @@ test('SvgItem.setPosition without notification', () => {
 });
 
 test('SvgItem.setPosition with notification', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -351,12 +361,7 @@ test('SvgItem.setPosition with notification', () => {
 });
 
 test('SvgItem.bounds', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -364,12 +369,7 @@ test('SvgItem.bounds', () => {
 });
 
 test('SvgItem.setBounds without notification', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -379,12 +379,7 @@ test('SvgItem.setBounds without notification', () => {
 });
 
 test('SvgItem.setBounds with notification', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -394,12 +389,7 @@ test('SvgItem.setBounds with notification', () => {
 });
 
 test('SvgItem.isMoveable when moveable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -411,12 +401,7 @@ test('SvgItem.isMoveable when moveable', () => {
 });
 
 test('SvgItem.isMoveable when not moveable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -428,12 +413,7 @@ test('SvgItem.isMoveable when not moveable', () => {
 });
 
 test('SvgItem.isSelectable when selectable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -445,12 +425,7 @@ test('SvgItem.isSelectable when selectable', () => {
 });
 
 test('SvgItem.isSelectable when not selectable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -462,12 +437,7 @@ test('SvgItem.isSelectable when not selectable', () => {
 });
 
 test('SvgItem.isResizable when fully resizable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -482,12 +452,7 @@ test('SvgItem.isResizable when fully resizable', () => {
 });
 
 test('SvgItem.isSelectable when not resizable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -502,12 +467,7 @@ test('SvgItem.isSelectable when not resizable', () => {
 });
 
 test('SvgItem.isSelectable when partially resizable', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(
@@ -522,12 +482,7 @@ test('SvgItem.isSelectable when partially resizable', () => {
 });
 
 test('SvgItem.drag for not moveable item', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -541,12 +496,7 @@ test('SvgItem.drag for not moveable item', () => {
 });
 
 test('SvgItem.drag for moveable item without mouse-down offset', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -561,12 +511,7 @@ test('SvgItem.drag for moveable item without mouse-down offset', () => {
 });
 
 test('SvgItem.drag for moveable item with mouse-down offset', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -581,12 +526,7 @@ test('SvgItem.drag for moveable item with mouse-down offset', () => {
 });
 
 test('SvgItem.isSelected for selectable item', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -601,12 +541,7 @@ test('SvgItem.isSelected for selectable item', () => {
 });
 
 test('SvgItem.isSelected for not selectable item', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -621,12 +556,7 @@ test('SvgItem.isSelected for not selectable item', () => {
 });
 
 test('SvgItem.select for selectable item', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -640,12 +570,7 @@ test('SvgItem.select for selectable item', () => {
 });
 
 test('SvgItem.select for not selectable item', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -659,12 +584,7 @@ test('SvgItem.select for not selectable item', () => {
 });
 
 test('SvgItem.deselect', () => {
-  document.body.innerHTML =
-    'div' +
-    '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-    '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-    '  </svg>' +
-    '</div>';
+  document.body.innerHTML = htmlBodyWithSvgItem;
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -676,4 +596,104 @@ test('SvgItem.deselect', () => {
   svgItem.select();
   svgItem.deselect();
   expect(svgItem.isSelected()).toBeFalsy();
+});
+
+test('SvgItem react to mouse-down event', () => {
+  document.body.innerHTML = htmlBodyWithSvgItem;
+  const svgElem = document.getElementById('svgElem');
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.selectable
+  );
+
+  const initialMousePos = { x: 3, y: 4 };
+  // Zero distance means click.
+  const dragDist = 0;
+  simulateMouseDrag($('#svgElem'), initialMousePos, dragDist);
+
+  expect(svgItem.isSelected()).toBeTruthy();
+});
+
+test('SvgItem react to mouse-down event for not selectable item', () => {
+  document.body.innerHTML = htmlBodyWithSvgItem;
+  const svgElem = document.getElementById('svgElem');
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.none
+  );
+
+  const initialMousePos = { x: 3, y: 4 };
+  // Zero distance means click.
+  const dragDist = 0;
+  simulateMouseDrag($('#svgElem'), initialMousePos, dragDist);
+
+  expect(svgItem.isSelected()).toBeFalsy();
+});
+
+test('SvgItem react to mouse-move large enough to trigger dragging', () => {
+  document.body.innerHTML = htmlBodyWithSvgItem;
+  const svgElem = document.getElementById('svgElem');
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.selectable | cred.editBehavior.moveable
+  );
+
+  const initialItemPos = svgItem.position;
+  const initialMousePos = { x: 3, y: 4 };
+  const dragDist = 10;
+  simulateMouseDrag($('#svgElem'), initialMousePos, dragDist);
+
+  expect(svgItem.isSelected()).toBeTruthy();
+  expect(svgItem.position).toEqual(
+    new geom.Point(initialItemPos.x + dragDist, initialItemPos.y + dragDist)
+  );
+});
+
+test('SvgItem react to mouse-move too small to trigger dragging', () => {
+  document.body.innerHTML = htmlBodyWithSvgItem;
+  const svgElem = document.getElementById('svgElem');
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.selectable | cred.editBehavior.moveable
+  );
+
+  const initialItemPos = svgItem.position;
+  const initialMousePos = { x: 3, y: 4 };
+  const dragDist = 2;
+  simulateMouseDrag($('#svgElem'), initialMousePos, dragDist);
+
+  expect(svgItem.isSelected()).toBeTruthy();
+  expect(svgItem.position).toEqual(initialItemPos);
+});
+
+test('SvgItem react to mouse-move when item is not movable', () => {
+  document.body.innerHTML = htmlBodyWithSvgItem;
+  const svgElem = document.getElementById('svgElem');
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.selectable
+  );
+
+  const initialItemPos = svgItem.position;
+  const initialMousePos = { x: 3, y: 4 };
+  const dragDist = 10;
+  simulateMouseDrag($('#svgElem'), initialMousePos, dragDist);
+
+  expect(svgItem.isSelected()).toBeTruthy();
+  expect(svgItem.position).toEqual(initialItemPos);
 });

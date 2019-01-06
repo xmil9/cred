@@ -5,13 +5,8 @@
 
 ///////////////////
 
-// Namespaces
-var geom = geom || {};
-
-///////////////////
-
 // Geometry module.
-geom = (function() {
+var geom = (function() {
   ///////////////////
 
   // Represents a rectangle.

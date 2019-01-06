@@ -5,208 +5,227 @@
 
 ///////////////////
 
-// Namespace
-var cred = cred || {};
+// Cred module.
+var cred = (function() {
+  ///////////////////
+  // Language and locales.
 
-///////////////////
-// Language and locales.
+  // Enum of supported languages.
+  const language = {
+    english: 'en',
+    japanese: 'jp',
+    german: 'de',
 
-// Enum of supported languages.
-cred.language = {
-  english: 'en',
-  japanese: 'jp',
-  german: 'de',
+    // Makes the languages iterable.
+    *[Symbol.iterator]() {
+      yield this.english;
+      yield this.japanese;
+      yield this.german;
+    }
+  };
+  Object.freeze(language);
 
-  // Makes the languages iterable.
-  *[Symbol.iterator]() {
-    yield this.english;
-    yield this.japanese;
-    yield this.german;
-  }
-};
-Object.freeze(cred.language);
+  // Enum for the locale that a resource applies to.
+  const locale = {
+    any: 'any',
+    english: language.english,
+    japanese: language.japanese,
+    german: language.german,
 
-// Enum for the locale that a resource applies to.
-cred.locale = {
-  any: 'any',
-  english: cred.language.english,
-  japanese: cred.language.japanese,
-  german: cred.language.german,
+    // Makes the locales iterable.
+    *[Symbol.iterator]() {
+      yield this.any;
+      yield this.english;
+      yield this.japanese;
+      yield this.german;
+    }
+  };
+  Object.freeze(locale);
 
-  // Makes the locales iterable.
-  *[Symbol.iterator]() {
-    yield this.any;
-    yield this.english;
-    yield this.japanese;
-    yield this.german;
-  }
-};
-Object.freeze(cred.locale);
-
-// Returns the locale corresponding to a given language.
-cred.localeFromLanguage = function(language) {
-  switch (language) {
-    case cred.language.english: {
-      return cred.locale.english;
-    }
-    case cred.language.japanese: {
-      return cred.locale.japanese;
-    }
-    case cred.language.german: {
-      return cred.locale.german;
-    }
-    default: {
-      throw new Error('Unexpected language value.');
-    }
-  }
-};
-
-// Returns the language corresponding to a given locale.
-// Returns a given replacement for the 'any' locale.
-cred.languageFromLocale = function(locale, replaceAnyWith = undefined) {
-  switch (locale) {
-    case cred.locale.english: {
-      return cred.language.english;
-    }
-    case cred.locale.japanese: {
-      return cred.language.japanese;
-    }
-    case cred.locale.german: {
-      return cred.language.german;
-    }
-    case cred.locale.any: {
-      return replaceAnyWith;
-    }
-    default: {
-      throw new Error('Unexpected locale value.');
+  // Returns the locale corresponding to a given language.
+  function localeFromLanguage(fromLanguage) {
+    switch (fromLanguage) {
+      case language.english: {
+        return locale.english;
+      }
+      case language.japanese: {
+        return locale.japanese;
+      }
+      case language.german: {
+        return locale.german;
+      }
+      default: {
+        throw new Error('Unexpected language value.');
+      }
     }
   }
-};
 
-///////////////////
-// Tokens
-
-// Enum of supported token kinds.
-cred.tokenKind = {
-  comma: 'comma',
-  binaryOr: 'or',
-  openParenthesis: 'open(',
-  closeParenthesis: 'close)',
-  number: 'num',
-  directive: 'directive',
-  comment: 'comment',
-  string: 'str',
-  identifier: 'id',
-  keyword: 'key'
-};
-Object.freeze(cred.tokenKind);
-
-// Returns the humanly readable name for a given kind of token.
-cred.tokenKindName = function(kind) {
-  switch (kind) {
-    case cred.tokenKind.comma: {
-      return 'comma';
-    }
-    case cred.tokenKind.binaryOr: {
-      return 'binary-or';
-    }
-    case cred.tokenKind.openParenthesis: {
-      return 'opening parenthesis';
-    }
-    case cred.tokenKind.closeParenthesis: {
-      return 'closing parenthesis';
-    }
-    case cred.tokenKind.number: {
-      return 'number';
-    }
-    case cred.tokenKind.directive: {
-      return 'directive';
-    }
-    case cred.tokenKind.comment: {
-      return 'comment';
-    }
-    case cred.tokenKind.string: {
-      return 'string';
-    }
-    case cred.tokenKind.identifier: {
-      return 'identifier';
-    }
-    case cred.tokenKind.keyword: {
-      return 'keyword';
-    }
-    default: {
-      return '';
+  // Returns the language corresponding to a given locale.
+  // Returns a given replacement for the 'any' locale.
+  function languageFromLocale(fromLocale, replaceAnyWith = undefined) {
+    switch (fromLocale) {
+      case locale.english: {
+        return language.english;
+      }
+      case locale.japanese: {
+        return language.japanese;
+      }
+      case locale.german: {
+        return language.german;
+      }
+      case locale.any: {
+        return replaceAnyWith;
+      }
+      default: {
+        throw new Error('Unexpected locale value.');
+      }
     }
   }
-};
 
-///////////////////
-// I/O
+  ///////////////////
+  // Tokens
 
-cred.resourceVersion = '1.1';
+  // Enum of supported token kinds.
+  const tokenKind = {
+    comma: 'comma',
+    binaryOr: 'or',
+    openParenthesis: 'open(',
+    closeParenthesis: 'close)',
+    number: 'num',
+    directive: 'directive',
+    comment: 'comment',
+    string: 'str',
+    identifier: 'id',
+    keyword: 'key'
+  };
+  Object.freeze(tokenKind);
 
-// Map that associates languages with the labels that identify
-// their files.
-cred.languageFileLabels = new Map([
-  [cred.language.english, 'English'],
-  [cred.language.japanese, 'Japan'],
-  [cred.language.german, 'German']
-]);
-Object.freeze(cred.languageFileLabels);
-
-// Extensions for dialog files.
-cred.fileExtension = {
-  dialogFile: '.dlg',
-  stringFile: '.str'
-};
-Object.freeze(cred.fileExtension);
-
-// Returns the file name of a dialog resource file for a given dialog name and a given
-// locale.
-cred.dialogFileName = function(dialogId, locale) {
-  let langLabel = '';
-  const lang = cred.languageFromLocale(locale);
-  if (lang) {
-    langLabel = '.' + cred.languageFileLabels.get(lang);
+  // Returns the humanly readable name for a given kind of token.
+  function tokenKindName(kind) {
+    switch (kind) {
+      case tokenKind.comma: {
+        return 'comma';
+      }
+      case tokenKind.binaryOr: {
+        return 'binary-or';
+      }
+      case tokenKind.openParenthesis: {
+        return 'opening parenthesis';
+      }
+      case tokenKind.closeParenthesis: {
+        return 'closing parenthesis';
+      }
+      case tokenKind.number: {
+        return 'number';
+      }
+      case tokenKind.directive: {
+        return 'directive';
+      }
+      case tokenKind.comment: {
+        return 'comment';
+      }
+      case tokenKind.string: {
+        return 'string';
+      }
+      case tokenKind.identifier: {
+        return 'identifier';
+      }
+      case tokenKind.keyword: {
+        return 'keyword';
+      }
+      default: {
+        return '';
+      }
+    }
   }
-  return dialogId + langLabel + cred.fileExtension.dialogFile;
-};
 
-// Returns the file name of a dialog string file for a given dialog name and a given
-// locale.
-cred.stringFileName = function(dialogId, language) {
-  const langLabel = '.' + cred.languageFileLabels.get(language);
-  return dialogId + langLabel + cred.fileExtension.stringFile;
-};
+  ///////////////////
+  // I/O
 
-///////////////////
-// Editing
+  const resourceVersion = '1.1';
 
-// Bit flags for supported editing behavior.
-cred.editBehavior = {
-  // Basic flags.
-  none: 0,
-  moveable: 1,
-  resizableUp: 2,
-  resizableLeft: 4,
-  resizableDown: 8,
-  resizableRight: 16,
-  selectable: 32,
-  // Combinations of basic flags.
-  resizableFully: 30,
-  all: 63
-};
-Object.freeze(cred.editBehavior);
+  // Map that associates languages with the labels that identify
+  // their files.
+  const languageFileLabels = new Map([
+    [language.english, 'English'],
+    [language.japanese, 'Japan'],
+    [language.german, 'German']
+  ]);
+  Object.freeze(languageFileLabels);
 
-// Indicates the context that a modification applies to. Global context will affect all
-// locales, local context only the current locale.
-cred.editContext = {
-  globalDefault: 'global',
-  globalOnly: 'global_only',
-  localDefault: 'local',
-  localOnly: 'local_only'
-};
-Object.freeze(cred.editContext);
+  // Extensions for dialog files.
+  const fileExtension = {
+    dialogFile: '.dlg',
+    stringFile: '.str'
+  };
+  Object.freeze(fileExtension);
+
+  // Returns the file name of a dialog resource file for a given dialog name and a given
+  // locale.
+  function dialogFileName(dialogId, locale) {
+    let langLabel = '';
+    const lang = languageFromLocale(locale);
+    if (lang) {
+      langLabel = '.' + languageFileLabels.get(lang);
+    }
+    return dialogId + langLabel + fileExtension.dialogFile;
+  }
+
+  // Returns the file name of a dialog string file for a given dialog name and a given
+  // locale.
+  function stringFileName(dialogId, language) {
+    const langLabel = '.' + languageFileLabels.get(language);
+    return dialogId + langLabel + fileExtension.stringFile;
+  }
+
+  ///////////////////
+  // Editing
+
+  // Bit flags for supported editing behavior.
+  const editBehavior = {
+    // Basic flags.
+    none: 0,
+    moveable: 1,
+    resizableUp: 2,
+    resizableLeft: 4,
+    resizableDown: 8,
+    resizableRight: 16,
+    selectable: 32,
+    // Combinations of basic flags.
+    resizableFully: 30,
+    all: 63
+  };
+  Object.freeze(editBehavior);
+
+  // Indicates the context that a modification applies to. Global context will affect all
+  // locales, local context only the current locale.
+  const editContext = {
+    globalDefault: 'global',
+    globalOnly: 'global_only',
+    localDefault: 'local',
+    localOnly: 'local_only'
+  };
+  Object.freeze(editContext);
+
+  ///////////////////
+
+  // Exports
+  return {
+    dialogFileName: dialogFileName,
+    editBehavior: editBehavior,
+    editContext: editContext,
+    fileExtension: fileExtension,
+    language: language,
+    languageFileLabels: languageFileLabels,
+    languageFromLocale: languageFromLocale,
+    locale: locale,
+    localeFromLanguage: localeFromLanguage,
+    resourceVersion: resourceVersion,
+    stringFileName: stringFileName,
+    tokenKind: tokenKind,
+    tokenKindName: tokenKindName
+  };
+})();
 
 // Exports for CommonJS environments.
 var module = module || {};

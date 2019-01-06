@@ -5,13 +5,8 @@
 
 ///////////////////
 
-// Namespaces
-var web = web || {};
-
-///////////////////
-
 // Web module.
-web = (function() {
+var web = (function() {
   ///////////////////
 
   // Saves a given text under a given filename to the 'downloads' folder.

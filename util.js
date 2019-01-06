@@ -5,13 +5,8 @@
 
 ///////////////////
 
-// Namespaces
-var util = util || {};
-
-///////////////////
-
 // Utilities module.
-util = (function() {
+var util = (function() {
   ///////////////////
 
   // Converts a given string to a number.

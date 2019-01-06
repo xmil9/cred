@@ -5,13 +5,8 @@
 
 ///////////////////
 
-// Namespaces
-var filesys = filesys || {};
-
-///////////////////
-
 // File system module.
-filesys = (function() {
+var filesys = (function() {
   ///////////////////
 
   // Returns the file extension of a given path.

@@ -5,13 +5,8 @@
 
 ///////////////////
 
-// Namespaces
-var html = html || {};
-
-///////////////////
-
 // HTML module.
-html = (function() {
+var html = (function() {
   ///////////////////
 
   // Creates a div element.

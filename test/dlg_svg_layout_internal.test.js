@@ -4,12 +4,17 @@
 'use strict';
 
 const $ = require('jquery');
-var svg = require('../svg');
 var cred = require('../cred_types');
 cred.svglayout_internal = require('../dlg_svg_layout_internal');
 const geom = require('../geom');
+// Need to import SVG module to be able to globally mock it. However, the module is
+// not directly used in this file, so ESLint flags it as unused var. The following
+// line turns this warning off.
+// eslint-disable-next-line no-unused-vars
+const svg = require('../svg');
 
-// Mock impl for the svg module.
+// Mock impl for the SVG module.
+// This will replace the SVG module globally in all loaded modules of this file!
 jest.mock('../svg', () => ({
   svgFromScreenPoint: function(pt) {
     return pt;

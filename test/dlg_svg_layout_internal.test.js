@@ -5,6 +5,7 @@
 
 const $ = require('jquery');
 var cred = require('../cred_types');
+cred.spec = require('../dlg_spec');
 cred.svglayout_internal = require('../dlg_svg_layout_internal');
 const geom = require('../geom');
 // Need to import SVG module to be able to globally mock it. However, the module is
@@ -16,9 +17,31 @@ const svg = require('../svg');
 // Mock impl for the SVG module.
 // This will replace the SVG module globally in all loaded modules of this file!
 jest.mock('../svg', () => ({
+  // Jest mock module are not allowed to have dependencies on any code outside
+  // themselves. Therefore, we have to inject the dependencies explicitly.
+  injectDocument(document) {
+    this.document = document;
+  },
+
+  // Reimplementation of svg.create() because the original cannot be called.
+  // Not ideal!
+  create: function(tag, parent, attribs) {
+    if (!this.document) {
+      throw new Error('Document not injected.');
+    }
+    const svgNamespace = 'http://www.w3.org/2000/svg';
+    const elem = this.document.createElementNS(svgNamespace, tag);
+    for (const key in attribs) {
+      elem.setAttributeNS(null, key, attribs[key]);
+    }
+    parent.appendChild(elem);
+    return elem;
+  },
+
   svgFromScreenPoint: function(pt) {
     return pt;
   },
+
   screenFromSvgPoint: function(pt) {
     return pt;
   }
@@ -62,6 +85,59 @@ class SvgDisplayMock {
 
   deselectItem() {
     this.deselectItemCalled = true;
+  }
+}
+
+// Helper class to mock DialogResource objects.
+class DialogResourceMock {
+  constructor(dlg, ctrls) {
+    this._dlg = dlg;
+    this._ctrls = ctrls;
+  }
+
+  get dialog() {
+    return this._dlg;
+  }
+
+  dialogPropertyValue(key) {
+    return this._dlg.property(key);
+  }
+
+  *controls() {
+    yield* this._ctrls;
+  }
+}
+
+// Helper class to mock Dialog objects.
+class DialogMock {
+  constructor(id, props) {
+    this.id = id;
+    this._props = props;
+  }
+
+  isDialog() {
+    return true;
+  }
+
+  property(key) {
+    return this._props.get(key);
+  }
+}
+
+// Helper class to mock Control objects.
+class ControlMock {
+  constructor(id, type, props) {
+    this.id = id;
+    this.type = type;
+    this._props = props;
+  }
+
+  isDialog() {
+    return false;
+  }
+
+  property(key) {
+    return this._props.get(key);
   }
 }
 
@@ -301,13 +377,23 @@ test('toDialogCoord for other type', () => {
 
 ///////////////////
 
-// HTML body used for most test cases.
+// HTML body used for most SVGItem test cases.
 const htmlBodyWithSvgItem =
   'div' +
   '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
   '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
   '  </svg>' +
   '</div>';
+
+// Sets up a default test environment for SvgItem tests.
+// Returns a SvgItem object created in that environment.
+function setupSvgItemTestDefaults(behaviorFlags = cred.editBehavior.none) {
+  document.body.innerHTML = htmlBodyWithSvgItem;
+  const svgElem = document.getElementById('svgElem');
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  return new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock, behaviorFlags);
+}
 
 test('SvgItem.svgDisplay', () => {
   document.body.innerHTML = htmlBodyWithSvgItem;
@@ -333,10 +419,7 @@ test('SvgItem.controller', () => {
 });
 
 test('SvgItem.position', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const svgItem = setupSvgItemTestDefaults();
   expect(svgItem.position).toEqual(new geom.Point(1, 2));
 });
 
@@ -361,10 +444,7 @@ test('SvgItem.setPosition with notification', () => {
 });
 
 test('SvgItem.bounds', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const svgItem = setupSvgItemTestDefaults();
   expect(svgItem.bounds).toEqual(new geom.Rect(1, 2, 10, 20));
 });
 
@@ -389,62 +469,27 @@ test('SvgItem.setBounds with notification', () => {
 });
 
 test('SvgItem.isMoveable when moveable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.moveable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.moveable);
   expect(svgItem.isMoveable).toBeTruthy();
 });
 
 test('SvgItem.isMoveable when not moveable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
   expect(svgItem.isMoveable).toBeFalsy();
 });
 
 test('SvgItem.isSelectable when selectable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.selectable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
   expect(svgItem.isSelectable).toBeTruthy();
 });
 
 test('SvgItem.isSelectable when not selectable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
   expect(svgItem.isSelectable).toBeFalsy();
 });
 
 test('SvgItem.isResizable when fully resizable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.resizableFully
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.resizableFully);
   expect(svgItem.isResizable(cred.editBehavior.resizableDown)).toBeTruthy();
   expect(svgItem.isResizable(cred.editBehavior.resizableUp)).toBeTruthy();
   expect(svgItem.isResizable(cred.editBehavior.resizableLeft)).toBeTruthy();
@@ -452,14 +497,7 @@ test('SvgItem.isResizable when fully resizable', () => {
 });
 
 test('SvgItem.isSelectable when not resizable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
   expect(svgItem.isResizable(cred.editBehavior.resizableDown)).toBeFalsy();
   expect(svgItem.isResizable(cred.editBehavior.resizableUp)).toBeFalsy();
   expect(svgItem.isResizable(cred.editBehavior.resizableLeft)).toBeFalsy();
@@ -467,12 +505,7 @@ test('SvgItem.isSelectable when not resizable', () => {
 });
 
 test('SvgItem.isSelectable when partially resizable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
+  const svgItem = setupSvgItemTestDefaults(
     cred.editBehavior.resizableLeft | cred.editBehavior.resizableRight
   );
   expect(svgItem.isResizable(cred.editBehavior.resizableDown)).toBeFalsy();
@@ -482,132 +515,60 @@ test('SvgItem.isSelectable when partially resizable', () => {
 });
 
 test('SvgItem.drag for not moveable item', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
   const result = svgItem.drag({ clientX: 10, clientY: 20 }, { x: 0, y: 0 });
   expect(result).toBeFalsy();
 });
 
 test('SvgItem.drag for moveable item without mouse-down offset', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.moveable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.moveable);
   const result = svgItem.drag({ clientX: 10, clientY: 20 }, { x: 0, y: 0 });
   expect(result).toBeTruthy();
   expect(svgItem.position).toEqual(new geom.Point(10, 20));
 });
 
 test('SvgItem.drag for moveable item with mouse-down offset', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.moveable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.moveable);
   const result = svgItem.drag({ clientX: 10, clientY: 20 }, { x: 2, y: 3 });
   expect(result).toBeTruthy();
   expect(svgItem.position).toEqual(new geom.Point(8, 17));
 });
 
 test('SvgItem.isSelected for selectable item', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.selectable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
   expect(svgItem.isSelected()).toBeFalsy();
   svgItem.select();
   expect(svgItem.isSelected()).toBeTruthy();
 });
 
 test('SvgItem.isSelected for not selectable item', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
   expect(svgItem.isSelected()).toBeFalsy();
   svgItem.select();
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
 test('SvgItem.select for selectable item', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.selectable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
   svgItem.select();
   expect(svgItem.isSelected()).toBeTruthy();
 });
 
 test('SvgItem.select for not selectable item', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
   svgItem.select();
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
 test('SvgItem.deselect', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.selectable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
   svgItem.select();
   svgItem.deselect();
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
 test('SvgItem react to mouse-down event', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.selectable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
 
   const initialMousePos = { x: 3, y: 4 };
   // Zero distance means click.
@@ -618,15 +579,7 @@ test('SvgItem react to mouse-down event', () => {
 });
 
 test('SvgItem react to mouse-down event for not selectable item', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.none
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
 
   const initialMousePos = { x: 3, y: 4 };
   // Zero distance means click.
@@ -637,13 +590,7 @@ test('SvgItem react to mouse-down event for not selectable item', () => {
 });
 
 test('SvgItem react to mouse-move large enough to trigger dragging', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
+  const svgItem = setupSvgItemTestDefaults(
     cred.editBehavior.selectable | cred.editBehavior.moveable
   );
 
@@ -659,13 +606,7 @@ test('SvgItem react to mouse-move large enough to trigger dragging', () => {
 });
 
 test('SvgItem react to mouse-move too small to trigger dragging', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
+  const svgItem = setupSvgItemTestDefaults(
     cred.editBehavior.selectable | cred.editBehavior.moveable
   );
 
@@ -679,15 +620,7 @@ test('SvgItem react to mouse-move too small to trigger dragging', () => {
 });
 
 test('SvgItem react to mouse-move when item is not movable', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
-  const svgElem = document.getElementById('svgElem');
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.selectable
-  );
+  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
 
   const initialItemPos = svgItem.position;
   const initialMousePos = { x: 3, y: 4 };
@@ -696,4 +629,156 @@ test('SvgItem react to mouse-move when item is not movable', () => {
 
   expect(svgItem.isSelected()).toBeTruthy();
   expect(svgItem.position).toEqual(initialItemPos);
+});
+
+///////////////////
+
+// HTML body used for most SVGDialog test cases.
+const htmlBodyWithSvgRoot =
+  'div' +
+  '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
+  '  </svg>' +
+  '</div>';
+
+// Sets up a default test environment for SvgDialog tests.
+// Returns a SvgDialog object created in that environment.
+function setupSvgDialogTestDefaults(ctrls) {
+  document.body.innerHTML = htmlBodyWithSvgRoot;
+  svg.injectDocument(document);
+
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const dlgResMock = new DialogResourceMock(
+    new DialogMock(
+      'mydlg',
+      new Map([[cred.spec.propertyLabel.width, 20], [cred.spec.propertyLabel.height, 10]])
+    ),
+    ctrls
+  );
+
+  return new cred.svglayout_internal.SvgDialog(dlgResMock, svgDisplayMock);
+}
+
+test('SvgDialog - creation of SVG element for dialog', () => {
+  const svgDlg = setupSvgDialogTestDefaults();
+  expect(svgDlg.htmlElement).toBeDefined();
+});
+
+test('SvgDialog.resource', () => {
+  document.body.innerHTML = htmlBodyWithSvgRoot;
+  svg.injectDocument(document);
+
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const dlgMock = new DialogMock(
+    'mydlg',
+    new Map([[cred.spec.propertyLabel.width, 20], [cred.spec.propertyLabel.height, 10]])
+  );
+  const dlgResMock = new DialogResourceMock(dlgMock);
+
+  const svgDlg = new cred.svglayout_internal.SvgDialog(dlgResMock, svgDisplayMock);
+  expect(svgDlg.resource()).toBe(dlgMock);
+});
+
+test('SvgDialog.itemSpec', () => {
+  const svgDlg = setupSvgDialogTestDefaults();
+  expect(svgDlg.itemSpec()).toBeDefined();
+});
+
+test('SvgDialog.id', () => {
+  const svgDlg = setupSvgDialogTestDefaults();
+  expect(svgDlg.id).toEqual('mydlg');
+});
+
+test('SvgDialog.isDialog', () => {
+  const svgDlg = setupSvgDialogTestDefaults();
+  expect(svgDlg.isDialog()).toBeTruthy();
+});
+
+test('SvgDialog.buildControls', () => {
+  const ctrls = [
+    new ControlMock(
+      'ctrl1',
+      cred.spec.controlType.label,
+      new Map([
+        [cred.spec.propertyLabel.left, 3],
+        [cred.spec.propertyLabel.top, 5],
+        [cred.spec.propertyLabel.width, 3],
+        [cred.spec.propertyLabel.height, 4]
+      ])
+    ),
+    new ControlMock(
+      'ctrl2',
+      cred.spec.controlType.pushButton,
+      new Map([
+        [cred.spec.propertyLabel.left, 13],
+        [cred.spec.propertyLabel.top, 15],
+        [cred.spec.propertyLabel.width, 5],
+        [cred.spec.propertyLabel.height, 6]
+      ])
+    )
+  ];
+  const svgDlg = setupSvgDialogTestDefaults(ctrls);
+  svgDlg.buildControls();
+  expect(svgDlg.findControlItemWithId('ctrl1')).toBeDefined();
+  expect(svgDlg.findControlItemWithId('ctrl2')).toBeDefined();
+});
+
+test('SvgDialog.resourceBounds', () => {
+  const dlgResMock = new DialogResourceMock(
+    new DialogMock(
+      'mydlg',
+      new Map([
+        [cred.spec.propertyLabel.width, 200],
+        [cred.spec.propertyLabel.height, 300]
+      ])
+    )
+  );
+
+  expect(cred.svglayout_internal.SvgDialog.resourceBounds(dlgResMock)).toEqual(
+    new geom.Rect(0, 0, 200, 300)
+  );
+});
+
+test('SvgDialog.resourceBounds for dialog resource without width and height properties', () => {
+  const dlgResMock = new DialogResourceMock(new DialogMock('mydlg', new Map()));
+  expect(cred.svglayout_internal.SvgDialog.resourceBounds(dlgResMock)).toEqual(
+    new geom.Rect(0, 0, 0, 0)
+  );
+});
+
+test('SvgDialog.findControlItemWithId for existing control', () => {
+  const ctrl = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 3],
+      [cred.spec.propertyLabel.height, 4]
+    ])
+  );
+  const svgDlg = setupSvgDialogTestDefaults([ctrl]);
+  svgDlg.buildControls();
+
+  const svgCtrl = svgDlg.findControlItemWithId('myctrl');
+  expect(svgCtrl).toBeDefined();
+  expect(svgCtrl.resource()).toBe(ctrl);
+});
+
+test('SvgDialog.findControlItemWithId for not existing control', () => {
+  const ctrl = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 3],
+      [cred.spec.propertyLabel.height, 4]
+    ])
+  );
+  const svgDlg = setupSvgDialogTestDefaults([ctrl]);
+  svgDlg.buildControls();
+
+  expect(svgDlg.findControlItemWithId('other')).toBeUndefined();
 });

@@ -345,7 +345,7 @@ cred.svglayout_internal = (function() {
           cred.editBehavior.resizableDown |
           cred.editBehavior.selectable
       );
-      // Resource information for the file that contains the dialog's definition.
+      // Information about the dialog's resource.
       this._dlgResource = dlgResource;
       // Specification for the dialog.
       this._dlgSpec = cred.spec.makeDialogSpec();
@@ -385,8 +385,8 @@ cred.svglayout_internal = (function() {
       return new geom.Rect(
         0,
         0,
-        dlgResource.dialogPropertyValue('Width'),
-        dlgResource.dialogPropertyValue('Height')
+        dlgResource.dialogPropertyValue(cred.spec.propertyLabel.width),
+        dlgResource.dialogPropertyValue(cred.spec.propertyLabel.height)
       );
     }
 

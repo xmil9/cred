@@ -28,8 +28,8 @@ var svg = (function() {
 
   // Creates a SVG DOM element with a given element tag, parent element, and attributes.
   function create(tag, parent, attribs) {
-    let elem = document.createElementNS(NS, tag);
-    for (let key in attribs) {
+    const elem = document.createElementNS(NS, tag);
+    for (const key in attribs) {
       elem.setAttributeNS(null, key, attribs[key]);
     }
     parent.appendChild(elem);

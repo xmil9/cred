@@ -49,6 +49,21 @@ jest.mock('../svg', () => ({
 
 ///////////////////
 
+// HTML body with a SVG root element.
+const htmlBodyWithSvgRoot =
+  'div' +
+  '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
+  '  </svg>' +
+  '</div>';
+
+// HTML body with a SVG root and a sub element.
+const htmlBodyWithSvgItem =
+  'div' +
+  '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
+  '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
+  '  </svg>' +
+  '</div>';
+
 // Helper class to mock the controller.
 class ControllerMock {
   constructor() {
@@ -137,7 +152,8 @@ class ControlMock {
   }
 
   property(key) {
-    return this._props.get(key);
+    // Return a Property object stub.
+    return { value: this._props.get(key) };
   }
 }
 
@@ -376,14 +392,6 @@ test('toDialogCoord for other type', () => {
 });
 
 ///////////////////
-
-// HTML body used for most SVGItem test cases.
-const htmlBodyWithSvgItem =
-  'div' +
-  '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-  '    <rect id="svgElem" x="1" y="2" width="10" height="20"></rect>' +
-  '  </svg>' +
-  '</div>';
 
 // Sets up a default test environment for SvgItem tests.
 // Returns a SvgItem object created in that environment.
@@ -633,13 +641,6 @@ test('SvgItem react to mouse-move when item is not movable', () => {
 
 ///////////////////
 
-// HTML body used for most SVGDialog test cases.
-const htmlBodyWithSvgRoot =
-  'div' +
-  '  <svg id="svgRoot" width="100" height="100" viewBox="0 0 100 100">' +
-  '  </svg>' +
-  '</div>';
-
 // Sets up a default test environment for SvgDialog tests.
 // Returns a SvgDialog object created in that environment.
 function setupSvgDialogTestDefaults(ctrls) {
@@ -781,4 +782,93 @@ test('SvgDialog.findControlItemWithId for not existing control', () => {
   svgDlg.buildControls();
 
   expect(svgDlg.findControlItemWithId('other')).toBeUndefined();
+});
+
+///////////////////
+
+// Sets up a default test environment for SvgDialog tests.
+// Returns a SvgDialog object created in that environment.
+function setupSvgControlTestDefaults() {
+  document.body.innerHTML = htmlBodyWithSvgRoot;
+  svg.injectDocument(document);
+
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const ctrlMock = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 40],
+      [cred.spec.propertyLabel.height, 22]
+    ])
+  );
+
+  return new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplayMock);
+}
+
+test('SvgControl - creation of SVG element for control', () => {
+  const svgCtrl = setupSvgControlTestDefaults();
+  expect(svgCtrl.htmlElement).toBeDefined();
+});
+
+test('SvgControl.resource', () => {
+  document.body.innerHTML = htmlBodyWithSvgRoot;
+  svg.injectDocument(document);
+
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const ctrlMock = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 40],
+      [cred.spec.propertyLabel.height, 22]
+    ])
+  );
+
+  const svgCtrl = new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplayMock);
+  expect(svgCtrl.resource()).toBe(ctrlMock);
+});
+
+test('SvgControl.itemSpec', () => {
+  const svgCtrl = setupSvgControlTestDefaults();
+  expect(svgCtrl.itemSpec()).toBeDefined();
+});
+
+test('SvgControl.id', () => {
+  const svgCtrl = setupSvgControlTestDefaults();
+  expect(svgCtrl.id).toEqual('myctrl');
+});
+
+test('SvgControl.isDialog', () => {
+  const svgCtrl = setupSvgControlTestDefaults();
+  expect(svgCtrl.isDialog()).toBeFalsy();
+});
+
+test('SvgControl.resourceBounds', () => {
+  const ctrlMock = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 40],
+      [cred.spec.propertyLabel.height, 22]
+    ])
+  );
+
+  expect(cred.svglayout_internal.SvgControl.resourceBounds(ctrlMock)).toEqual(
+    new geom.Rect(3, 5, 40, 22)
+  );
+});
+
+test('SvgControl.resourceBounds for control resource without properties', () => {
+  const ctrlMock = new ControlMock('myctrl', cred.spec.controlType.label, new Map());
+  expect(cred.svglayout_internal.SvgControl.resourceBounds(ctrlMock)).toEqual(
+    new geom.Rect(0, 0, 0, 0)
+  );
 });

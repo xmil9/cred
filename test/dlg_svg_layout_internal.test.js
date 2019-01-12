@@ -64,6 +64,11 @@ const htmlBodyWithSvgItem =
   '  </svg>' +
   '</div>';
 
+function setupHtmlDocument(htmlTemplate) {
+  document.body.innerHTML = htmlTemplate;
+  svg.injectDocument(document);
+}
+
 // Helper class to mock the controller.
 class ControllerMock {
   constructor() {
@@ -332,10 +337,11 @@ test('htmlElementSize for undefined element', () => {
 });
 
 test('htmlElementSize for button element', () => {
-  document.body.innerHTML =
+  setupHtmlDocument(
     '<div>' +
-    '  <button id="myid" style="width:200px;height:22px">Click</button>' +
-    '</div>';
+      '  <button id="myid" style="width:200px;height:22px">Click</button>' +
+      '</div>'
+  );
   const $elem = $('#myid');
   const expectedSize = new geom.Size($elem.width(), $elem.height());
   const elem = document.getElementById('myid');
@@ -343,10 +349,11 @@ test('htmlElementSize for button element', () => {
 });
 
 test('htmlElementSize for hidden element', () => {
-  document.body.innerHTML =
+  setupHtmlDocument(
     '<div>' +
-    '  <button id="myid" style="width:200px;height:22px">Click</button>' +
-    '</div>';
+      '  <button id="myid" style="width:200px;height:22px">Click</button>' +
+      '</div>'
+  );
   const $elem = $('#myid');
   $elem.hide();
   const expectedSize = new geom.Size($elem.width(), $elem.height());
@@ -396,7 +403,7 @@ test('toDialogCoord for other type', () => {
 // Sets up a default test environment for SvgItem tests.
 // Returns a SvgItem object created in that environment.
 function setupSvgItemTestDefaults(behaviorFlags = cred.editBehavior.none) {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -404,7 +411,7 @@ function setupSvgItemTestDefaults(behaviorFlags = cred.editBehavior.none) {
 }
 
 test('SvgItem.svgDisplay', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -412,14 +419,14 @@ test('SvgItem.svgDisplay', () => {
 });
 
 test('SvgItem.htmlElement', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem);
   expect(svgItem.htmlElement).toBe(svgElem);
 });
 
 test('SvgItem.controller', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -432,7 +439,7 @@ test('SvgItem.position', () => {
 });
 
 test('SvgItem.setPosition without notification', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -442,7 +449,7 @@ test('SvgItem.setPosition without notification', () => {
 });
 
 test('SvgItem.setPosition with notification', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -457,7 +464,7 @@ test('SvgItem.bounds', () => {
 });
 
 test('SvgItem.setBounds without notification', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -467,7 +474,7 @@ test('SvgItem.setBounds without notification', () => {
 });
 
 test('SvgItem.setBounds with notification', () => {
-  document.body.innerHTML = htmlBodyWithSvgItem;
+  setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgDisplayMock = new SvgDisplayMock();
   const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
@@ -644,7 +651,7 @@ test('SvgItem react to mouse-move when item is not movable', () => {
 // Sets up a default test environment for SvgDialog tests.
 // Returns a SvgDialog object created in that environment.
 function setupSvgDialogTestDefaults(ctrls) {
-  document.body.innerHTML = htmlBodyWithSvgRoot;
+  setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
   const svgRootElem = document.getElementById('svgRoot');
@@ -666,7 +673,7 @@ test('SvgDialog - creation of SVG element for dialog', () => {
 });
 
 test('SvgDialog.resource', () => {
-  document.body.innerHTML = htmlBodyWithSvgRoot;
+  setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
   const svgRootElem = document.getElementById('svgRoot');
@@ -789,7 +796,7 @@ test('SvgDialog.findControlItemWithId for not existing control', () => {
 // Sets up a default test environment for SvgDialog tests.
 // Returns a SvgDialog object created in that environment.
 function setupSvgControlTestDefaults() {
-  document.body.innerHTML = htmlBodyWithSvgRoot;
+  setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
   const svgRootElem = document.getElementById('svgRoot');
@@ -814,7 +821,7 @@ test('SvgControl - creation of SVG element for control', () => {
 });
 
 test('SvgControl.resource', () => {
-  document.body.innerHTML = htmlBodyWithSvgRoot;
+  setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
   const svgRootElem = document.getElementById('svgRoot');
@@ -871,4 +878,844 @@ test('SvgControl.resourceBounds for control resource without properties', () => 
   expect(cred.svglayout_internal.SvgControl.resourceBounds(ctrlMock)).toEqual(
     new geom.Rect(0, 0, 0, 0)
   );
+});
+
+///////////////////
+
+// Subclass of SelectionMarker to test the SelectionMarker functinality.
+class TestMarker extends cred.svglayout_internal.SelectionMarker {
+  constructor(id, pos, isEnabled, selectedSvgItem, svgDisplay) {
+    super(id, pos, isEnabled, selectedSvgItem, svgDisplay);
+    this.positionOnSelectedItemWasCalled = false;
+    this.adjustBoundsWasCalled = false;
+  }
+
+  static positionOnItem(svgItem) {
+    return svgItem.bounds.center();
+  }
+
+  static topLeftPositionOnItem(svgItem) {
+    return TestMarker.positionOnItem(svgItem).subtract(
+      cred.svglayout_internal.SelectionMarker.markerOffset
+    );
+  }
+
+  _positionOnSelectedItem() {
+    this.positionOnSelectedItemWasCalled = true;
+    return TestMarker.positionOnItem(this.selectedItem);
+  }
+
+  _adjustBounds(bounds, offset) {
+    this.adjustBoundsWasCalled = true;
+    // Move, don't resize.
+    return new geom.Rect(
+      bounds.left + offset.x,
+      bounds.top + offset.y,
+      bounds.width,
+      bounds.height
+    );
+  }
+}
+
+// Sets up a default test environment for SelectionMarker tests.
+// Returns a SelectionMarker object created in that environment.
+function setupSelectionMarkerTestDefaults(isEnabled) {
+  setupHtmlDocument(htmlBodyWithSvgItem);
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgElem = document.getElementById('svgElem');
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.all
+  );
+
+  return new TestMarker(
+    'mymarker',
+    TestMarker.positionOnItem(svgItem),
+    isEnabled,
+    svgItem,
+    svgDisplayMock
+  );
+}
+
+test('SelectionMarker - creation of marker element', () => {
+  const marker = setupSelectionMarkerTestDefaults(true);
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('SelectionMarker - enabled marker is moveable', () => {
+  const marker = setupSelectionMarkerTestDefaults(true);
+  expect(marker.isMoveable).toBeTruthy();
+});
+
+test('SelectionMarker - enabled marker is not moveable', () => {
+  const marker = setupSelectionMarkerTestDefaults(false);
+  expect(marker.isMoveable).toBeFalsy();
+});
+
+test('SelectionMarker.markerOffset', () => {
+  expect(cred.svglayout_internal.SelectionMarker.markerOffset).toBeGreaterThan(0);
+});
+
+test('SelectionMarker.markerSize', () => {
+  expect(cred.svglayout_internal.SelectionMarker.markerSize).toBeGreaterThan(0);
+});
+
+test('SelectionMarker.selectedItem', () => {
+  setupHtmlDocument(htmlBodyWithSvgItem);
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgElem = document.getElementById('svgElem');
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.all
+  );
+  const marker = new TestMarker(
+    'mymarker',
+    TestMarker.positionOnItem(svgItem),
+    true,
+    svgItem,
+    svgDisplayMock
+  );
+
+  expect(marker.selectedItem).toBe(svgItem);
+});
+
+test('SelectionMarker.drag for disabled marker', () => {
+  const marker = setupSelectionMarkerTestDefaults(false);
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('SelectionMarker.drag for enabled marker', () => {
+  const marker = setupSelectionMarkerTestDefaults(true);
+  const prevMarkerPos = marker.position;
+  const prevItemPos = marker.selectedItem.position;
+
+  const dragEndPos = new geom.Point(10, 20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemPos = prevItemPos.add(dragOffset);
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.position).toEqual(expectedItemPos);
+});
+
+test('SelectionMarker.select', () => {
+  const marker = setupSelectionMarkerTestDefaults(true);
+  marker.select();
+
+  // Selection markers themselves cannot be selected, so the call should have no
+  // effect.
+  expect(marker.isSelected()).toBeFalsy();
+});
+
+test('SelectionMarker.deselect', () => {
+  const marker = setupSelectionMarkerTestDefaults(true);
+  marker.select();
+  marker.deselect();
+
+  expect(marker.isSelected()).toBeFalsy();
+});
+
+test('SelectionMarker.update', () => {
+  const marker = setupSelectionMarkerTestDefaults(true);
+  marker.selectedItem.setPosition(new geom.Point(5, 6), false);
+  marker.update();
+
+  expect(marker.position).toEqual(TestMarker.topLeftPositionOnItem(marker.selectedItem));
+});
+
+///////////////////
+
+// Sets up a default test environment for concrete selection marker tests.
+// Returns a selection marker object created in that environment.
+function setupSpecificSelectionMarkerTestDefaults(markerType, editFlags) {
+  setupHtmlDocument(htmlBodyWithSvgItem);
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const svgElem = document.getElementById('svgElem');
+  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock, editFlags);
+  return new markerType(svgItem, svgDisplayMock);
+}
+
+test('LeftTopSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('LeftTopSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftTopSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('LeftTopSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left + dragOffset.x,
+    prevItemBounds.top + dragOffset.y,
+    prevItemBounds.width - dragOffset.x,
+    prevItemBounds.height - dragOffset.y
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('LeftTopSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(15, 20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.right - 1,
+    prevItemBounds.bottom - 1,
+    1,
+    1
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('LeftTopSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .leftTop()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('TopSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.TopSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('TopSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.TopSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('TopSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.TopSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top + dragOffset.y,
+    prevItemBounds.width,
+    prevItemBounds.height - dragOffset.y
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('TopSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.TopSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(15, 20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.bottom - 1,
+    prevItemBounds.width,
+    1
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('TopSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.TopSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .centerTop()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('RightTopSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('RightTopSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightTopSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('RightTopSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top + dragOffset.y,
+    prevItemBounds.width + dragOffset.x,
+    prevItemBounds.height - dragOffset.y
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('RightTopSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(-10, 20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.bottom - 1,
+    1,
+    1
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('RightTopSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightTopSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .rightTop()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('RightSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('RightSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('RightSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top,
+    prevItemBounds.width + dragOffset.x,
+    prevItemBounds.height
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('RightSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(-10, 20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top,
+    1,
+    prevItemBounds.height
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('RightSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .rightCenter()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('RightBottomSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('RightBottomSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightBottomSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('RightBottomSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top,
+    prevItemBounds.width + dragOffset.x,
+    prevItemBounds.height + dragOffset.y
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('RightBottomSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(-10, -20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(prevItemBounds.left, prevItemBounds.top, 1, 1);
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('RightBottomSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.RightBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .rightBottom()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('BottomSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.BottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('BottomSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.BottomSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('BottomSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.BottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top,
+    prevItemBounds.width,
+    prevItemBounds.height + dragOffset.y
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('BottomSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.BottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(20, -20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left,
+    prevItemBounds.top,
+    prevItemBounds.width,
+    1
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('BottomSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.BottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .centerBottom()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('LeftBottomSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('LeftBottomSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftBottomSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('LeftBottomSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left + dragOffset.x,
+    prevItemBounds.top,
+    prevItemBounds.width - dragOffset.x,
+    prevItemBounds.height + dragOffset.y
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('LeftBottomSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(20, -20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.right - 1,
+    prevItemBounds.top,
+    1,
+    1
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('LeftBottomSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftBottomSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .leftBottom()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+test('LeftSelectionMarker - creation of marker element', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftSelectionMarker,
+    cred.editBehavior.all
+  );
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('LeftSelectionMarker.drag for disabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftSelectionMarker,
+    cred.editBehavior.none
+  );
+  const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
+
+  expect(result).toBeFalsy();
+});
+
+test('LeftSelectionMarker.drag for enabled marker', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevMarkerPos = marker.position;
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(5, 6);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const adjustedDragEndPos = dragEndPos.subtract(mouseDownOffset);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const dragOffset = adjustedDragEndPos.subtract(prevMarkerPos);
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.left + dragOffset.x,
+    prevItemBounds.top,
+    prevItemBounds.width - dragOffset.x,
+    prevItemBounds.height
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('LeftSelectionMarker.drag - prevent invalid item dimensions', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftSelectionMarker,
+    cred.editBehavior.all
+  );
+  const prevItemBounds = marker.selectedItem.bounds;
+
+  const dragEndPos = new geom.Point(20, -20);
+  const mouseDownOffset = new geom.Point(1, 1);
+  const result = marker.drag(
+    { clientX: dragEndPos.x, clientY: dragEndPos.y },
+    mouseDownOffset
+  );
+
+  const expectedItemBounds = new geom.Rect(
+    prevItemBounds.right - 1,
+    prevItemBounds.top,
+    1,
+    prevItemBounds.height
+  );
+  expect(result).toBeTruthy();
+  expect(marker.selectedItem.bounds).toEqual(expectedItemBounds);
+});
+
+test('LeftSelectionMarker.update', () => {
+  const marker = setupSpecificSelectionMarkerTestDefaults(
+    cred.svglayout_internal.LeftSelectionMarker,
+    cred.editBehavior.all
+  );
+  marker.selectedItem.setPosition(new geom.Point(10, 12), false);
+  marker.update();
+
+  const expectedPos = marker.selectedItem.bounds
+    .leftCenter()
+    .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
+  expect(marker.position).toEqual(expectedPos);
 });

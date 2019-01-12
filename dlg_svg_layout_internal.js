@@ -418,24 +418,24 @@ cred.svglayout_internal = (function() {
 
   // Represents the SVG item for a control.
   class SvgControl extends SvgItem {
-    constructor(ctrlDefinition, svgDisplay) {
+    constructor(ctrlResource, svgDisplay) {
       super(
         SvgControl._createHtmlElement(
-          SvgControl.resourceBounds(ctrlDefinition),
+          SvgControl.resourceBounds(ctrlResource),
           svgDisplay.htmlElement
         ),
         svgDisplay,
         cred.editBehavior.all
       );
       // Resource information for the control.
-      this._ctrlDefinition = ctrlDefinition;
+      this._ctrlResource = ctrlResource;
       // Specification for this type of control.
-      this._ctrlSpec = new cred.spec.makeControlSpec(ctrlDefinition.type);
+      this._ctrlSpec = new cred.spec.makeControlSpec(ctrlResource.type);
     }
 
     // Polymorphic function to return the resource definition for the control.
     resource() {
-      return this._ctrlDefinition;
+      return this._ctrlResource;
     }
 
     // Polymorphic function to return the specification for the control's type.
@@ -454,13 +454,13 @@ cred.svglayout_internal = (function() {
     }
 
     // Returns the bounds of the control as they are defined in the resource.
-    static resourceBounds(ctrlDefinition) {
+    static resourceBounds(ctrlResource) {
       const propertyLabel = cred.spec.propertyLabel;
       return new geom.Rect(
-        ctrlDefinition.property(propertyLabel.left).value,
-        ctrlDefinition.property(propertyLabel.top).value,
-        ctrlDefinition.property(propertyLabel.width).value,
-        ctrlDefinition.property(propertyLabel.height).value
+        ctrlResource.property(propertyLabel.left).value,
+        ctrlResource.property(propertyLabel.top).value,
+        ctrlResource.property(propertyLabel.width).value,
+        ctrlResource.property(propertyLabel.height).value
       );
     }
 
@@ -599,7 +599,7 @@ cred.svglayout_internal = (function() {
         // Adjust the selected item according to the offset and the concrete
         // marker.
         this.selectedItem.setBounds(
-          this.adjustBounds(this.selectedItem.bounds, offset),
+          this._adjustBounds(this.selectedItem.bounds, offset),
           true
         );
         return true;
@@ -624,7 +624,7 @@ cred.svglayout_internal = (function() {
     // Update the marker's position to changes in the item's position or size.
     update() {
       this.setPosition(
-        this.positionOnItem().subtract(SelectionMarker.markerOffset),
+        this._positionOnSelectedItem().subtract(SelectionMarker.markerOffset),
         false
       );
     }
@@ -657,24 +657,30 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return LeftTopSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.leftTop();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The left-top marker adjusts the position and dimensions of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const maxLeft = bounds.right - 1;
+      const maxTop = bounds.bottom - 1;
+      const minWidth = 1;
+      const minHeight = 1;
       return new geom.Rect(
-        bounds.left + offset.x,
-        bounds.top + offset.y,
-        bounds.width - offset.x,
-        bounds.height - offset.y
+        Math.min(bounds.left + offset.x, maxLeft),
+        Math.min(bounds.top + offset.y, maxTop),
+        Math.max(bounds.width - offset.x, minWidth),
+        Math.max(bounds.height - offset.y, minHeight)
       );
     }
   }
@@ -692,24 +698,28 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return TopSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.centerTop();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The top marker adjusts the y-position and height of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const maxTop = bounds.bottom - 1;
+      const minHeight = 1;
       return new geom.Rect(
         bounds.left,
-        bounds.top + offset.y,
+        Math.min(bounds.top + offset.y, maxTop),
         bounds.width,
-        bounds.height - offset.y
+        Math.max(bounds.height - offset.y, minHeight)
       );
     }
   }
@@ -729,24 +739,29 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return RightTopSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.rightTop();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The right-top marker adjusts y-coordinate and the dimensions of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const maxTop = bounds.bottom - 1;
+      const minWidth = 1;
+      const minHeight = 1;
       return new geom.Rect(
         bounds.left,
-        bounds.top + offset.y,
-        bounds.width + offset.x,
-        bounds.height - offset.y
+        Math.min(bounds.top + offset.y, maxTop),
+        Math.max(bounds.width + offset.x, minWidth),
+        Math.max(bounds.height - offset.y, minHeight)
       );
     }
   }
@@ -764,23 +779,26 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return RightSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.rightCenter();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The right marker adjusts the width of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const minWidth = 1;
       return new geom.Rect(
         bounds.left,
         bounds.top,
-        bounds.width + offset.x,
+        Math.max(bounds.width + offset.x, minWidth),
         bounds.height
       );
     }
@@ -801,24 +819,28 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return RightBottomSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.rightBottom();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The right-bottom marker adjusts the dimensions of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const minWidth = 1;
+      const minHeight = 1;
       return new geom.Rect(
         bounds.left,
         bounds.top,
-        bounds.width + offset.x,
-        bounds.height + offset.y
+        Math.max(bounds.width + offset.x, minWidth),
+        Math.max(bounds.height + offset.y, minHeight)
       );
     }
   }
@@ -836,24 +858,27 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return BottomSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.centerBottom();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The bottom marker adjusts the height of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const minHeight = 1;
       return new geom.Rect(
         bounds.left,
         bounds.top,
         bounds.width,
-        bounds.height + offset.y
+        Math.max(bounds.height + offset.y, minHeight)
       );
     }
   }
@@ -873,24 +898,29 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return LeftBottomSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.leftBottom();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The left-bottom marker adjusts x-coordinate and dimensions of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const maxLeft = bounds.right - 1;
+      const minWidth = 1;
+      const minHeight = 1;
       return new geom.Rect(
-        bounds.left + offset.x,
+        Math.min(bounds.left + offset.x, maxLeft),
         bounds.top,
-        bounds.width - offset.x,
-        bounds.height + offset.y
+        Math.max(bounds.width - offset.x, minWidth),
+        Math.max(bounds.height + offset.y, minHeight)
       );
     }
   }
@@ -908,23 +938,27 @@ cred.svglayout_internal = (function() {
     }
 
     // Polymorphic property of selection markers to return the position of the
-    // marker on the item that it is attached to.
-    positionOnItem() {
+    // marker's center on the item that it is attached to.
+    _positionOnSelectedItem() {
       return LeftSelectionMarker._positionOnItem(this.selectedItem);
     }
 
-    // Returns the position of the marker on a given item.
+    // Returns the position of the marker's center on a given item.
     static _positionOnItem(item) {
       return item.bounds.leftCenter();
     }
 
-    // Polymorphic property of selection markers to adjust given bounds to the
-    // marker being moved by a given offset.
-    adjustBounds(bounds, offset) {
+    // Polymorphic property of selection markers to adjust given bounds according
+    // to the edit policy of the marker.
+    // The left marker adjusts x-coordinate and width of the target bounds.
+    _adjustBounds(bounds, offset) {
+      // Prevent invalid bounds.
+      const maxLeft = bounds.right - 1;
+      const minWidth = 1;
       return new geom.Rect(
-        bounds.left + offset.x,
+        Math.min(bounds.left + offset.x, maxLeft),
         bounds.top,
-        bounds.width - offset.x,
+        Math.max(bounds.width - offset.x, minWidth),
         bounds.height
       );
     }

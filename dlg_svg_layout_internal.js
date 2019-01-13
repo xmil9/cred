@@ -508,6 +508,7 @@ cred.svglayout_internal = (function() {
     // Clear the selection.
     clear() {
       if (this._selectedSvgItem) {
+        // The 'deselect' function of the selected item will call Selection.remove.
         this._selectedSvgItem.deselect();
       }
     }

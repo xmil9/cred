@@ -91,6 +91,10 @@ class SvgDisplayMock {
     this.deselectItemCalled = false;
   }
 
+  injectSelection(selection) {
+    this._selection = selection;
+  }
+
   updateSelection() {
     this.updateSelectionCalled = true;
   }
@@ -103,8 +107,11 @@ class SvgDisplayMock {
     this.selectItemCalled = true;
   }
 
-  deselectItem() {
+  deselectItem(svgItem) {
     this.deselectItemCalled = true;
+    if (this._selection) {
+      this._selection.remove(svgItem);
+    }
   }
 }
 
@@ -1718,4 +1725,92 @@ test('LeftSelectionMarker.update', () => {
     .leftCenter()
     .subtract(cred.svglayout_internal.SelectionMarker.markerOffset);
   expect(marker.position).toEqual(expectedPos);
+});
+
+///////////////////
+
+// Sets up a default test environment for Selection tests.
+// Returns Selection and SvgItem objects created in that environment.
+function setupSelectionTestDefaults() {
+  setupHtmlDocument(htmlBodyWithSvgItem);
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
+  const selection = new cred.svglayout_internal.Selection(svgDisplayMock);
+  svgDisplayMock.injectSelection(selection);
+
+  const svgElem = document.getElementById('svgElem');
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    cred.editBehavior.all
+  );
+
+  return [selection, svgItem];
+}
+
+test('Selection construction', () => {
+  const [selection] = setupSelectionTestDefaults();
+  expect(selection).toBeDefined();
+  expect(selection.selectedItem).toBeUndefined();
+});
+
+test('Selection.selectedItem when nothing is selected', () => {
+  const [selection] = setupSelectionTestDefaults();
+  expect(selection.selectedItem).toBeUndefined();
+});
+
+test('Selection.selectedItem when an itemn is selected', () => {
+  const [selection, svgItem] = setupSelectionTestDefaults();
+  selection.add(svgItem);
+  expect(selection.selectedItem).toBe(svgItem);
+});
+
+test('Selection.add to empty selection', () => {
+  const [selection, svgItem] = setupSelectionTestDefaults();
+  selection.add(svgItem);
+  expect(selection.selectedItem).toBe(svgItem);
+});
+
+test('Selection.add to existing selection', () => {
+  const [selection, svgItem] = setupSelectionTestDefaults();
+  selection.add(svgItem);
+  const mockedItem = {
+    bounds: new geom.Rect(1, 1, 10, 10),
+    isResizable() {
+      return true;
+    }
+  };
+  selection.add(mockedItem);
+  expect(selection.selectedItem).toBe(mockedItem);
+});
+
+test('Selection.remove when item is selected', () => {
+  const [selection, svgItem] = setupSelectionTestDefaults();
+  selection.add(svgItem);
+  selection.remove(svgItem);
+  expect(selection.selectedItem).toBeUndefined();
+});
+
+test('Selection.remove when other item is selected', () => {
+  const [selection, svgItem] = setupSelectionTestDefaults();
+  selection.add(svgItem);
+  selection.remove({ something: 'else' });
+  expect(selection.selectedItem).toBe(svgItem);
+});
+
+test.only('Selection.clear when item is selected', () => {
+  const [selection, svgItem] = setupSelectionTestDefaults();
+  selection.add(svgItem);
+  selection.clear();
+  expect(selection.selectedItem).toBeUndefined();
+});
+
+test('Selection.clear when nothing is selected', () => {
+  const [selection] = setupSelectionTestDefaults();
+  selection.clear();
+  expect(selection.selectedItem).toBeUndefined();
+});
+
+test('Selection.update', () => {
+  // Skip because it is hard to observe.
 });

@@ -33,7 +33,7 @@ cred.svglayout_internal = (function() {
   // container of all SVG content for a dialog locale.
   class SvgDisplay {
     constructor(size, viewBox, parentHtmlElem, controllerProxy) {
-      this._htmlElem = SvgDisplay.createHtmlElement(size, viewBox, parentHtmlElem);
+      this._htmlElem = SvgDisplay._createHtmlElement(size, viewBox, parentHtmlElem);
       this._selection = new Selection(this);
       // The SVG item for the dialog that is displayed.
       this._dialogItem = undefined;
@@ -88,7 +88,7 @@ cred.svglayout_internal = (function() {
 
     // Return the SVG item that is part of the display and matches a given
     // id.
-    // ASSUMPTION: A dialog id is never the same as the id of one of its control!
+    // ASSUMPTION: A dialog id is never the same as the id of one of its controls!
     findItemWithId(id) {
       if (this._dialogItem.id === id) {
         return this._dialogItem;
@@ -97,7 +97,7 @@ cred.svglayout_internal = (function() {
     }
 
     // Creates the root SVG DOM element.
-    static createHtmlElement(size, viewBox, parentHtmlElem) {
+    static _createHtmlElement(size, viewBox, parentHtmlElem) {
       return svg.create('svg', parentHtmlElem, {
         width: `${size.w}`,
         height: `${size.h}`,

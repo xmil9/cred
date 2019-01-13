@@ -73,10 +73,20 @@ function setupHtmlDocument(htmlTemplate) {
 class ControllerMock {
   constructor() {
     this.notifyItemBoundsModifiedCalled = false;
+    this.notifyItemSelectedCalled = false;
+    this.notifySelectionClearedCalled = false;
   }
 
   notifyItemBoundsModified() {
     this.notifyItemBoundsModifiedCalled = true;
+  }
+
+  notifyItemSelected() {
+    this.notifyItemSelectedCalled = true;
+  }
+
+  notifySelectionCleared() {
+    this.notifySelectionClearedCalled = true;
   }
 }
 
@@ -407,111 +417,99 @@ test('toDialogCoord for other type', () => {
 
 ///////////////////
 
-// Sets up a default test environment for SvgItem tests.
-// Returns a SvgItem object created in that environment.
-function setupSvgItemTestDefaults(behaviorFlags = cred.editBehavior.none) {
+// Sets up a test environment for SvgItem tests.
+function setupSvgItemTestEnv(behaviorFlags = cred.editBehavior.none) {
   setupHtmlDocument(htmlBodyWithSvgItem);
   const svgElem = document.getElementById('svgElem');
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  return new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock, behaviorFlags);
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    svgElem,
+    svgDisplayMock,
+    behaviorFlags
+  );
+  return [svgItem, svgElem, svgDisplayMock];
 }
 
 test('SvgItem.svgDisplay', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const [svgItem, , svgDisplayMock] = setupSvgItemTestEnv();
   expect(svgItem.svgDisplay).toBe(svgDisplayMock);
 });
 
 test('SvgItem.htmlElement', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem);
+  const [svgItem, svgElem] = setupSvgItemTestEnv();
   expect(svgItem.htmlElement).toBe(svgElem);
 });
 
 test('SvgItem.controller', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const [svgItem, , svgDisplayMock] = setupSvgItemTestEnv();
   expect(svgItem.controller).toBe(svgDisplayMock.controller);
 });
 
 test('SvgItem.position', () => {
-  const svgItem = setupSvgItemTestDefaults();
+  const [svgItem] = setupSvgItemTestEnv();
   expect(svgItem.position).toEqual(new geom.Point(1, 2));
 });
 
 test('SvgItem.setPosition without notification', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const [svgItem, , svgDisplayMock] = setupSvgItemTestEnv();
   svgItem.setPosition({ x: 3, y: 4 }, false);
+
   expect(svgItem.bounds).toEqual(new geom.Rect(3, 4, 10, 20));
   expect(svgDisplayMock.controller.notifyItemBoundsModifiedCalled).toBeFalsy();
 });
 
 test('SvgItem.setPosition with notification', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const [svgItem, , svgDisplayMock] = setupSvgItemTestEnv();
   svgItem.setPosition({ x: 3, y: 4 }, true);
+
   expect(svgItem.bounds).toEqual(new geom.Rect(3, 4, 10, 20));
   expect(svgDisplayMock.controller.notifyItemBoundsModifiedCalled).toBeTruthy();
 });
 
 test('SvgItem.bounds', () => {
-  const svgItem = setupSvgItemTestDefaults();
+  const [svgItem] = setupSvgItemTestEnv();
   expect(svgItem.bounds).toEqual(new geom.Rect(1, 2, 10, 20));
 });
 
 test('SvgItem.setBounds without notification', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const [svgItem, , svgDisplayMock] = setupSvgItemTestEnv();
   svgItem.setBounds({ left: 3, top: 4, width: 30, height: 40 }, false);
+
   expect(svgItem.bounds).toEqual(new geom.Rect(3, 4, 30, 40));
   expect(svgDisplayMock.controller.notifyItemBoundsModifiedCalled).toBeFalsy();
 });
 
 test('SvgItem.setBounds with notification', () => {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgElem = document.getElementById('svgElem');
-  const svgDisplayMock = new SvgDisplayMock();
-  const svgItem = new cred.svglayout_internal.SvgItem(svgElem, svgDisplayMock);
+  const [svgItem, , svgDisplayMock] = setupSvgItemTestEnv();
   svgItem.setBounds({ left: 3, top: 4, width: 30, height: 40 }, true);
+
   expect(svgItem.bounds).toEqual(new geom.Rect(3, 4, 30, 40));
   expect(svgDisplayMock.controller.notifyItemBoundsModifiedCalled).toBeTruthy();
 });
 
 test('SvgItem.isMoveable when moveable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.moveable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.moveable);
   expect(svgItem.isMoveable).toBeTruthy();
 });
 
 test('SvgItem.isMoveable when not moveable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
   expect(svgItem.isMoveable).toBeFalsy();
 });
 
 test('SvgItem.isSelectable when selectable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
   expect(svgItem.isSelectable).toBeTruthy();
 });
 
 test('SvgItem.isSelectable when not selectable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
   expect(svgItem.isSelectable).toBeFalsy();
 });
 
 test('SvgItem.isResizable when fully resizable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.resizableFully);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.resizableFully);
   expect(svgItem.isResizable(cred.editBehavior.resizableDown)).toBeTruthy();
   expect(svgItem.isResizable(cred.editBehavior.resizableUp)).toBeTruthy();
   expect(svgItem.isResizable(cred.editBehavior.resizableLeft)).toBeTruthy();
@@ -519,7 +517,7 @@ test('SvgItem.isResizable when fully resizable', () => {
 });
 
 test('SvgItem.isSelectable when not resizable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
   expect(svgItem.isResizable(cred.editBehavior.resizableDown)).toBeFalsy();
   expect(svgItem.isResizable(cred.editBehavior.resizableUp)).toBeFalsy();
   expect(svgItem.isResizable(cred.editBehavior.resizableLeft)).toBeFalsy();
@@ -527,7 +525,7 @@ test('SvgItem.isSelectable when not resizable', () => {
 });
 
 test('SvgItem.isSelectable when partially resizable', () => {
-  const svgItem = setupSvgItemTestDefaults(
+  const [svgItem] = setupSvgItemTestEnv(
     cred.editBehavior.resizableLeft | cred.editBehavior.resizableRight
   );
   expect(svgItem.isResizable(cred.editBehavior.resizableDown)).toBeFalsy();
@@ -537,60 +535,60 @@ test('SvgItem.isSelectable when partially resizable', () => {
 });
 
 test('SvgItem.drag for not moveable item', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
   const result = svgItem.drag({ clientX: 10, clientY: 20 }, { x: 0, y: 0 });
   expect(result).toBeFalsy();
 });
 
 test('SvgItem.drag for moveable item without mouse-down offset', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.moveable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.moveable);
   const result = svgItem.drag({ clientX: 10, clientY: 20 }, { x: 0, y: 0 });
   expect(result).toBeTruthy();
   expect(svgItem.position).toEqual(new geom.Point(10, 20));
 });
 
 test('SvgItem.drag for moveable item with mouse-down offset', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.moveable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.moveable);
   const result = svgItem.drag({ clientX: 10, clientY: 20 }, { x: 2, y: 3 });
   expect(result).toBeTruthy();
   expect(svgItem.position).toEqual(new geom.Point(8, 17));
 });
 
 test('SvgItem.isSelected for selectable item', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
   expect(svgItem.isSelected()).toBeFalsy();
   svgItem.select();
   expect(svgItem.isSelected()).toBeTruthy();
 });
 
 test('SvgItem.isSelected for not selectable item', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
   expect(svgItem.isSelected()).toBeFalsy();
   svgItem.select();
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
 test('SvgItem.select for selectable item', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
   svgItem.select();
   expect(svgItem.isSelected()).toBeTruthy();
 });
 
 test('SvgItem.select for not selectable item', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
   svgItem.select();
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
 test('SvgItem.deselect', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
   svgItem.select();
   svgItem.deselect();
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
 test('SvgItem react to mouse-down event', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
 
   const initialMousePos = { x: 3, y: 4 };
   // Zero distance means click.
@@ -601,7 +599,7 @@ test('SvgItem react to mouse-down event', () => {
 });
 
 test('SvgItem react to mouse-down event for not selectable item', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.none);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.none);
 
   const initialMousePos = { x: 3, y: 4 };
   // Zero distance means click.
@@ -612,7 +610,7 @@ test('SvgItem react to mouse-down event for not selectable item', () => {
 });
 
 test('SvgItem react to mouse-move large enough to trigger dragging', () => {
-  const svgItem = setupSvgItemTestDefaults(
+  const [svgItem] = setupSvgItemTestEnv(
     cred.editBehavior.selectable | cred.editBehavior.moveable
   );
 
@@ -628,7 +626,7 @@ test('SvgItem react to mouse-move large enough to trigger dragging', () => {
 });
 
 test('SvgItem react to mouse-move too small to trigger dragging', () => {
-  const svgItem = setupSvgItemTestDefaults(
+  const [svgItem] = setupSvgItemTestEnv(
     cred.editBehavior.selectable | cred.editBehavior.moveable
   );
 
@@ -642,7 +640,7 @@ test('SvgItem react to mouse-move too small to trigger dragging', () => {
 });
 
 test('SvgItem react to mouse-move when item is not movable', () => {
-  const svgItem = setupSvgItemTestDefaults(cred.editBehavior.selectable);
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
 
   const initialItemPos = svgItem.position;
   const initialMousePos = { x: 3, y: 4 };
@@ -655,31 +653,8 @@ test('SvgItem react to mouse-move when item is not movable', () => {
 
 ///////////////////
 
-// Sets up a default test environment for SvgDialog tests.
-// Returns a SvgDialog object created in that environment.
-function setupSvgDialogTestDefaults(ctrls) {
-  setupHtmlDocument(htmlBodyWithSvgRoot);
-  svg.injectDocument(document);
-
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const dlgResMock = new DialogResourceMock(
-    new DialogMock(
-      'mydlg',
-      new Map([[cred.spec.propertyLabel.width, 20], [cred.spec.propertyLabel.height, 10]])
-    ),
-    ctrls
-  );
-
-  return new cred.svglayout_internal.SvgDialog(dlgResMock, svgDisplayMock);
-}
-
-test('SvgDialog - creation of SVG element for dialog', () => {
-  const svgDlg = setupSvgDialogTestDefaults();
-  expect(svgDlg.htmlElement).toBeDefined();
-});
-
-test('SvgDialog.resource', () => {
+// Sets up a test environment for SvgDialog tests.
+function setupSvgDialogTestEnv(ctrls) {
   setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
@@ -689,24 +664,34 @@ test('SvgDialog.resource', () => {
     'mydlg',
     new Map([[cred.spec.propertyLabel.width, 20], [cred.spec.propertyLabel.height, 10]])
   );
-  const dlgResMock = new DialogResourceMock(dlgMock);
-
+  const dlgResMock = new DialogResourceMock(dlgMock, ctrls);
   const svgDlg = new cred.svglayout_internal.SvgDialog(dlgResMock, svgDisplayMock);
+
+  return [svgDlg, dlgMock];
+}
+
+test('SvgDialog - creation of SVG element for dialog', () => {
+  const [svgDlg] = setupSvgDialogTestEnv();
+  expect(svgDlg.htmlElement).toBeDefined();
+});
+
+test('SvgDialog.resource', () => {
+  const [svgDlg, dlgMock] = setupSvgDialogTestEnv();
   expect(svgDlg.resource()).toBe(dlgMock);
 });
 
 test('SvgDialog.itemSpec', () => {
-  const svgDlg = setupSvgDialogTestDefaults();
+  const [svgDlg] = setupSvgDialogTestEnv();
   expect(svgDlg.itemSpec()).toBeDefined();
 });
 
 test('SvgDialog.id', () => {
-  const svgDlg = setupSvgDialogTestDefaults();
+  const [svgDlg] = setupSvgDialogTestEnv();
   expect(svgDlg.id).toEqual('mydlg');
 });
 
 test('SvgDialog.isDialog', () => {
-  const svgDlg = setupSvgDialogTestDefaults();
+  const [svgDlg] = setupSvgDialogTestEnv();
   expect(svgDlg.isDialog()).toBeTruthy();
 });
 
@@ -733,7 +718,7 @@ test('SvgDialog.buildControls', () => {
       ])
     )
   ];
-  const svgDlg = setupSvgDialogTestDefaults(ctrls);
+  const [svgDlg] = setupSvgDialogTestEnv(ctrls);
   svgDlg.buildControls();
   expect(svgDlg.findControlItemWithId('ctrl1')).toBeDefined();
   expect(svgDlg.findControlItemWithId('ctrl2')).toBeDefined();
@@ -773,7 +758,7 @@ test('SvgDialog.findControlItemWithId for existing control', () => {
       [cred.spec.propertyLabel.height, 4]
     ])
   );
-  const svgDlg = setupSvgDialogTestDefaults([ctrl]);
+  const [svgDlg] = setupSvgDialogTestEnv([ctrl]);
   svgDlg.buildControls();
 
   const svgCtrl = svgDlg.findControlItemWithId('myctrl');
@@ -792,7 +777,7 @@ test('SvgDialog.findControlItemWithId for not existing control', () => {
       [cred.spec.propertyLabel.height, 4]
     ])
   );
-  const svgDlg = setupSvgDialogTestDefaults([ctrl]);
+  const [svgDlg] = setupSvgDialogTestEnv([ctrl]);
   svgDlg.buildControls();
 
   expect(svgDlg.findControlItemWithId('other')).toBeUndefined();
@@ -800,9 +785,8 @@ test('SvgDialog.findControlItemWithId for not existing control', () => {
 
 ///////////////////
 
-// Sets up a default test environment for SvgDialog tests.
-// Returns a SvgDialog object created in that environment.
-function setupSvgControlTestDefaults() {
+// Sets up a test environment for SvgDialog tests.
+function setupSvgControlTestEnv() {
   setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
@@ -818,48 +802,33 @@ function setupSvgControlTestDefaults() {
       [cred.spec.propertyLabel.height, 22]
     ])
   );
+  const svgCtrl = new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplayMock);
 
-  return new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplayMock);
+  return [svgCtrl, ctrlMock];
 }
 
 test('SvgControl - creation of SVG element for control', () => {
-  const svgCtrl = setupSvgControlTestDefaults();
+  const [svgCtrl] = setupSvgControlTestEnv();
   expect(svgCtrl.htmlElement).toBeDefined();
 });
 
 test('SvgControl.resource', () => {
-  setupHtmlDocument(htmlBodyWithSvgRoot);
-  svg.injectDocument(document);
-
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const ctrlMock = new ControlMock(
-    'myctrl',
-    cred.spec.controlType.label,
-    new Map([
-      [cred.spec.propertyLabel.left, 3],
-      [cred.spec.propertyLabel.top, 5],
-      [cred.spec.propertyLabel.width, 40],
-      [cred.spec.propertyLabel.height, 22]
-    ])
-  );
-
-  const svgCtrl = new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplayMock);
+  const [svgCtrl, ctrlMock] = setupSvgControlTestEnv();
   expect(svgCtrl.resource()).toBe(ctrlMock);
 });
 
 test('SvgControl.itemSpec', () => {
-  const svgCtrl = setupSvgControlTestDefaults();
+  const [svgCtrl] = setupSvgControlTestEnv();
   expect(svgCtrl.itemSpec()).toBeDefined();
 });
 
 test('SvgControl.id', () => {
-  const svgCtrl = setupSvgControlTestDefaults();
+  const [svgCtrl] = setupSvgControlTestEnv();
   expect(svgCtrl.id).toEqual('myctrl');
 });
 
 test('SvgControl.isDialog', () => {
-  const svgCtrl = setupSvgControlTestDefaults();
+  const [svgCtrl] = setupSvgControlTestEnv();
   expect(svgCtrl.isDialog()).toBeFalsy();
 });
 
@@ -924,52 +893,8 @@ class TestMarker extends cred.svglayout_internal.SelectionMarker {
   }
 }
 
-// Sets up a default test environment for SelectionMarker tests.
-// Returns a SelectionMarker object created in that environment.
-function setupSelectionMarkerTestDefaults(isEnabled) {
-  setupHtmlDocument(htmlBodyWithSvgItem);
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
-  const svgElem = document.getElementById('svgElem');
-  const svgItem = new cred.svglayout_internal.SvgItem(
-    svgElem,
-    svgDisplayMock,
-    cred.editBehavior.all
-  );
-
-  return new TestMarker(
-    'mymarker',
-    TestMarker.positionOnItem(svgItem),
-    isEnabled,
-    svgItem,
-    svgDisplayMock
-  );
-}
-
-test('SelectionMarker - creation of marker element', () => {
-  const marker = setupSelectionMarkerTestDefaults(true);
-  expect(marker.htmlElement).toBeDefined();
-});
-
-test('SelectionMarker - enabled marker is moveable', () => {
-  const marker = setupSelectionMarkerTestDefaults(true);
-  expect(marker.isMoveable).toBeTruthy();
-});
-
-test('SelectionMarker - enabled marker is not moveable', () => {
-  const marker = setupSelectionMarkerTestDefaults(false);
-  expect(marker.isMoveable).toBeFalsy();
-});
-
-test('SelectionMarker.markerOffset', () => {
-  expect(cred.svglayout_internal.SelectionMarker.markerOffset).toBeGreaterThan(0);
-});
-
-test('SelectionMarker.markerSize', () => {
-  expect(cred.svglayout_internal.SelectionMarker.markerSize).toBeGreaterThan(0);
-});
-
-test('SelectionMarker.selectedItem', () => {
+// Sets up a test environment for SelectionMarker tests.
+function setupSelectionMarkerTestEnv(isEnabled) {
   setupHtmlDocument(htmlBodyWithSvgItem);
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -982,23 +907,51 @@ test('SelectionMarker.selectedItem', () => {
   const marker = new TestMarker(
     'mymarker',
     TestMarker.positionOnItem(svgItem),
-    true,
+    isEnabled,
     svgItem,
     svgDisplayMock
   );
 
+  return [marker, svgItem];
+}
+
+test('SelectionMarker - creation of marker element', () => {
+  const [marker] = setupSelectionMarkerTestEnv(true);
+  expect(marker.htmlElement).toBeDefined();
+});
+
+test('SelectionMarker - enabled marker is moveable', () => {
+  const [marker] = setupSelectionMarkerTestEnv(true);
+  expect(marker.isMoveable).toBeTruthy();
+});
+
+test('SelectionMarker - enabled marker is not moveable', () => {
+  const [marker] = setupSelectionMarkerTestEnv(false);
+  expect(marker.isMoveable).toBeFalsy();
+});
+
+test('SelectionMarker.markerOffset', () => {
+  expect(cred.svglayout_internal.SelectionMarker.markerOffset).toBeGreaterThan(0);
+});
+
+test('SelectionMarker.markerSize', () => {
+  expect(cred.svglayout_internal.SelectionMarker.markerSize).toBeGreaterThan(0);
+});
+
+test('SelectionMarker.selectedItem', () => {
+  const [marker, svgItem] = setupSelectionMarkerTestEnv(false);
   expect(marker.selectedItem).toBe(svgItem);
 });
 
 test('SelectionMarker.drag for disabled marker', () => {
-  const marker = setupSelectionMarkerTestDefaults(false);
+  const [marker] = setupSelectionMarkerTestEnv(false);
   const result = marker.drag({ clientX: 10, clientY: 20 }, { x: 1, y: 1 });
 
   expect(result).toBeFalsy();
 });
 
 test('SelectionMarker.drag for enabled marker', () => {
-  const marker = setupSelectionMarkerTestDefaults(true);
+  const [marker] = setupSelectionMarkerTestEnv(true);
   const prevMarkerPos = marker.position;
   const prevItemPos = marker.selectedItem.position;
 
@@ -1017,7 +970,7 @@ test('SelectionMarker.drag for enabled marker', () => {
 });
 
 test('SelectionMarker.select', () => {
-  const marker = setupSelectionMarkerTestDefaults(true);
+  const [marker] = setupSelectionMarkerTestEnv(true);
   marker.select();
 
   // Selection markers themselves cannot be selected, so the call should have no
@@ -1026,7 +979,7 @@ test('SelectionMarker.select', () => {
 });
 
 test('SelectionMarker.deselect', () => {
-  const marker = setupSelectionMarkerTestDefaults(true);
+  const [marker] = setupSelectionMarkerTestEnv(true);
   marker.select();
   marker.deselect();
 
@@ -1034,7 +987,7 @@ test('SelectionMarker.deselect', () => {
 });
 
 test('SelectionMarker.update', () => {
-  const marker = setupSelectionMarkerTestDefaults(true);
+  const [marker] = setupSelectionMarkerTestEnv(true);
   marker.selectedItem.setPosition(new geom.Point(5, 6), false);
   marker.update();
 
@@ -1043,9 +996,8 @@ test('SelectionMarker.update', () => {
 
 ///////////////////
 
-// Sets up a default test environment for concrete selection marker tests.
-// Returns a selection marker object created in that environment.
-function setupSpecificSelectionMarkerTestDefaults(markerType, editFlags) {
+// Sets up a test environment for concrete selection marker tests.
+function setupSpecificSelectionMarkerTestEnv(markerType, editFlags) {
   setupHtmlDocument(htmlBodyWithSvgItem);
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -1055,15 +1007,15 @@ function setupSpecificSelectionMarkerTestDefaults(markerType, editFlags) {
 }
 
 test('LeftTopSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftTopSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('nw-marker')[0]);
 });
 
 test('LeftTopSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftTopSelectionMarker,
     cred.editBehavior.none
   );
@@ -1073,7 +1025,7 @@ test('LeftTopSelectionMarker.drag for disabled marker', () => {
 });
 
 test('LeftTopSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftTopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1100,7 +1052,7 @@ test('LeftTopSelectionMarker.drag for enabled marker', () => {
 });
 
 test('LeftTopSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftTopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1124,7 +1076,7 @@ test('LeftTopSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('LeftTopSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftTopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1140,15 +1092,15 @@ test('LeftTopSelectionMarker.update', () => {
 ///////////////////
 
 test('TopSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.TopSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('n-marker')[0]);
 });
 
 test('TopSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.TopSelectionMarker,
     cred.editBehavior.none
   );
@@ -1158,7 +1110,7 @@ test('TopSelectionMarker.drag for disabled marker', () => {
 });
 
 test('TopSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.TopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1185,7 +1137,7 @@ test('TopSelectionMarker.drag for enabled marker', () => {
 });
 
 test('TopSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.TopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1209,7 +1161,7 @@ test('TopSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('TopSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.TopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1225,15 +1177,15 @@ test('TopSelectionMarker.update', () => {
 ///////////////////
 
 test('RightTopSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightTopSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('ne-marker')[0]);
 });
 
 test('RightTopSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightTopSelectionMarker,
     cred.editBehavior.none
   );
@@ -1243,7 +1195,7 @@ test('RightTopSelectionMarker.drag for disabled marker', () => {
 });
 
 test('RightTopSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightTopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1270,7 +1222,7 @@ test('RightTopSelectionMarker.drag for enabled marker', () => {
 });
 
 test('RightTopSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightTopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1294,7 +1246,7 @@ test('RightTopSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('RightTopSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightTopSelectionMarker,
     cred.editBehavior.all
   );
@@ -1310,15 +1262,15 @@ test('RightTopSelectionMarker.update', () => {
 ///////////////////
 
 test('RightSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('e-marker')[0]);
 });
 
 test('RightSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightSelectionMarker,
     cred.editBehavior.none
   );
@@ -1328,7 +1280,7 @@ test('RightSelectionMarker.drag for disabled marker', () => {
 });
 
 test('RightSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightSelectionMarker,
     cred.editBehavior.all
   );
@@ -1355,7 +1307,7 @@ test('RightSelectionMarker.drag for enabled marker', () => {
 });
 
 test('RightSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightSelectionMarker,
     cred.editBehavior.all
   );
@@ -1379,7 +1331,7 @@ test('RightSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('RightSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightSelectionMarker,
     cred.editBehavior.all
   );
@@ -1395,15 +1347,15 @@ test('RightSelectionMarker.update', () => {
 ///////////////////
 
 test('RightBottomSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightBottomSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('se-marker')[0]);
 });
 
 test('RightBottomSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightBottomSelectionMarker,
     cred.editBehavior.none
   );
@@ -1413,7 +1365,7 @@ test('RightBottomSelectionMarker.drag for disabled marker', () => {
 });
 
 test('RightBottomSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightBottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1440,7 +1392,7 @@ test('RightBottomSelectionMarker.drag for enabled marker', () => {
 });
 
 test('RightBottomSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightBottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1459,7 +1411,7 @@ test('RightBottomSelectionMarker.drag - prevent invalid item dimensions', () => 
 });
 
 test('RightBottomSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.RightBottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1475,15 +1427,15 @@ test('RightBottomSelectionMarker.update', () => {
 ///////////////////
 
 test('BottomSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.BottomSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('s-marker')[0]);
 });
 
 test('BottomSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.BottomSelectionMarker,
     cred.editBehavior.none
   );
@@ -1493,7 +1445,7 @@ test('BottomSelectionMarker.drag for disabled marker', () => {
 });
 
 test('BottomSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.BottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1520,7 +1472,7 @@ test('BottomSelectionMarker.drag for enabled marker', () => {
 });
 
 test('BottomSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.BottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1544,7 +1496,7 @@ test('BottomSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('BottomSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.BottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1560,15 +1512,15 @@ test('BottomSelectionMarker.update', () => {
 ///////////////////
 
 test('LeftBottomSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftBottomSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('sw-marker')[0]);
 });
 
 test('LeftBottomSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftBottomSelectionMarker,
     cred.editBehavior.none
   );
@@ -1578,7 +1530,7 @@ test('LeftBottomSelectionMarker.drag for disabled marker', () => {
 });
 
 test('LeftBottomSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftBottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1605,7 +1557,7 @@ test('LeftBottomSelectionMarker.drag for enabled marker', () => {
 });
 
 test('LeftBottomSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftBottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1629,7 +1581,7 @@ test('LeftBottomSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('LeftBottomSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftBottomSelectionMarker,
     cred.editBehavior.all
   );
@@ -1645,15 +1597,15 @@ test('LeftBottomSelectionMarker.update', () => {
 ///////////////////
 
 test('LeftSelectionMarker - creation of marker element', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftSelectionMarker,
     cred.editBehavior.all
   );
-  expect(marker.htmlElement).toBeDefined();
+  expect(marker.htmlElement).toBe(document.getElementsByClassName('w-marker')[0]);
 });
 
 test('LeftSelectionMarker.drag for disabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftSelectionMarker,
     cred.editBehavior.none
   );
@@ -1663,7 +1615,7 @@ test('LeftSelectionMarker.drag for disabled marker', () => {
 });
 
 test('LeftSelectionMarker.drag for enabled marker', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftSelectionMarker,
     cred.editBehavior.all
   );
@@ -1690,7 +1642,7 @@ test('LeftSelectionMarker.drag for enabled marker', () => {
 });
 
 test('LeftSelectionMarker.drag - prevent invalid item dimensions', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftSelectionMarker,
     cred.editBehavior.all
   );
@@ -1714,7 +1666,7 @@ test('LeftSelectionMarker.drag - prevent invalid item dimensions', () => {
 });
 
 test('LeftSelectionMarker.update', () => {
-  const marker = setupSpecificSelectionMarkerTestDefaults(
+  const marker = setupSpecificSelectionMarkerTestEnv(
     cred.svglayout_internal.LeftSelectionMarker,
     cred.editBehavior.all
   );
@@ -1729,9 +1681,8 @@ test('LeftSelectionMarker.update', () => {
 
 ///////////////////
 
-// Sets up a default test environment for Selection tests.
-// Returns Selection and SvgItem objects created in that environment.
-function setupSelectionTestDefaults() {
+// Sets up a test environment for Selection tests.
+function setupSelectionTestEnv() {
   setupHtmlDocument(htmlBodyWithSvgItem);
   const svgRootElem = document.getElementById('svgRoot');
   const svgDisplayMock = new SvgDisplayMock(svgRootElem);
@@ -1745,34 +1696,34 @@ function setupSelectionTestDefaults() {
     cred.editBehavior.all
   );
 
-  return [selection, svgItem];
+  return [selection, svgItem, svgDisplayMock];
 }
 
 test('Selection construction', () => {
-  const [selection] = setupSelectionTestDefaults();
+  const [selection] = setupSelectionTestEnv();
   expect(selection).toBeDefined();
   expect(selection.selectedItem).toBeUndefined();
 });
 
 test('Selection.selectedItem when nothing is selected', () => {
-  const [selection] = setupSelectionTestDefaults();
+  const [selection] = setupSelectionTestEnv();
   expect(selection.selectedItem).toBeUndefined();
 });
 
 test('Selection.selectedItem when an itemn is selected', () => {
-  const [selection, svgItem] = setupSelectionTestDefaults();
+  const [selection, svgItem] = setupSelectionTestEnv();
   selection.add(svgItem);
   expect(selection.selectedItem).toBe(svgItem);
 });
 
 test('Selection.add to empty selection', () => {
-  const [selection, svgItem] = setupSelectionTestDefaults();
+  const [selection, svgItem] = setupSelectionTestEnv();
   selection.add(svgItem);
   expect(selection.selectedItem).toBe(svgItem);
 });
 
 test('Selection.add to existing selection', () => {
-  const [selection, svgItem] = setupSelectionTestDefaults();
+  const [selection, svgItem] = setupSelectionTestEnv();
   selection.add(svgItem);
   const mockedItem = {
     bounds: new geom.Rect(1, 1, 10, 10),
@@ -1785,32 +1736,228 @@ test('Selection.add to existing selection', () => {
 });
 
 test('Selection.remove when item is selected', () => {
-  const [selection, svgItem] = setupSelectionTestDefaults();
+  const [selection, svgItem] = setupSelectionTestEnv();
   selection.add(svgItem);
   selection.remove(svgItem);
   expect(selection.selectedItem).toBeUndefined();
 });
 
 test('Selection.remove when other item is selected', () => {
-  const [selection, svgItem] = setupSelectionTestDefaults();
+  const [selection, svgItem] = setupSelectionTestEnv();
   selection.add(svgItem);
   selection.remove({ something: 'else' });
   expect(selection.selectedItem).toBe(svgItem);
 });
 
-test.only('Selection.clear when item is selected', () => {
-  const [selection, svgItem] = setupSelectionTestDefaults();
+test('Selection.clear when item is selected', () => {
+  const [selection, svgItem] = setupSelectionTestEnv();
   selection.add(svgItem);
   selection.clear();
   expect(selection.selectedItem).toBeUndefined();
 });
 
 test('Selection.clear when nothing is selected', () => {
-  const [selection] = setupSelectionTestDefaults();
+  const [selection] = setupSelectionTestEnv();
   selection.clear();
   expect(selection.selectedItem).toBeUndefined();
 });
 
 test('Selection.update', () => {
-  // Skip because it is hard to observe.
+  const [selection, svgItem, svgDisplay] = setupSelectionTestEnv();
+  selection.add(svgItem);
+  const prevItemPos = svgItem.position;
+
+  const markerElem = document.getElementsByClassName('nw-marker')[0];
+  const markerItem = new cred.svglayout_internal.SvgItem(markerElem, svgDisplay);
+  const prevMarkerPos = markerItem.position;
+
+  // Offset the selected item.
+  const offset = 2;
+  svgItem.setPosition(prevItemPos.add(offset));
+  selection.update();
+
+  // Marker should be offset, too.
+  const expectedMarkerPos = prevMarkerPos.add(offset);
+  expect(markerItem.position).toEqual(expectedMarkerPos);
+});
+
+///////////////////
+
+// Sets up a test environment for SvgDisplay tests.
+function setupSvgDisplayTestEnv() {
+  setupHtmlDocument(htmlBodyWithSvgItem);
+  const svgRootElem = document.getElementById('svgRoot');
+  const mockedController = new ControllerMock();
+  const svgDisplay = new cred.svglayout_internal.SvgDisplay(
+    { w: 100, h: 100 },
+    { left: 0, top: 0, width: 100, height: 100 },
+    svgRootElem,
+    mockedController
+  );
+
+  return [svgDisplay, mockedController];
+}
+
+// Creates a mocked dialog resource object.
+function makeDialogResourceForSvgDisplayTests(ctrls = new Map()) {
+  const dlgMock = new DialogMock(
+    'mydlg',
+    new Map([[cred.spec.propertyLabel.width, 20], [cred.spec.propertyLabel.height, 10]])
+  );
+  return new DialogResourceMock(dlgMock, ctrls);
+}
+
+test('SvgDisplay construction', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  expect(svgDisplay).toBeDefined();
+});
+
+test('SvgDisplay.htmlElement', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  expect(svgDisplay.htmlElement).toBeDefined();
+});
+
+test('SvgDisplay.controller', () => {
+  const [svgDisplay, controller] = setupSvgDisplayTestEnv();
+  expect(svgDisplay.controller).toBe(controller);
+});
+
+test('SvgDisplay.buildDialog', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  const svgDlg = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+
+  expect(svgDlg).toBeDefined();
+});
+
+test('SvgDisplay.buildDialog clears the selection', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  // Select item.
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    document.getElementById('svgElem'),
+    svgDisplay,
+    cred.editBehavior.all
+  );
+  svgDisplay.selectItem(svgItem);
+  // Builds another dialog.
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+
+  expect(svgDisplay.selectedItem).toBeUndefined();
+});
+
+test('SvgDisplay.selectedItem', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  // Select item.
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    document.getElementById('svgElem'),
+    svgDisplay,
+    cred.editBehavior.all
+  );
+  svgDisplay.selectItem(svgItem);
+
+  expect(svgDisplay.selectedItem).toBe(svgItem);
+});
+
+test('SvgDisplay.selectedItem is undefined when nothing is selected', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  expect(svgDisplay.selectedItem).toBeUndefined();
+});
+
+test('SvgDisplay.deselectItem', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    document.getElementById('svgElem'),
+    svgDisplay,
+    cred.editBehavior.all
+  );
+  svgDisplay.selectItem(svgItem);
+  svgDisplay.deselectItem(svgItem);
+
+  expect(svgDisplay.selectedItem).toBeUndefined();
+});
+
+test('SvgDisplay.clearSelection', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    document.getElementById('svgElem'),
+    svgDisplay,
+    cred.editBehavior.all
+  );
+  svgDisplay.selectItem(svgItem);
+  svgDisplay.clearSelection();
+
+  expect(svgDisplay.selectedItem).toBeUndefined();
+  expect(svgDisplay.controller.notifySelectionClearedCalled).toBeTruthy();
+});
+
+test('SvgDisplay.updateSelection', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    document.getElementById('svgElem'),
+    svgDisplay,
+    cred.editBehavior.all
+  );
+  svgDisplay.selectItem(svgItem);
+  const prevItemPos = svgItem.position;
+
+  const markerElem = document.getElementsByClassName('nw-marker')[0];
+  const markerItem = new cred.svglayout_internal.SvgItem(markerElem, svgDisplay);
+  const prevMarkerPos = markerItem.position;
+
+  // Offset the selected item.
+  const offset = 2;
+  svgItem.setPosition(prevItemPos.add(offset));
+  svgDisplay.updateSelection();
+
+  // Marker should be offset, too.
+  const expectedMarkerPos = prevMarkerPos.add(offset);
+  expect(markerItem.position).toEqual(expectedMarkerPos);
+});
+
+test('SvgDisplay.findItemWithId for dialog item', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  const dlgItem = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+
+  expect(svgDisplay.findItemWithId('mydlg')).toBe(dlgItem);
+});
+
+test('SvgDisplay.findItemWithId for control item', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  const ctrl = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 3],
+      [cred.spec.propertyLabel.height, 4]
+    ])
+  );
+  const svgDlg = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests([ctrl]));
+  svgDlg.buildControls();
+
+  expect(svgDisplay.findItemWithId('myctrl')).toBeDefined();
+});
+
+test('SvgDisplay.findItemWithId for not existing item', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  const ctrl = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 3],
+      [cred.spec.propertyLabel.height, 4]
+    ])
+  );
+  const svgDlg = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests([ctrl]));
+  svgDlg.buildControls();
+
+  expect(svgDisplay.findItemWithId('missing')).toBeUndefined();
 });

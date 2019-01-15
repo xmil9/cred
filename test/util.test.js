@@ -25,6 +25,15 @@ test('toNumber for floating point numbers', () => {
   expect(util.toNumber('0.0000001')).toBe(0.0000001);
 });
 
+test('toNumber for undefined', () => {
+  expect(util.toNumber(undefined)).toBeUndefined();
+});
+
+test('toNumber with default', () => {
+  expect(util.toNumber(undefined, 0)).toEqual(0);
+  expect(util.toNumber(undefined, 23.5)).toEqual(23.5);
+});
+
 ///////////////////
 
 test('insertAfter in middle', () => {

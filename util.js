@@ -10,7 +10,10 @@ var util = (function() {
   ///////////////////
 
   // Converts a given string to a number.
-  function toNumber(str) {
+  function toNumber(str, defaultVal) {
+    if (typeof str === 'undefined') {
+      return defaultVal;
+    }
     if (str.indexOf('.') >= 0) {
       return parseFloat(str);
     }

@@ -172,7 +172,7 @@ cred.controller = (function() {
     // --- Internal functions ---
 
     // Dispatches notifications to the controlled components.
-    _dispatch(source, notificationFunc) {
+    _dispatch(source, notificationFn) {
       // Extract all parameters that are passed in addition to the named ones
       // into an array. They will be forwarded to the notified objects.
       let forwardedArgs = Array.from(arguments).slice(2);
@@ -181,8 +181,8 @@ cred.controller = (function() {
       // is given.
       for (let i = 0; i < this._controlledLowToHighLevel.length; ++i) {
         let target = this._controlledLowToHighLevel[i];
-        if (target !== source && notificationFunc in target) {
-          target[notificationFunc](...forwardedArgs);
+        if (target !== source && notificationFn in target) {
+          target[notificationFn](...forwardedArgs);
         }
       }
     }

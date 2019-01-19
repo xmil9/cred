@@ -8,27 +8,13 @@ const html = require('../html');
 
 ///////////////////
 
-// Provide window.crypto.getRandomValues Web API by redirecting to node's crypto
-// module.
-function defineJQuery() {
-  if (typeof global.$ === 'undefined') {
-    global.$ = $;
-  }
-}
-
-///////////////////
-
 test('makeDivElement with class name', () => {
-  defineJQuery();
-
   const $div = html.makeDivElement('test');
   expect($div).toBeDefined();
   expect($div[0].className).toBe('test');
 });
 
 test('makeDivElement without class name', () => {
-  defineJQuery();
-
   const $div = html.makeDivElement();
   expect($div).toBeDefined();
   expect($div.is('div')).toBeTruthy();
@@ -37,8 +23,6 @@ test('makeDivElement without class name', () => {
 ///////////////////
 
 test('makeLabelElement with for-tag', () => {
-  defineJQuery();
-
   const $label = html.makeLabelElement('my label', 'labeled');
   expect($label).toBeDefined();
   expect($label.is('label')).toBeTruthy();
@@ -47,8 +31,6 @@ test('makeLabelElement with for-tag', () => {
 });
 
 test('makeDivElement without for-tag', () => {
-  defineJQuery();
-
   const $label = html.makeLabelElement('my label');
   expect($label).toBeDefined();
   expect($label.is('label')).toBeTruthy();
@@ -58,8 +40,6 @@ test('makeDivElement without for-tag', () => {
 ///////////////////
 
 test('makeInputElement for text input with value', () => {
-  defineJQuery();
-
   const $input = html.makeInputElement('text', 'myid', false, 'hello');
   expect($input).toBeDefined();
   expect($input.is('input')).toBeTruthy();
@@ -70,8 +50,6 @@ test('makeInputElement for text input with value', () => {
 });
 
 test('makeInputElement for text input without value', () => {
-  defineJQuery();
-
   const $input = html.makeInputElement('text', 'myid', false);
   expect($input).toBeDefined();
   expect($input.is('input')).toBeTruthy();
@@ -82,8 +60,6 @@ test('makeInputElement for text input without value', () => {
 });
 
 test('makeInputElement for disabled text input', () => {
-  defineJQuery();
-
   const $input = html.makeInputElement('text', 'myid', true);
   expect($input).toBeDefined();
   expect($input.is('input')).toBeTruthy();
@@ -93,8 +69,6 @@ test('makeInputElement for disabled text input', () => {
 });
 
 test('makeInputElement for other input types', () => {
-  defineJQuery();
-
   for (const type of ['submit', 'radio', 'checkbox', 'button', 'color', 'date']) {
     const $input = html.makeInputElement(type, 'myid', false, 'hello');
     expect($input).toBeDefined();
@@ -106,8 +80,6 @@ test('makeInputElement for other input types', () => {
 ///////////////////
 
 test('makeSelectElement enabled', () => {
-  defineJQuery();
-
   const $select = html.makeSelectElement('myid', false);
   expect($select).toBeDefined();
   expect($select.attr('id')).toBe('myid');
@@ -115,8 +87,6 @@ test('makeSelectElement enabled', () => {
 });
 
 test('makeSelectElement disabled', () => {
-  defineJQuery();
-
   const $select = html.makeSelectElement('myid', true);
   expect($select).toBeDefined();
   expect($select.attr('id')).toBe('myid');
@@ -126,8 +96,6 @@ test('makeSelectElement disabled', () => {
 ///////////////////
 
 test('makeOptionElement with numeric value', () => {
-  defineJQuery();
-
   const $opt = html.makeOptionElement('opt1', 1);
   expect($opt).toBeDefined();
   expect($opt.text()).toBe('opt1');
@@ -135,8 +103,6 @@ test('makeOptionElement with numeric value', () => {
 });
 
 test('makeOptionElement with string value', () => {
-  defineJQuery();
-
   const $opt = html.makeOptionElement('opt1', '1');
   expect($opt).toBeDefined();
   expect($opt.text()).toBe('opt1');
@@ -146,8 +112,6 @@ test('makeOptionElement with string value', () => {
 ///////////////////
 
 test('makeFieldsetElement enabled with id', () => {
-  defineJQuery();
-
   const $fieldset = html.makeFieldsetElement(false, 'myid');
   expect($fieldset).toBeDefined();
   expect($fieldset.attr('id')).toBe('myid');
@@ -155,8 +119,6 @@ test('makeFieldsetElement enabled with id', () => {
 });
 
 test('makeFieldsetElement disabled without id', () => {
-  defineJQuery();
-
   const $fieldset = html.makeFieldsetElement(true);
   expect($fieldset).toBeDefined();
   expect($fieldset.attr('id')).toBeUndefined();
@@ -166,16 +128,12 @@ test('makeFieldsetElement disabled without id', () => {
 ///////////////////
 
 test('makeSpanElement with text', () => {
-  defineJQuery();
-
   const $span = html.makeSpanElement('some text');
   expect($span).toBeDefined();
   expect($span.text()).toBe('some text');
 });
 
 test('makeSpanElement without text', () => {
-  defineJQuery();
-
   const $span = html.makeSpanElement();
   expect($span).toBeDefined();
   expect($span.text()).toBe('');
@@ -184,8 +142,6 @@ test('makeSpanElement without text', () => {
 ///////////////////
 
 test('addClasses for one class', () => {
-  defineJQuery();
-
   document.body.innerHTML =
     '<div id="myelem">                                        ' +
     '</div>                                                   ';
@@ -198,8 +154,6 @@ test('addClasses for one class', () => {
 });
 
 test('addClasses for multiple class', () => {
-  defineJQuery();
-
   document.body.innerHTML =
     '<div id="myelem">                                        ' +
     '</div>                                                   ';
@@ -214,8 +168,6 @@ test('addClasses for multiple class', () => {
 });
 
 test('addClasses for no class', () => {
-  defineJQuery();
-
   document.body.innerHTML =
     '<div id="myelem">                                        ' +
     '</div>                                                   ';
@@ -226,8 +178,6 @@ test('addClasses for no class', () => {
 });
 
 test('addClasses for adding to existing classes', () => {
-  defineJQuery();
-
   document.body.innerHTML =
     '<div id="myelem" class="A B">                          ' +
     '</div>                                                   ';

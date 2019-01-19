@@ -170,10 +170,10 @@ cred.svglayout_internal = (function() {
     // Returns the bounding rectangle of the HTML element for this item.
     get bounds() {
       return new geom.Rect(
-        util.toNumber($(this._htmlElem).attr('x')),
-        util.toNumber($(this._htmlElem).attr('y')),
-        util.toNumber($(this._htmlElem).attr('width')),
-        util.toNumber($(this._htmlElem).attr('height'))
+        util.toNumber($(this._htmlElem).attr('x'), 0),
+        util.toNumber($(this._htmlElem).attr('y'), 0),
+        util.toNumber($(this._htmlElem).attr('width'), 0),
+        util.toNumber($(this._htmlElem).attr('height'), 0)
       );
     }
 

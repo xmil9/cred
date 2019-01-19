@@ -1865,6 +1865,20 @@ test('SvgDisplay.selectedItem is undefined when nothing is selected', () => {
   expect(svgDisplay.selectedItem).toBeUndefined();
 });
 
+test('SvgDisplay.selectItem', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  // Select item.
+  const svgItem = new cred.svglayout_internal.SvgItem(
+    document.getElementById('svgElem'),
+    svgDisplay,
+    cred.editBehavior.all
+  );
+  svgDisplay.selectItem(svgItem);
+
+  expect(svgDisplay.selectedItem).toBe(svgItem);
+});
+
 test('SvgDisplay.deselectItem', () => {
   const [svgDisplay] = setupSvgDisplayTestEnv();
   svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());

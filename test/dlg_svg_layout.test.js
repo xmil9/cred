@@ -129,18 +129,6 @@ function spyOnLayoutDisplay(layout, locale) {
   return layout._svgDisplays.get(locale);
 }
 
-// Returns the HTML element representing the displayed dialog in a given SVG display.
-function dialogHtmlElement(display) {
-  if (typeof display === 'undefined' || typeof display.htmlElement === 'undefined') {
-    return undefined;
-  }
-  const children = display.htmlElement.children;
-  if (children.length === 0 || children[0].nodeName.toLowerCase() !== 'rect') {
-    return undefined;
-  }
-  return children[0];
-}
-
 // Returns the HTML content for the tab section of the cred page.
 function makeTabsHtml() {
   return (

@@ -16,6 +16,7 @@ function tryRequire(file) {
 }
 
 // Dependencies
+var $ = tryRequire('jquery') || $ || {};
 var cred = tryRequire('./cred_types') || cred || {};
 var geom = tryRequire('./geom') || geom || {};
 var html = tryRequire('./html') || html || {};
@@ -89,15 +90,14 @@ cred.ui_internal = (function() {
     // resource definition of either a dialog or control.
     populate(item) {
       this.clear();
-      // Set up title.
-      $('#item-title').text(item.itemSpec().title + ' Properties');
+      this._setTitle(item.itemSpec().title + ' Properties');
       this._buildProperties(item);
       this._registerEvents();
     }
 
     // Clears all fields in the property pane.
     clear() {
-      $('#item-title').text('Properties');
+      this._setTitle('Properties');
       this._unregisterEvents();
       $('#property-list').empty();
       this._propertyComponents.clear();
@@ -127,7 +127,7 @@ cred.ui_internal = (function() {
     // Sets up event handlers.
     _registerEvents() {
       this._registerPropertyTypeHandlers();
-      this._registerSematicPropertyHandlers();
+      this._registerSemanticPropertyHandlers();
     }
 
     // Register handlers for each property type.
@@ -158,20 +158,20 @@ cred.ui_internal = (function() {
       }
     }
 
-    // Register property handlers for sematic tags.
-    _registerSematicPropertyHandlers() {
+    // Register property handlers for semantic tags.
+    _registerSemanticPropertyHandlers() {
       const self = this;
 
-      // Collection of handlers for sematic tags.
-      const sematicHandlers = new Map([
+      // Collection of handlers for semantic tags.
+      const semanticHandlers = new Map([
         [cred.spec.semanticPropertyTag.id, this._onIdChanged],
         [cred.spec.semanticPropertyTag.bounds, this._onBoundsChanged]
       ]);
 
       for (const tag of cred.spec.semanticPropertyTag) {
         let $tagged = $(`.${tag}`);
-        $tagged.on(`change.${tag}`, e => sematicHandlers.get(tag).call(self, e));
-        // For elements with sematic handlers remove the property type handler.
+        $tagged.on(`change.${tag}`, e => semanticHandlers.get(tag).call(self, e));
+        // For elements with semantic handlers remove the property type handler.
         $tagged.off('change.propertyType');
       }
     }
@@ -247,6 +247,11 @@ cred.ui_internal = (function() {
     }
 
     // --- Internal functions ---
+
+    // Sets the title of the properties pane to a given text.
+    _setTitle(titleText) {
+      $('#item-title').text(titleText);
+    }
 
     // Populate pane with HTML elements for the properties supported by the
     // item.
@@ -489,7 +494,7 @@ cred.ui_internal = (function() {
         })
         .addClass('global-image-checkbox')
         .on('click', e => {
-          // Toggle flag that CSS uses to apply an image.
+          // Toggle flag that is used in CSS to apply an image.
           if (!$(e.target).hasClass('disabled')) {
             $(e.target).toggleClass('checked');
           }
@@ -820,7 +825,10 @@ cred.ui_internal = (function() {
     contentIdFromHtmlElement: contentIdFromHtmlElement,
     DisplayHeader: DisplayHeader,
     localeFromContentId: localeFromContentId,
+    makeHtmlFlagId: makeHtmlFlagId,
     makeHtmlImageCheckboxId: makeHtmlImageCheckboxId,
+    PropertyComponent: PropertyComponent,
+    PropertyComponentBuilder: PropertyComponentBuilder,
     PropertyPane: PropertyPane
   };
 })();

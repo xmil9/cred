@@ -1,5 +1,5 @@
 //
-// Tests for the SVG layout view.
+// Tests for the internal functionality of the SVG layout module.
 //
 'use strict';
 

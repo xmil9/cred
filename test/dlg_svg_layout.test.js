@@ -270,7 +270,7 @@ test('SvgLayout.clear', () => {
   layout.populate(collectHtmlDisplayElements());
   layout.clear();
 
-  for (const locale in cred.locale) {
+  for (const locale of cred.locale) {
     expect(spyOnLayoutDisplay(layout, locale)).toBeUndefined();
   }
   const svgElems = document.getElementsByTagName('svg');

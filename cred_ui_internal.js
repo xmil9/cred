@@ -65,7 +65,7 @@ cred.ui_internal = (function() {
 
   ///////////////////
 
-  // Handles interactions with the properties pane.
+  // Represents the properties pane.
   class PropertyPane {
     constructor(controllerProxy) {
       // A proxy object that calls the actual controller with the correct
@@ -78,8 +78,6 @@ cred.ui_internal = (function() {
       this._propertyComponents = new Map();
     }
 
-    // --- External interface ---
-
     setup() {}
 
     get controller() {
@@ -87,7 +85,7 @@ cred.ui_internal = (function() {
     }
 
     // Populates the fields of the property pane with the values of a given
-    // resource definition of either a dialog or control.
+    // layout item.
     populate(item) {
       this.clear();
       this._setTitle(item.itemSpec().title + ' Properties');

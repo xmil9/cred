@@ -38,12 +38,62 @@ class PropertySpecMock {
 
 // Mocks controller objects.
 class ControllerMock {
-  constructor(locale) {
+  constructor(locale, selectedItem) {
     this.currentLocale = locale;
+    this.notifyItemPropertyModifiedCalled = false;
+    this.notifyItemLocalizedStringPropertyModifiedCalled = false;
+    this.notifyItemFlagPropertyModifiedCalled = false;
+    this.notifyItemIdModifiedCalled = false;
+    this.notifyItemBoundsModifiedCalled = false;
   }
 
   lookupString() {
     return 'localized text';
+  }
+
+  notifyItemPropertyModified() {
+    this.notifyItemPropertyModifiedCalled = true;
+  }
+
+  notifyItemLocalizedStringPropertyModified() {
+    this.notifyItemLocalizedStringPropertyModifiedCalled = true;
+  }
+
+  notifyItemFlagPropertyModified() {
+    this.notifyItemFlagPropertyModifiedCalled = true;
+  }
+
+  notifyItemIdModified() {
+    this.notifyItemIdModifiedCalled = true;
+  }
+
+  notifyItemBoundsModified() {
+    this.notifyItemBoundsModifiedCalled = true;
+  }
+}
+
+// Mocks SVG item objects.
+class SvgItemMock {
+  constructor(definition, spec) {
+    this._spec = spec;
+    this._definition = definition;
+  }
+
+  itemSpec() {
+    return this._spec;
+  }
+
+  resource() {
+    return this._definition;
+  }
+}
+
+// Mocks the definition of resource objects.
+class ResourceDefinitinMock {
+  constructor() {}
+
+  property(label) {
+    return new PropertyMock('100', 'My ' + label, cred.spec.physicalPropertyType.string);
   }
 }
 
@@ -650,4 +700,207 @@ test('PropertyComponentBuilder.buildFlagsComponent', () => {
   // Check that a fieldset element got created in the DOM.
   const $fieldsets = $('fieldset');
   expect($fieldsets.length).toEqual(1);
+});
+
+///////////////////
+
+// Sets up a test environment for PropertyPane tests.
+function setupPropertyPaneTextEnv() {
+  document.body.innerHTML =
+    '<div id="property-pane">' +
+    '  <div id="item-title">Properties</div>' +
+    '  <div id="property-list"></div>' +
+    '</div>';
+}
+
+test('PropertyPane.controller', () => {
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  expect(pane.controller).toBe(controller);
+});
+
+test('PropertyPane.populate', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $titleElem = $('#item-title');
+  expect($titleElem.text()).toEqual('Dialog Properties');
+  const $props = $('#property-list');
+  expect($props.children().length).toBeGreaterThan(0);
+});
+
+test('PropertyPane notify controller when a property changes', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#FontSize-property');
+  $elem.text('22');
+  $elem.trigger('change');
+
+  expect(controller.notifyItemPropertyModifiedCalled).toBeTruthy();
+});
+
+test('PropertyPane notify controller when a localized string property changes', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#Text-property');
+  $elem.text('new text');
+  $elem.trigger('change');
+
+  expect(controller.notifyItemLocalizedStringPropertyModified).toBeTruthy();
+});
+
+test('PropertyPane notify controller when a boolean property changes', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#KillPopup-property');
+  $elem.prop('checked', true);
+  $elem.trigger('change');
+
+  expect(controller.notifyItemPropertyModifiedCalled).toBeTruthy();
+});
+
+test.only('PropertyPane notify controller when a flags property changes', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#WS_CHILD-flag');
+  $elem.prop('checked', true);
+  $elem.trigger('change');
+
+  expect(controller.notifyItemFlagPropertyModified).toBeTruthy();
+});
+
+test('PropertyPane notify controller when a id property changes', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#ResourceName-property');
+  $elem.text('newId');
+  $elem.trigger('change');
+
+  expect(controller.notifyItemIdModified).toBeTruthy();
+});
+
+test('PropertyPane notify controller when a bounds property changes', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  let $elem = $('#Left-property');
+  $elem.text('0');
+  $elem.trigger('change');
+
+  expect(controller.notifyItemBoundsModified).toBeTruthy();
+
+  $elem = $('#Height-property');
+  $elem.text('200');
+  $elem.trigger('change');
+
+  expect(controller.notifyItemBoundsModified).toBeTruthy();
+});
+
+test('PropertyPane.clear', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  pane.clear();
+
+  const $titleElem = $('#item-title');
+  expect($titleElem.text()).toEqual('Properties');
+  const $props = $('#property-list');
+  expect($props.children().length).toEqual(0);
+});
+
+test('PropertyPane.setBounds', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  pane.setBounds({ left: 111, top: 222, width: 333, height: 444 });
+
+  const $leftElem = $('#Left-property');
+  expect($leftElem.val()).toEqual('111');
+  const $rightElem = $('#Right-property');
+  expect($rightElem.val()).toEqual('222');
+  const $widthElem = $('#Width-property');
+  expect($widthElem.val()).toEqual('333');
+  const $heightElem = $('#Height-property');
+  expect($heightElem.val()).toEqual('444');
+});
+
+test('PropertyPane.update for selected item', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  controller.selectedItem = item;
+
+  pane.update();
+
+  const $titleElem = $('#item-title');
+  expect($titleElem.text()).toEqual('Dialog Properties');
+  const $props = $('#property-list');
+  expect($props.children().length).toBeGreaterThan(0);
+});
+
+test('PropertyPane.update for no item', () => {
+  setupPropertyPaneTextEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  controller.selectedItem = undefined;
+
+  pane.update();
+
+  const $titleElem = $('#item-title');
+  expect($titleElem.text()).toEqual('Properties');
+  const $props = $('#property-list');
+  expect($props.children().length).toEqual(0);
 });

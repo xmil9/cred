@@ -37,8 +37,6 @@ cred.ui_internal = (function() {
       this._controllerProxy = controllerProxy;
     }
 
-    // --- External interface ---
-
     setup() {
       let self = this;
       $('#linked-flag').on('change', event => self._onLinkedToMasterChanged(event));
@@ -55,8 +53,6 @@ cred.ui_internal = (function() {
       $linkedFlag.prop('checked', this.controller.isLinkedToMaster(currentLocale));
       $linkedFlag.prop('disabled', currentLocale === cred.locale.any);
     }
-
-    // --- Event handlers ---
 
     _onLinkedToMasterChanged() {
       this.controller.notifyLinkedToMasterModified($('#linked-flag').is(':checked'));

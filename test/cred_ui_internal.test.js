@@ -38,17 +38,23 @@ class PropertySpecMock {
 
 // Mocks controller objects.
 class ControllerMock {
-  constructor(locale, selectedItem) {
+  constructor(locale, isLinked) {
     this.currentLocale = locale;
+    this._isLinked = isLinked;
     this.notifyItemPropertyModifiedCalled = false;
     this.notifyItemLocalizedStringPropertyModifiedCalled = false;
     this.notifyItemFlagPropertyModifiedCalled = false;
     this.notifyItemIdModifiedCalled = false;
     this.notifyItemBoundsModifiedCalled = false;
+    this.notifyLinkedToMasterModifiedCalled = false;
   }
 
   lookupString() {
     return 'localized text';
+  }
+
+  isLinkedToMaster() {
+    return this._isLinked;
   }
 
   notifyItemPropertyModified() {
@@ -69,6 +75,10 @@ class ControllerMock {
 
   notifyItemBoundsModified() {
     this.notifyItemBoundsModifiedCalled = true;
+  }
+
+  notifyLinkedToMasterModified() {
+    this.notifyLinkedToMasterModifiedCalled = true;
   }
 }
 
@@ -705,7 +715,7 @@ test('PropertyComponentBuilder.buildFlagsComponent', () => {
 ///////////////////
 
 // Sets up a test environment for PropertyPane tests.
-function setupPropertyPaneTextEnv() {
+function setupPropertyPaneTestEnv() {
   document.body.innerHTML =
     '<div id="property-pane">' +
     '  <div id="item-title">Properties</div>' +
@@ -720,7 +730,7 @@ test('PropertyPane.controller', () => {
 });
 
 test('PropertyPane.populate', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -735,7 +745,7 @@ test('PropertyPane.populate', () => {
 });
 
 test('PropertyPane notify controller when a property changes', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -751,7 +761,7 @@ test('PropertyPane notify controller when a property changes', () => {
 });
 
 test('PropertyPane notify controller when a localized string property changes', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -767,7 +777,7 @@ test('PropertyPane notify controller when a localized string property changes', 
 });
 
 test('PropertyPane notify controller when a boolean property changes', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -782,8 +792,8 @@ test('PropertyPane notify controller when a boolean property changes', () => {
   expect(controller.notifyItemPropertyModifiedCalled).toBeTruthy();
 });
 
-test.only('PropertyPane notify controller when a flags property changes', () => {
-  setupPropertyPaneTextEnv();
+test('PropertyPane notify controller when a flags property changes', () => {
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -799,7 +809,7 @@ test.only('PropertyPane notify controller when a flags property changes', () => 
 });
 
 test('PropertyPane notify controller when a id property changes', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -815,7 +825,7 @@ test('PropertyPane notify controller when a id property changes', () => {
 });
 
 test('PropertyPane notify controller when a bounds property changes', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -837,7 +847,7 @@ test('PropertyPane notify controller when a bounds property changes', () => {
 });
 
 test('PropertyPane.clear', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -854,7 +864,7 @@ test('PropertyPane.clear', () => {
 });
 
 test('PropertyPane.setBounds', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -866,8 +876,8 @@ test('PropertyPane.setBounds', () => {
 
   const $leftElem = $('#Left-property');
   expect($leftElem.val()).toEqual('111');
-  const $rightElem = $('#Right-property');
-  expect($rightElem.val()).toEqual('222');
+  const $topElem = $('#Top-property');
+  expect($topElem.val()).toEqual('222');
   const $widthElem = $('#Width-property');
   expect($widthElem.val()).toEqual('333');
   const $heightElem = $('#Height-property');
@@ -875,7 +885,7 @@ test('PropertyPane.setBounds', () => {
 });
 
 test('PropertyPane.update for selected item', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   const resDef = new ResourceDefinitinMock();
@@ -892,7 +902,7 @@ test('PropertyPane.update for selected item', () => {
 });
 
 test('PropertyPane.update for no item', () => {
-  setupPropertyPaneTextEnv();
+  setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
   const pane = new cred.ui_internal.PropertyPane(controller);
   controller.selectedItem = undefined;
@@ -903,4 +913,80 @@ test('PropertyPane.update for no item', () => {
   expect($titleElem.text()).toEqual('Properties');
   const $props = $('#property-list');
   expect($props.children().length).toEqual(0);
+});
+
+///////////////////
+
+// Sets up a test environment for DisplayHeader tests.
+function setupDisplayHeaderTestEnv() {
+  document.body.innerHTML =
+    '<div id="display-header">' +
+    '   <input type="checkbox" id="linked-flag" disabled="">' +
+    '   <label>Linked to Master</label>' +
+    '</div>';
+}
+
+test('DisplayHeader notifies controller about changes in linked-to-master state', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock();
+  const header = new cred.ui_internal.DisplayHeader(controller);
+  header.setup();
+
+  const $linkedFlag = $('#linked-flag');
+  $linkedFlag.prop('checked', true);
+  $linkedFlag.trigger('change');
+
+  expect(controller.notifyLinkedToMasterModifiedCalled).toBeTruthy();
+});
+
+test('DisplayHeader.controller', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock();
+  const header = new cred.ui_internal.DisplayHeader(controller);
+
+  expect(header.controller).toBe(controller);
+});
+
+test('DisplayHeader linked flag should be checked when current locale is linekd', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock(cred.locale.english, true);
+  const header = new cred.ui_internal.DisplayHeader(controller);
+
+  header.update();
+  const $linkedFlag = $('#linked-flag');
+
+  expect($linkedFlag.is(':checked')).toBeTruthy();
+});
+
+test('DisplayHeader linked flag should not be checked when current locale is not linekd', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock(cred.locale.english, false);
+  const header = new cred.ui_internal.DisplayHeader(controller);
+
+  header.update();
+  const $linkedFlag = $('#linked-flag');
+
+  expect($linkedFlag.is(':checked')).toBeFalsy();
+});
+
+test('DisplayHeader linked flag should be enabled when current locale is not the master locale', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock(cred.locale.english, true);
+  const header = new cred.ui_internal.DisplayHeader(controller);
+
+  header.update();
+  const $linkedFlag = $('#linked-flag');
+
+  expect($linkedFlag.is(':disabled')).toBeFalsy();
+});
+
+test('DisplayHeader linked flag should be enabled when current locale is not the master locale', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock(cred.locale.any, true);
+  const header = new cred.ui_internal.DisplayHeader(controller);
+
+  header.update();
+  const $linkedFlag = $('#linked-flag');
+
+  expect($linkedFlag.is(':disabled')).toBeTruthy();
 });

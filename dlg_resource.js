@@ -129,7 +129,7 @@ cred.resource = (function() {
         .catch(err => {
           self._controller.notifyErrorOccurred(
             this,
-            `Unable to open file ${fileSet.dialogId}.\nError: ${err}`
+            `Unable to open file ${fileSet.dialogId}.\n${err}`
           );
         });
     }

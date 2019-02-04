@@ -137,7 +137,7 @@ cred.resource = (function() {
     // Stores the current dialog resources.
     _storeDialog() {
       if (this._resourceSet) {
-        let writer = new cred.io.Writer(this._resourceSet, this._writeFile);
+        let writer = new cred.io.Writer(this._resourceSet, this._writeTextFile);
         writer.write();
       }
     }

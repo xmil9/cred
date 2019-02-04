@@ -332,8 +332,8 @@ cred.io = (function() {
   class Writer {
     constructor(
       dlgResourceSet,
-      // Allow to inject function to write a text file. Will be passed two arguments, the
-      // file name and the text content.
+      // Allow to inject a function to write a text file. Will be passed two arguments,
+      // the file name and the text content.
       writeTextFile,
       // Allow to inject function to encode text, e.g. to Shift-JIS.
       encode = encodeText

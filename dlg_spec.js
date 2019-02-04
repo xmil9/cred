@@ -89,22 +89,28 @@ cred.spec = (function() {
     imageTriStateDisabled: 'ImageTriStateDisabled',
     imageTriStateHot: 'ImageTriStateHot',
     imageTriStatePressed: 'ImageTriStatePressed',
+    incFactor: 'IncFactor',
     incValue: 'IncValue',
     killPopup: 'KillPopup',
     left: 'Left',
+    maximum: 'Max',
     maxValue: 'MaxValue',
     minValue: 'MinValue',
+    minimum: 'Min',
     ownerDrawn: 'OwnerDrawn',
     paddingType: 'PaddingType',
+    pageIncFactor: 'PageIncFactor',
     precision: 'Precision',
     pushButtonLike: 'PushButtonLike',
     readOnly: 'ReadOnly',
     resourceClass: 'ResourceClass',
+    solidColorsOnly: 'SolidColorsOnly',
     splitButtonLike: 'SplitButtonLike',
     styleFlags: 'StyleFlags',
     tabStop: 'TabStop',
     text: 'Text',
     textAlign: 'TextAlign',
+    tickMarks: 'TickMarks',
     toolBarLike: 'ToolBarLike',
     tooltip: 'Tooltip',
     top: 'Top',
@@ -714,10 +720,14 @@ cred.spec = (function() {
 
   // Enum for supported types of controls.
   const controlType = {
+    checkBox: 'CheckBox',
+    comboBox: 'ComboBox',
     imagePushButton: 'ImagePushButton',
+    inkButton: 'InkButton',
     label: 'Label',
     placeHolder: 'PlaceHolder',
     pushButton: 'PushButton',
+    slider: 'Slider',
     textBox: 'TextBox'
   };
   Object.freeze(controlType);
@@ -1705,7 +1715,7 @@ cred.spec = (function() {
     }
   }
 
-  // Specification for image push button controls.
+  // Specification for textbox controls.
   class TextBoxSpec extends ControlSpec {
     constructor() {
       super();
@@ -1885,63 +1895,63 @@ cred.spec = (function() {
           writeAsStringWhenSerialized: false,
           enums: [
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_AlphaNumeric',
+              value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
               display: 'Alphanumeric'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Numeric',
+              value: 'ACDSystems::UI::UnitType::type_Numeric',
               display: 'Numeric'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Percentage',
+              value: 'ACDSystems::UI::UnitType::type_Percentage',
               display: 'Percentage'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Angle',
+              value: 'ACDSystems::UI::UnitType::type_Angle',
               display: 'Angle'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Canvas',
+              value: 'ACDSystems::UI::UnitType::type_Canvas',
               display: 'Canvas'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_CanvasXCoord',
+              value: 'ACDSystems::UI::UnitType::type_CanvasXCoord',
               display: 'Canvas X-Coordinate'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_CanvasYCoord',
+              value: 'ACDSystems::UI::UnitType::type_CanvasYCoord',
               display: 'Canvas Y-Coordinate'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_CanvasXDist',
+              value: 'ACDSystems::UI::UnitType::type_CanvasXDist',
               display: 'Canvas X-Distance'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_CanvasYDist',
+              value: 'ACDSystems::UI::UnitType::type_CanvasYDist',
               display: 'Canvas Y-Distance'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Password',
+              value: 'ACDSystems::UI::UnitType::type_Password',
               display: 'Password'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_PaperSpace',
+              value: 'ACDSystems::UI::UnitType::type_PaperSpace',
               display: 'Paper Space'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Latitude',
+              value: 'ACDSystems::UI::UnitType::type_Latitude',
               display: 'Latitude'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Longitude',
+              value: 'ACDSystems::UI::UnitType::type_Longitude',
               display: 'Longitude'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_DMSAngle',
+              value: 'ACDSystems::UI::UnitType::type_DMSAngle',
               display: 'Angle in Degrees Minutes Seconds'
             },
             {
-              value: 'Unit,ACDSystems::UI::UnitType::type_Custom',
+              value: 'ACDSystems::UI::UnitType::type_Custom',
               display: 'Custom'
             }
           ]
@@ -1957,6 +1967,518 @@ cred.spec = (function() {
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+    }
+  }
+
+  // Specification for combobox controls.
+  class ComboBoxSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'ComboBox';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      this._propertyDisplayOrder.push(propertyLabel.readOnly);
+      this._propertyDisplayOrder.push(propertyLabel.precision);
+      this._propertyDisplayOrder.push(propertyLabel.incValue);
+      this._propertyDisplayOrder.push(propertyLabel.minValue);
+      this._propertyDisplayOrder.push(propertyLabel.maxValue);
+      this._propertyDisplayOrder.push(propertyLabel.commandDelay);
+      this._propertyDisplayOrder.push(propertyLabel.unit);
+      this._propertyDisplayOrder.push(propertyLabel.customUnitIndex);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.commandDelay,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.commandDelay,
+          displayedLabel: 'Command Delay',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.customUnitIndex,
+        new IntegerPropertySpec({
+          label: propertyLabel.customUnitIndex,
+          displayedLabel: 'Custom Unit Index',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.incValue,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.incValue,
+          displayedLabel: 'Increment Value',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.maxValue,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.maxValue,
+          displayedLabel: 'Max Value',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.minValue,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.minValue,
+          displayedLabel: 'Min Value',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.precision,
+        new IntegerPropertySpec({
+          label: propertyLabel.precision,
+          displayedLabel: 'Precison',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.readOnly,
+        new BooleanPropertySpec({
+          label: propertyLabel.readOnly,
+          displayedLabel: 'Read-Only',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.unit,
+        new EnumPropertySpec({
+          label: propertyLabel.unit,
+          displayedLabel: 'Unit',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          enums: [
+            {
+              value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
+              display: 'Alphanumeric'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Numeric',
+              display: 'Numeric'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Percentage',
+              display: 'Percentage'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Angle',
+              display: 'Angle'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Canvas',
+              display: 'Canvas'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_CanvasXCoord',
+              display: 'Canvas X-Coordinate'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_CanvasYCoord',
+              display: 'Canvas Y-Coordinate'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_CanvasXDist',
+              display: 'Canvas X-Distance'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_CanvasYDist',
+              display: 'Canvas Y-Distance'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Password',
+              display: 'Password'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_PaperSpace',
+              display: 'Paper Space'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Latitude',
+              display: 'Latitude'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Longitude',
+              display: 'Longitude'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_DMSAngle',
+              display: 'Angle in Degrees Minutes Seconds'
+            },
+            {
+              value: 'ACDSystems::UI::UnitType::type_Custom',
+              display: 'Custom'
+            }
+          ]
+        })
+      );
+    }
+  }
+
+  // Specification for ink button controls.
+  class InkButtonSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'InkButton';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.solidColorsOnly,
+        propertyLabel.id
+      );
+      this._propertyDisplayOrder.push(propertyLabel.solidColorsOnly);
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.solidColorsOnly,
+        new BooleanPropertySpec({
+          label: propertyLabel.solidColorsOnly,
+          displayedLabel: 'Solid Colors Only',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false
+        })
+      );
+    }
+  }
+
+  // Specification for slider controls.
+  class SliderSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'Slider';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      this._propertyDisplayOrder.push(propertyLabel.maximum);
+      this._propertyDisplayOrder.push(propertyLabel.minimum);
+      this._propertyDisplayOrder.push(propertyLabel.incFactor);
+      this._propertyDisplayOrder.push(propertyLabel.pageIncFactor);
+      this._propertyDisplayOrder.push(propertyLabel.tickMarks);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.incFactor,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.incFactor,
+          displayedLabel: 'Increment Factor',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.maximum,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.maximum,
+          displayedLabel: 'Maximum',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.minimum,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.minimum,
+          displayedLabel: 'Minimum',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.pageIncFactor,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.pageIncFactor,
+          displayedLabel: 'Page Inc Factor',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.tickMarks,
+        new EnumPropertySpec({
+          label: propertyLabel.tickMarks,
+          displayedLabel: 'Tick Marks',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          enums: [
+            {
+              value: 'ACDSystems::UI::Slider::None',
+              display: 'None'
+            },
+            {
+              value: 'ACDSystems::UI::Slider::Above',
+              display: 'Above'
+            },
+            {
+              value: 'ACDSystems::UI::Slider::Below',
+              display: 'Below'
+            },
+            {
+              value: 'ACDSystems::UI::Slider::Both',
+              display: 'Both'
+            }
+          ]
+        })
+      );
+    }
+  }
+
+  // Specification for checkbox controls.
+  class CheckBoxSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'Checkbox';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
@@ -1983,6 +2505,18 @@ cred.spec = (function() {
       }
       case controlType.textBox: {
         return new TextBoxSpec();
+      }
+      case controlType.checkBox: {
+        return new CheckBoxSpec();
+      }
+      case controlType.comboBox: {
+        return new ComboBoxSpec();
+      }
+      case controlType.inkButton: {
+        return new InkButtonSpec();
+      }
+      case controlType.slider: {
+        return new SliderSpec();
       }
       default: {
         throw new Error('Unexpected control type.');

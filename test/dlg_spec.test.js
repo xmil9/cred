@@ -340,11 +340,14 @@ test('FlagsPropertySpec.hasFlag', () => {
 
 test('spec.makeControlSpec', () => {
   for (const type of [
-    'ImagePushButton',
-    'Label',
-    'PlaceHolder',
-    'PushButton',
-    'TextBox'
+    cred.spec.controlType.imagePushButton,
+    cred.spec.controlType.label,
+    cred.spec.controlType.placeHolder,
+    cred.spec.controlType.pushButton,
+    cred.spec.controlType.textBox,
+    cred.spec.controlType.comboBox,
+    cred.spec.controlType.inkButton,
+    cred.spec.controlType.slider
   ]) {
     const spec = cred.spec.makeControlSpec(type);
     expect(spec).toBeDefined();
@@ -352,14 +355,14 @@ test('spec.makeControlSpec', () => {
 });
 
 test('ControlSpec.propertySpec', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   const ctrlTypePropSpec = ctrlSpec.propertySpec(cred.spec.propertyLabel.ctrlType);
   expect(ctrlTypePropSpec).toBeDefined();
   expect(ctrlTypePropSpec.label).toEqual(cred.spec.propertyLabel.ctrlType);
 });
 
 test('ControlSpec.propertySpecs', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   const propSpecGen = ctrlSpec.propertySpecs();
   expect(propSpecGen).toBeDefined();
   const generatedPropSpecs = Array.from(propSpecGen);
@@ -367,7 +370,7 @@ test('ControlSpec.propertySpecs', () => {
 });
 
 test('ControlSpec.propertyLabels', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   const propLabelGen = ctrlSpec.propertyLabels();
   expect(propLabelGen).toBeDefined();
   const generatedPropLabels = Array.from(propLabelGen);
@@ -375,7 +378,7 @@ test('ControlSpec.propertyLabels', () => {
 });
 
 test('ControlSpec.propertyDisplayOrder', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   const displayOrderGen = ctrlSpec.propertyDisplayOrder();
   expect(displayOrderGen).toBeDefined();
   const generatedDisplayOrder = Array.from(displayOrderGen);
@@ -383,7 +386,7 @@ test('ControlSpec.propertyDisplayOrder', () => {
 });
 
 test('ControlSpec.setBehaviorFlag', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   ctrlSpec.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
   expect(
     ctrlSpec.hasBehaviorFlag(cred.spec.controlBehavior.serializeProperties)
@@ -391,7 +394,7 @@ test('ControlSpec.setBehaviorFlag', () => {
 });
 
 test('ControlSpec.hasBehaviorFlag', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   expect(
     ctrlSpec.hasBehaviorFlag(cred.spec.controlBehavior.serializeProperties)
   ).toBeFalsy();
@@ -402,7 +405,7 @@ test('ControlSpec.hasBehaviorFlag', () => {
 });
 
 test('ControlSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [
     cred.spec.propertyLabel.ctrlType,
@@ -431,18 +434,18 @@ test('ControlSpec defined properties', () => {
 
 ///////////////////
 
-test('ImagePushButtonSpec ceation', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('ImagePushButton');
+test('ImagePushButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imagePushButton);
   expect(ctrlSpec).toBeDefined();
 });
 
 test('ImagePushButtonSpec.title', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('ImagePushButton');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imagePushButton);
   expect(ctrlSpec.title).toEqual(expect.any(String));
 });
 
 test('ImagePushButtonSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('ImagePushButton');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imagePushButton);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [
     cred.spec.propertyLabel.pushButtonLike,
@@ -468,18 +471,18 @@ test('ImagePushButtonSpec defined properties', () => {
 
 ///////////////////
 
-test('LabelSpec ceation', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+test('LabelSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   expect(ctrlSpec).toBeDefined();
 });
 
 test('LabelSpec.title', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   expect(ctrlSpec.title).toEqual(expect.any(String));
 });
 
 test('LabelSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('Label');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.label);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text, cred.spec.propertyLabel.textAlign]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
@@ -488,18 +491,18 @@ test('LabelSpec defined properties', () => {
 
 ///////////////////
 
-test('PlaceHolderSpec ceation', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PlaceHolder');
+test('PlaceHolderSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.placeHolder);
   expect(ctrlSpec).toBeDefined();
 });
 
 test('PlaceHolderSpec.title', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PlaceHolder');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.placeHolder);
   expect(ctrlSpec.title).toEqual(expect.any(String));
 });
 
 test('PlaceHolderSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PlaceHolder');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.placeHolder);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
@@ -508,18 +511,18 @@ test('PlaceHolderSpec defined properties', () => {
 
 ///////////////////
 
-test('PushButtonSpec ceation', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PushButton');
+test('PushButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.pushButton);
   expect(ctrlSpec).toBeDefined();
 });
 
 test('PushButtonSpec.title', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PushButton');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.pushButton);
   expect(ctrlSpec.title).toEqual(expect.any(String));
 });
 
 test('PushButtonSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PushButton');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.pushButton);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
@@ -527,25 +530,25 @@ test('PushButtonSpec defined properties', () => {
 });
 
 test('PushButtonSpec added style flags', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('PushButton');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.pushButton);
   const styleFlags = ctrlSpec.propertySpec(cred.spec.propertyLabel.styleFlags);
   expect(styleFlags.hasFlag('BS_PUSHBUTTON')).toBeTruthy();
 });
 
 ///////////////////
 
-test('TextBoxSpec ceation', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('TextBox');
+test('TextBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.textBox);
   expect(ctrlSpec).toBeDefined();
 });
 
 test('TextBoxSpec.title', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('TextBox');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.textBox);
   expect(ctrlSpec.title).toEqual(expect.any(String));
 });
 
 test('TextBoxSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec('TextBox');
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.textBox);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [
     cred.spec.propertyLabel.text,
@@ -559,6 +562,103 @@ test('TextBoxSpec defined properties', () => {
     cred.spec.propertyLabel.unit,
     cred.spec.propertyLabel.upDownArrows
   ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('ComboBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.comboBox);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('ComboBoxSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.comboBox);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('ComboBoxSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.comboBox);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.commandDelay,
+    cred.spec.propertyLabel.customUnitIndex,
+    cred.spec.propertyLabel.incValue,
+    cred.spec.propertyLabel.maxValue,
+    cred.spec.propertyLabel.minValue,
+    cred.spec.propertyLabel.precision,
+    cred.spec.propertyLabel.readOnly,
+    cred.spec.propertyLabel.unit
+  ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('InkButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.inkButton);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('InkButtonSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.inkButton);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('InkButtonSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.inkButton);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.solidColorsOnly]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('SliderSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('SliderSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('SliderSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.maximum,
+    cred.spec.propertyLabel.minimum,
+    cred.spec.propertyLabel.incFactor,
+    cred.spec.propertyLabel.pageIncFactor,
+    cred.spec.propertyLabel.tickMarks
+  ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('CheckBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('CheckBoxSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('CheckBoxSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }
 });

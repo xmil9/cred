@@ -340,14 +340,19 @@ test('FlagsPropertySpec.hasFlag', () => {
 
 test('spec.makeControlSpec', () => {
   for (const type of [
+    cred.spec.controlType.checkBox,
+    cred.spec.controlType.comboBox,
+    cred.spec.controlType.cornerBox,
+    cred.spec.controlType.groupBox,
     cred.spec.controlType.imagePushButton,
+    cred.spec.controlType.inkButton,
     cred.spec.controlType.label,
+    cred.spec.controlType.menuButton,
     cred.spec.controlType.placeHolder,
     cred.spec.controlType.pushButton,
-    cred.spec.controlType.textBox,
-    cred.spec.controlType.comboBox,
-    cred.spec.controlType.inkButton,
-    cred.spec.controlType.slider
+    cred.spec.controlType.radioButton,
+    cred.spec.controlType.slider,
+    cred.spec.controlType.textBox
   ]) {
     const spec = cred.spec.makeControlSpec(type);
     expect(spec).toBeDefined();
@@ -611,7 +616,10 @@ test('InkButtonSpec.title', () => {
 test('InkButtonSpec defined properties', () => {
   const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.inkButton);
   const props = Array.from(ctrlSpec.propertySpecs());
-  for (const label of [cred.spec.propertyLabel.solidColorsOnly]) {
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.solidColorsOnly
+  ]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }
 });
@@ -646,17 +654,97 @@ test('SliderSpec defined properties', () => {
 ///////////////////
 
 test('CheckBoxSpec creation', () => {
-  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.checkBox);
   expect(ctrlSpec).toBeDefined();
 });
 
 test('CheckBoxSpec.title', () => {
-  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.checkBox);
   expect(ctrlSpec.title).toEqual(expect.any(String));
 });
 
 test('CheckBoxSpec defined properties', () => {
-  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.slider);
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.checkBox);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('GroupBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.groupBox);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('GroupBoxSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.groupBox);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('GroupBoxSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.groupBox);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('MenuButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.menuButton);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('MenuButtonSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.menuButton);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('MenuButtonSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.menuButton);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('RadioButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.radioButton);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('RadioButtonSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.radioButton);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('RadioButtonSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.radioButton);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text, cred.spec.propertyLabel.checked]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('CornerBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.cornerBox);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('CornerBoxSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.cornerBox);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('CornerBoxSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.cornerBox);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);

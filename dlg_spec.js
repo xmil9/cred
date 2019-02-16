@@ -66,6 +66,7 @@ cred.spec = (function() {
     anchorLeft: 'AnchorLeft',
     anchorRight: 'AnchorRight',
     anchorTop: 'AnchorTop',
+    checked: 'Checked',
     commandDelay: 'CommandDelay',
     ctrlType: 'Type',
     customUnitIndex: 'CustomUnitIndex',
@@ -176,6 +177,10 @@ cred.spec = (function() {
         typeof config.writeAsStringWhenSerialized !== 'undefined'
           ? config.writeAsStringWhenSerialized
           : false;
+      this._writeSerializedCaption =
+        typeof config.writeSerializedCaption !== 'undefined'
+          ? config.writeSerializedCaption
+          : false;
       // Contextual tags for the property.
       this._tags = config.tags || [];
       this._tags.push(logicalType);
@@ -225,6 +230,10 @@ cred.spec = (function() {
 
     writeAsStringWhenSerialized() {
       return this._writeAsStringWhenSerialized;
+    }
+
+    writeSerializedCaption() {
+      return this._writeSerializedCaption;
     }
 
     get logicalType() {
@@ -475,6 +484,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: true,
             writeSerialized: false,
             writeAsStringWhenSerialized: true,
+            writeSerializedCaption: false,
             tags: [semanticPropertyTag.id]
           })
         ],
@@ -492,6 +502,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
             writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false,
             tags: [semanticPropertyTag.bounds]
           })
         ],
@@ -509,6 +520,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
             writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false,
             tags: [semanticPropertyTag.bounds]
           })
         ],
@@ -526,6 +538,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
             writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false,
             tags: [semanticPropertyTag.bounds]
           })
         ],
@@ -543,6 +556,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
             writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false,
             tags: [semanticPropertyTag.bounds]
           })
         ],
@@ -559,7 +573,8 @@ cred.spec = (function() {
             writeLabeled: true,
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
-            writeAsStringWhenSerialized: false
+            writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false
           })
         ],
         [
@@ -575,7 +590,8 @@ cred.spec = (function() {
             writeLabeled: false,
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
-            writeAsStringWhenSerialized: false
+            writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false
           })
         ],
         [
@@ -591,7 +607,8 @@ cred.spec = (function() {
             writeLabeled: false,
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
-            writeAsStringWhenSerialized: false
+            writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false
           })
         ],
         [
@@ -607,7 +624,8 @@ cred.spec = (function() {
             writeLabeled: false,
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
-            writeAsStringWhenSerialized: false
+            writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false
           })
         ],
         [
@@ -623,7 +641,8 @@ cred.spec = (function() {
             writeLabeled: true,
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
-            writeAsStringWhenSerialized: false
+            writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false
           })
         ],
         [
@@ -640,6 +659,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
             writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false,
             enums: [
               {
                 value: 'ACDSystems::UI::DialogPaddingTypes::Default',
@@ -674,6 +694,7 @@ cred.spec = (function() {
             writeAsStringWhenLabeled: false,
             writeSerialized: false,
             writeAsStringWhenSerialized: false,
+            writeSerializedCaption: false,
             flags: [
               {
                 textValue: 'WS_CHILD',
@@ -722,11 +743,15 @@ cred.spec = (function() {
   const controlType = {
     checkBox: 'CheckBox',
     comboBox: 'ComboBox',
+    cornerBox: 'CornerBox',
+    groupBox: 'GroupBox',
     imagePushButton: 'ImagePushButton',
     inkButton: 'InkButton',
     label: 'Label',
+    menuButton: 'MenuButton',
     placeHolder: 'PlaceHolder',
     pushButton: 'PushButton',
+    radioButton: 'RadioButton',
     slider: 'Slider',
     textBox: 'TextBox'
   };
@@ -811,7 +836,8 @@ cred.spec = (function() {
           writeLabeled: false,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -828,6 +854,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: true,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           tags: [semanticPropertyTag.id]
         })
       );
@@ -845,6 +872,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           tags: [semanticPropertyTag.bounds]
         })
       );
@@ -862,6 +890,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           tags: [semanticPropertyTag.bounds]
         })
       );
@@ -879,6 +908,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           tags: [semanticPropertyTag.bounds]
         })
       );
@@ -896,6 +926,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           tags: [semanticPropertyTag.bounds]
         })
       );
@@ -912,7 +943,8 @@ cred.spec = (function() {
           writeLabeled: false,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -929,6 +961,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           flags: [
             {
               textValue: 'WS_CHILD',
@@ -967,6 +1000,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           flags: []
         })
       );
@@ -983,7 +1017,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -999,7 +1034,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1015,7 +1051,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1031,7 +1068,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1047,7 +1085,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1063,7 +1102,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1079,7 +1119,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1095,7 +1136,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1111,7 +1153,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1127,7 +1170,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -1235,7 +1279,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1251,7 +1296,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1267,7 +1313,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1283,7 +1330,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1299,7 +1347,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1315,7 +1364,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1331,7 +1381,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1347,7 +1398,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1363,7 +1415,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1379,7 +1432,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1395,7 +1449,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1411,7 +1466,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: true,
           writeSerialized: true,
-          writeAsStringWhenSerialized: true
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1428,6 +1484,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           enums: [
             {
               value: 'ACDSystems::UI::ImageSizeType::px16',
@@ -1477,7 +1534,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1493,7 +1551,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: true,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1509,7 +1568,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1525,7 +1585,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: true,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -1576,7 +1637,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1593,6 +1655,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           enums: [
             {
               value: 'ACDSystems::UI::TextAlign::Left',
@@ -1652,7 +1715,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -1699,7 +1763,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -1764,7 +1829,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1780,7 +1846,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1796,7 +1863,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1812,7 +1880,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1828,7 +1897,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1844,7 +1914,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1860,7 +1931,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1876,7 +1948,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -1893,6 +1966,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           enums: [
             {
               value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
@@ -1970,7 +2044,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -2024,7 +2099,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2040,7 +2116,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2056,7 +2133,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2072,7 +2150,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2088,7 +2167,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2104,7 +2184,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2120,7 +2201,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2136,7 +2218,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2153,6 +2236,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           enums: [
             {
               value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
@@ -2246,9 +2330,8 @@ cred.spec = (function() {
       util.insertAfter(
         this._propertyDisplayOrder,
         propertyLabel.solidColorsOnly,
-        propertyLabel.id
+        propertyLabel.text
       );
-      this._propertyDisplayOrder.push(propertyLabel.solidColorsOnly);
     }
 
     // Polymorphic function to set behavior flags for the control.
@@ -2271,7 +2354,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: true
         })
       );
       this._propertySpecs.set(
@@ -2287,7 +2371,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: true,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -2338,7 +2423,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2354,7 +2440,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2370,7 +2457,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2386,7 +2474,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2402,7 +2491,8 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
       this._propertySpecs.set(
@@ -2419,6 +2509,7 @@ cred.spec = (function() {
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
           enums: [
             {
               value: 'ACDSystems::UI::Slider::None',
@@ -2482,7 +2573,218 @@ cred.spec = (function() {
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
-          writeAsStringWhenSerialized: false
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
+  // Specification for groupbox controls.
+  class GroupBoxSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'GroupBox';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
+  // Specification for menu button controls.
+  class MenuButtonSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'MenuButton';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
+  // Specification for radio button controls.
+  class RadioButtonSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'RadioButton';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.checked,
+        propertyLabel.text
+      );
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.checked,
+        new BooleanPropertySpec({
+          label: propertyLabel.checked,
+          displayedLabel: 'Checked',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
+  // Specification for corner box controls.
+  class CornerBoxSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'CornerBox';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
         })
       );
     }
@@ -2491,11 +2793,29 @@ cred.spec = (function() {
   // Factory function for control specs based on a given control type.
   function makeControlSpec(ctrlType) {
     switch (ctrlType) {
+      case controlType.checkBox: {
+        return new CheckBoxSpec();
+      }
+      case controlType.comboBox: {
+        return new ComboBoxSpec();
+      }
+      case controlType.cornerBox: {
+        return new CornerBoxSpec();
+      }
+      case controlType.groupBox: {
+        return new GroupBoxSpec();
+      }
       case controlType.imagePushButton: {
         return new ImagePushButtonSpec();
       }
+      case controlType.inkButton: {
+        return new InkButtonSpec();
+      }
       case controlType.label: {
         return new LabelSpec();
+      }
+      case controlType.menuButton: {
+        return new MenuButtonSpec();
       }
       case controlType.placeHolder: {
         return new PlaceHolderSpec();
@@ -2503,20 +2823,14 @@ cred.spec = (function() {
       case controlType.pushButton: {
         return new PushButtonSpec();
       }
-      case controlType.textBox: {
-        return new TextBoxSpec();
-      }
-      case controlType.checkBox: {
-        return new CheckBoxSpec();
-      }
-      case controlType.comboBox: {
-        return new ComboBoxSpec();
-      }
-      case controlType.inkButton: {
-        return new InkButtonSpec();
+      case controlType.radioButton: {
+        return new RadioButtonSpec();
       }
       case controlType.slider: {
         return new SliderSpec();
+      }
+      case controlType.textBox: {
+        return new TextBoxSpec();
       }
       default: {
         throw new Error('Unexpected control type.');

@@ -267,6 +267,7 @@ cred.lexer = (function() {
       this._lexer = lexer;
       // Don't store the surrounding double quotes.
       this._value = '';
+      this._insideNestedString = false;
     }
 
     // Processes the next character.
@@ -274,16 +275,22 @@ cred.lexer = (function() {
     next(ch) {
       // Check if the string has ended.
       if (ch === '"') {
-        // If the next character is another double quote then it's an escape
-        // sequence. Store both.
-        // Otherwise the string has ended.
         let nextChar = this._lexer.peekAheadBy(1);
-        if (nextChar === '"') {
+        if (this._insideNestedString) {
+          // End nested string treatment and continue reading the outer string.
+          this._insideNestedString = false;
+        } else if (this._isNestedString()) {
+          // Start nested string treatment and continue reading the inner string.
+          this._insideNestedString = true;
+        } else if (nextChar === '"') {
+          // If the next character is another double quote then it's an escape
+          // sequence. Store both.
           this._value += ch;
           this._value += nextChar;
           this._lexer.skipAheadBy(1);
           return this;
         } else {
+          // Otherwise the string has ended.
           this._storeToken();
           return new UndecidedState(this._lexer);
         }
@@ -303,6 +310,14 @@ cred.lexer = (function() {
 
     _storeToken() {
       this._lexer.storeToken(cred.tokenKind.string, this._value);
+    }
+
+    // Checks for situations where nested strings can occurr.
+    _isNestedString() {
+      // Within serialized control properties when a caption is following the
+      // property sequence. In this case we should have just read the caption
+      // label.
+      return this._value.endsWith(cred.serializedCaptionLabel);
     }
   }
 

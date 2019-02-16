@@ -535,7 +535,8 @@ cred.parser = (function() {
       'String with serialized properties expected.'
     );
 
-    let labeledValues = deserializeProperties(token.value);
+    const serializedProps = token.value;
+    const labeledValues = deserializeProperties(serializedProps);
     for (let labeledVal of labeledValues) {
       const type = typeOfSerializedPropertyValue(labeledVal.value);
       let property = cred.resource.makeProperty(
@@ -553,6 +554,11 @@ cred.parser = (function() {
   //      {[label1=value1][label2=value2][label2=value2]...}
   // If a value is a string it is enclosed in two double-quotes, e.g.
   //      [label=""strval""].
+  // Unfortunately, there is a special case to allow specifying the caption text
+  // as whose value these properties are encoded. This is done by appending
+  // 'Caption=""' (without the single quotes) after the closing curly braces of
+  // the property pairs, e.g.
+  //      {[label1=value1][label2=value2][label2=value2]...}Caption="caption_value"
   function deserializeProperties(serialized) {
     serialized = serialized.trim();
     let len = serialized.length;
@@ -560,14 +566,42 @@ cred.parser = (function() {
       return [];
     }
 
-    if (!serialized.startsWith('{') || !serialized.endsWith('}')) {
+    if (
+      !(
+        serialized.startsWith('{') || serialized.startsWith(cred.serializedCaptionLabel)
+      ) ||
+      !(serialized.endsWith('}') || serialized.endsWith('"'))
+    ) {
       throw new Error('Invalid serialized properties.');
     }
 
+    let serializedPairs = undefined;
+    let caption = undefined;
+    if (serialized.startsWith('{')) {
+      [serializedPairs, caption] = serialized.split('}');
+    } else {
+      caption = serialized;
+    }
+
+    let props = [];
+    if (serializedPairs) {
+      // Trim off the starting brace. Note that the closing brace has already been
+      // trimmed off by the splt operation.
+      props = deserializePropertySequence(serializedPairs.substring(1));
+    }
+    if (caption) {
+      props.push(deserializeCaptionProperty(caption));
+    }
+    return props;
+  }
+
+  // Deserializes a given string holding a sequence of key-value property pairs into
+  // an array of  objects with 'label' and 'value' fields.
+  // The property pair sequence has the following format:
+  //      [label1=value1][label2=value2][label2=value2]...
+  function deserializePropertySequence(pairs) {
     return (
-      serialized
-        // Trim off the enclosing braces.
-        .substring(1, len - 1)
+      pairs
         // Split properties into array at '['s.
         .split('[')
         // Transform into array of property objects.
@@ -594,11 +628,32 @@ cred.parser = (function() {
     );
   }
 
+  // Deserializes the serialized caption property of a control. Returns the deserialized
+  // caption property as an object with 'label' and 'value' fields.
+  // The serialized caption property has the following format:
+  //    Caption="my caption"
+  function deserializeCaptionProperty(serializedCaption) {
+    if (!serializedCaption.startsWith(cred.serializedCaptionLabel)) {
+      throw new Error('Invalid serialized caption.');
+    }
+    return {
+      label: cred.spec.propertyLabel.text,
+      // Trim the label, separator, and the double-quotes around the caption value.
+      value: serializedCaption.substring(
+        cred.serializedCaptionLabel.length + 1,
+        serializedCaption.length - 1
+      )
+    };
+  }
+
   // Determines the type of a given string value.
   // Returns the physical property type.
   function typeOfSerializedPropertyValue(valueAsStr) {
-    // If it is enclosed in double-quotes, it's a string.
-    if (valueAsStr.startsWith('"') && valueAsStr.endsWith('"')) {
+    // If it is empty or enclosed in double-quotes, it's a string.
+    if (
+      valueAsStr.length === 0 ||
+      (valueAsStr.startsWith('"') && valueAsStr.endsWith('"'))
+    ) {
       return cred.spec.physicalPropertyType.string;
     }
     // If it does not contain anything but digits, '.', and '-', then it's

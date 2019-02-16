@@ -339,12 +339,28 @@ cred.gen = (function() {
 
   // Generates the caption property for a given control.
   function generateControlCaption(ctrl) {
+    const captionProp = ctrl.property(cred.spec.propertyLabel.text);
+
+    // Serialize properties into the caption text if configured for the control.
     const ctrlSpec = cred.spec.makeControlSpec(ctrl.type);
     if (ctrlSpec.hasBehaviorFlag(cred.spec.controlBehavior.serializeProperties)) {
-      return `"${generateSerializedItemProperties(ctrl, ctrlSpec)}"`;
+      let serialized = `"${generateSerializedItemProperties(ctrl, ctrlSpec)}`;
+
+      // Append the caption text if configured.
+      const captionPropSpec = ctrlSpec.propertySpec(cred.spec.propertyLabel.text);
+      if (captionPropSpec && captionPropSpec.writeSerializedCaption()) {
+        let captionText = '';
+        const captionProp = ctrl.property(cred.spec.propertyLabel.text);
+        if (captionProp) {
+          captionText = captionProp.value;
+        }
+        serialized += `Caption="${captionText}"`;
+      }
+
+      serialized += '"';
+      return serialized;
     }
 
-    const captionProp = ctrl.property(cred.spec.propertyLabel.text);
     return captionProp ? captionProp.valueAsString() : '""';
   }
 

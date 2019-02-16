@@ -63,6 +63,12 @@ test('cred.lexer.analyse empty string', () => {
   expect(tokens[0].isMatch(cred.tokenKind.string, '')).toBeTruthy();
 });
 
+test('cred.lexer.analyse nested string for control captions', () => {
+  const tokens = cred.lexer.analyse('"Caption="my caption""');
+  expect(tokens.length).toEqual(1);
+  expect(tokens[0].isMatch(cred.tokenKind.string, 'Caption="my caption"')).toBeTruthy();
+});
+
 test('cred.lexer.analyse identifier', () => {
   const tokens = cred.lexer.analyse('my_id');
   expect(tokens.length).toEqual(1);

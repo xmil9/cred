@@ -83,7 +83,7 @@ var cred = (function() {
   }
 
   ///////////////////
-  // Tokens
+  // Parsing
 
   // Enum of supported token kinds.
   const tokenKind = {
@@ -138,6 +138,9 @@ var cred = (function() {
       }
     }
   }
+
+  // Label that identifies a control caption within a serialized property string.
+  const serializedCaptionLabel = 'Caption=';
 
   ///////////////////
   // I/O
@@ -221,6 +224,7 @@ var cred = (function() {
     locale: locale,
     localeFromLanguage: localeFromLanguage,
     resourceVersion: resourceVersion,
+    serializedCaptionLabel: serializedCaptionLabel,
     stringFileName: stringFileName,
     tokenKind: tokenKind,
     tokenKindName: tokenKindName

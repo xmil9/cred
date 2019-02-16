@@ -1486,6 +1486,371 @@ test('cred.parser.parseDialog for multiple serialized control properties with wh
   ).toEqual(0);
 });
 
+test('cred.parser.parseDialog for empty serialized control properties', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,"{}",445,360,75,22,0,0)      ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId')).toBeDefined();
+  expect(Array.from(dlgRes.control('ctrlId').properties()).length).toEqual(9);
+});
+
+test('cred.parser.parseDialog for serialized control properties with caption', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,                             ' +
+    '"{[Tooltip=StringId][ToolBarLike=0]}Caption="mycaption"",445,360,75,22,   ' +
+    '0,0)                                                                       ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    'mycaption'
+  );
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
+  ).toEqual('StringId');
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+  ).toEqual(0);
+});
+
+test('cred.parser.parseDialog for serialized control properties with caption that has spaces', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,                             ' +
+    '"{[Tooltip=StringId][ToolBarLike=0]}Caption="my multiword caption"",       ' +
+    '445,360,75,22,0,0)                                                         ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    'my multiword caption'
+  );
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
+  ).toEqual('StringId');
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+  ).toEqual(0);
+});
+
+test('cred.parser.parseDialog for serialized control properties with caption that has digits', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,                             ' +
+    '"{[Tooltip=StringId][ToolBarLike=0]}Caption="my caption 3"",               ' +
+    '445,360,75,22,0,0)                                                         ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    'my caption 3'
+  );
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
+  ).toEqual('StringId');
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+  ).toEqual(0);
+});
+
+test('cred.parser.parseDialog for serialized control properties with caption that has a dash', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,                             ' +
+    '"{[Tooltip=StringId][ToolBarLike=0]}Caption="my-caption"",                 ' +
+    '445,360,75,22,0,0)                                                         ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    'my-caption'
+  );
+});
+
+test('cred.parser.parseDialog for serialized control properties with caption that has a nultiple spaces', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,                             ' +
+    '"{[Tooltip=StringId][ToolBarLike=0]}Caption="my     caption"",             ' +
+    '445,360,75,22,0,0)                                                         ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    'my     caption'
+  );
+});
+
+test('cred.parser.parseDialog for serialized control properties with empty caption', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,                             ' +
+    '"{[Tooltip=StringId][ToolBarLike=0]}Caption=""",445,360,75,22,0,0)         ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    ''
+  );
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
+  ).toEqual('StringId');
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+  ).toEqual(0);
+});
+
+test('cred.parser.parseDialog for empty serialized control properties with caption', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,"{}Caption=""",445,360,75,   ' +
+    '22,0,0)                                                                    ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    ''
+  );
+  expect(Array.from(dlgRes.control('ctrlId').properties()).length).toEqual(10);
+});
+
+test('cred.parser.parseDialog for no serialized control properties but caption', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,"Caption="test"",445,360,75, ' +
+    '22,0,0)                                                                    ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+    'test'
+  );
+  expect(Array.from(dlgRes.control('ctrlId').properties()).length).toEqual(10);
+});
+
+test('cred.parser.parseDialog for invalid serialized control properties', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,"invalid",445,360,75,22,0,0) ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
+});
+
 test('cred.parser.parseDialog for positional style flags control property', () => {
   const content =
     '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +

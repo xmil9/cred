@@ -460,7 +460,8 @@ test('cred.parser.parseDialog for serialized flag property not supported', () =>
     '#endif                                                                     ';
 
   const tokens = cred.lexer.analyse(content);
-  expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.extStyleFlags)).toEqual(0);
 });
 
 test('cred.parser.parseDialog for serialized dialog identifier property', () => {
@@ -1151,6 +1152,37 @@ test('cred.parser.parseDialog for control declaration', () => {
   expect(dlgRes.control('ctrlId').type).toEqual(cred.spec.controlType.pushButton);
 });
 
+test('cred.parser.parseDialog for control declaration with numeric id', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,100)                                          ' +
+    '  begin_control_definitions()                                              ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control(100)).toBeDefined();
+  expect(dlgRes.control(100).id).toEqual(100);
+  expect(dlgRes.control(100).type).toEqual(cred.spec.controlType.pushButton);
+});
+
 test('cred.parser.parseDialog for minimal control definition', () => {
   const content =
     '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
@@ -1208,6 +1240,56 @@ test('cred.parser.parseDialog for minimal control definition', () => {
   ).toEqual(0);
   expect(
     dlgRes.control('ctrlId').property(cred.spec.propertyLabel.extStyleFlags).value
+  ).toEqual(0);
+});
+
+test('cred.parser.parseDialog for minimal control definition with numeric id', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,101)                                          ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,101,labelId,445,360,75,22,0,0)      ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.control(101)).toBeDefined();
+  expect(dlgRes.control(101).id).toEqual(101);
+  expect(dlgRes.control(101).type).toEqual(cred.spec.controlType.pushButton);
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.ctrlType).value).toEqual(
+    cred.spec.controlType.pushButton
+  );
+  expect(
+    dlgRes.control(101).property(cred.spec.propertyLabel.resourceClass).value
+  ).toEqual('Button');
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.id).value).toEqual(101);
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.left).value).toEqual(445);
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.top).value).toEqual(360);
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.width).value).toEqual(75);
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.height).value).toEqual(22);
+  expect(dlgRes.control(101).property(cred.spec.propertyLabel.styleFlags).value).toEqual(
+    0
+  );
+  expect(
+    dlgRes.control(101).property(cred.spec.propertyLabel.extStyleFlags).value
   ).toEqual(0);
 });
 
@@ -1375,7 +1457,10 @@ test('cred.parser.parseDialog for serialized flag control property not supported
     '#endif                                                                     ';
 
   const tokens = cred.lexer.analyse(content);
-  expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(
+    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.extStyleFlags).value
+  ).toEqual(0);
 });
 
 test('cred.parser.parseDialog for serialized control identifier property', () => {

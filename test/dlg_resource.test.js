@@ -794,25 +794,94 @@ test('FlagsProperty.isSet for not existing flag', () => {
 
 ///////////////////
 
+// Simplifies creating a control object by setting up the properties.
+function makeControlHelper(type, id, isNumericId = false) {
+  const typeProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.ctrlType,
+    cred.spec.physicalPropertyType.identifier,
+    type
+  );
+  const idProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.id,
+    isNumericId
+      ? cred.spec.physicalPropertyType.number
+      : cred.spec.physicalPropertyType.identifier,
+    id
+  );
+  return new cred.resource.Control(typeProp, idProp);
+}
+
 test('Control construction', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const typeProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.ctrlType,
+    cred.spec.physicalPropertyType.identifier,
+    cred.spec.controlType.imagePushButton
+  );
+  const idProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.id,
+    cred.spec.physicalPropertyType.identifier,
+    'myid'
+  );
+  const ctrl = new cred.resource.Control(typeProp, idProp);
   expect(ctrl).toBeDefined();
   expect(ctrl.type).toEqual(cred.spec.controlType.imagePushButton);
   expect(ctrl.id).toEqual('myid');
 });
 
+test('Control construction for numeric id', () => {
+  const typeProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.ctrlType,
+    cred.spec.physicalPropertyType.identifier,
+    cred.spec.controlType.imagePushButton
+  );
+  const idProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.id,
+    cred.spec.physicalPropertyType.number,
+    100
+  );
+  const ctrl = new cred.resource.Control(typeProp, idProp);
+  expect(ctrl).toBeDefined();
+  expect(ctrl.type).toEqual(cred.spec.controlType.imagePushButton);
+  expect(ctrl.id).toEqual(100);
+});
+
+test('Control construction for negactive numeric id', () => {
+  const typeProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.ctrlType,
+    cred.spec.physicalPropertyType.identifier,
+    cred.spec.controlType.imagePushButton
+  );
+  const idProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.id,
+    cred.spec.physicalPropertyType.number,
+    -1
+  );
+  const ctrl = new cred.resource.Control(typeProp, idProp);
+  expect(ctrl).toBeDefined();
+  expect(ctrl.type).toEqual(cred.spec.controlType.imagePushButton);
+  expect(ctrl.id).toEqual(-1);
+});
+
 test('Control construction without type', () => {
-  expect(() => new cred.resource.Control(undefined, 'myid')).toThrow();
+  const idProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.id,
+    cred.spec.physicalPropertyType.identifier,
+    'myid'
+  );
+  expect(() => new cred.resource.Control(undefined, idProp)).toThrow();
 });
 
 test('Control construction without id', () => {
-  expect(
-    () => new cred.resource.Control(cred.spec.controlType.imagePushButton, undefined)
-  ).toThrow();
+  const typeProp = cred.resource.makeProperty(
+    cred.spec.propertyLabel.ctrlType,
+    cred.spec.physicalPropertyType.identifier,
+    cred.spec.controlType.imagePushButton
+  );
+  expect(() => new cred.resource.Control(typeProp, undefined)).toThrow();
 });
 
 test('Control.copy', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -831,28 +900,40 @@ test('Control.copy', () => {
 });
 
 test('Control.type', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl.type).toEqual(cred.spec.controlType.imagePushButton);
 });
 
 test('Control.id getter', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl.id).toEqual('myid');
 });
 
 test('Control.id setter', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.id = 'changed_id';
   expect(ctrl.id).toEqual('changed_id');
 });
 
+test('Control.id setter for numeric id as string', () => {
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 100);
+  ctrl.id = '101';
+  expect(ctrl.id).toEqual(101);
+});
+
+test('Control.id setter for numeric id as number', () => {
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 100);
+  ctrl.id = 101;
+  expect(ctrl.id).toEqual(101);
+});
+
 test('Control.isDialog', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   expect(ctrl.isDialog()).toBeFalsy();
 });
 
 test('Control.haveProperty for existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -866,7 +947,7 @@ test('Control.haveProperty for existing property', () => {
 });
 
 test('Control.haveProperty for not existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -880,13 +961,13 @@ test('Control.haveProperty for not existing property', () => {
 });
 
 test('Control.haveProperty for pre-defined property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
 
   expect(ctrl.haveProperty(cred.spec.propertyLabel.ctrlType)).toBeTruthy();
 });
 
 test('Control.property for existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -902,7 +983,7 @@ test('Control.property for existing property', () => {
 });
 
 test('Control.property for not existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -916,7 +997,7 @@ test('Control.property for not existing property', () => {
 });
 
 test('Control.property for pre-defined property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
 
   const prop = ctrl.property(cred.spec.propertyLabel.ctrlType);
   expect(prop).toBeDefined();
@@ -924,7 +1005,7 @@ test('Control.property for pre-defined property', () => {
 });
 
 test('Control.setProperty for new property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.setProperty(
     'my_prop',
     cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.string, 'test')
@@ -936,7 +1017,7 @@ test('Control.setProperty for new property', () => {
 });
 
 test('Control.setProperty for existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     'my_prop',
     cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.number, 1)
@@ -954,7 +1035,7 @@ test('Control.setProperty for existing property', () => {
 });
 
 test('Control.properties', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -989,7 +1070,7 @@ test('Control.properties', () => {
 });
 
 test('Control.addPositionalProperty for new property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
 
   ctrl.addPositionalProperty(
     cred.spec.propertyLabel.enabled,
@@ -1003,7 +1084,7 @@ test('Control.addPositionalProperty for new property', () => {
 });
 
 test('Control.addPositionalProperty for existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -1026,7 +1107,7 @@ test('Control.addPositionalProperty for existing property', () => {
 });
 
 test('Control.addLabeledProperty for new property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
 
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
@@ -1040,7 +1121,7 @@ test('Control.addLabeledProperty for new property', () => {
 });
 
 test('Control.addLabeledProperty for existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -1063,7 +1144,7 @@ test('Control.addLabeledProperty for existing property', () => {
 });
 
 test('Control.addSerializedProperty for new property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
 
   ctrl.addSerializedProperty(
     cred.spec.propertyLabel.enabled,
@@ -1077,7 +1158,7 @@ test('Control.addSerializedProperty for new property', () => {
 });
 
 test('Control.addSerializedProperty for existing property', () => {
-  const ctrl = new cred.resource.Control(cred.spec.controlType.imagePushButton, 'myid');
+  const ctrl = makeControlHelper(cred.spec.controlType.imagePushButton, 'myid');
   ctrl.addLabeledProperty(
     cred.spec.propertyLabel.enabled,
     cred.resource.makeProperty(
@@ -1128,7 +1209,7 @@ test('Dialog.copy when populated', () => {
       'test-value'
     )
   );
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
 
   const copy = dlg.copy();
   expect(copy).toBeDefined();
@@ -1399,7 +1480,7 @@ test('Dialog.addSerializedProperty for existing property', () => {
 
 test('Dialog.control for existing control', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
 
   const ctrl = dlg.control('label-id');
   expect(ctrl).toBeDefined();
@@ -1413,10 +1494,8 @@ test('Dialog.control for not existing control', () => {
 
 test('Dialog.controls', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
-  dlg.addControl(
-    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
-  );
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.pushButton, 'button-id'));
 
   const ctrlArray = Array.from(dlg.controls());
   expect(ctrlArray.length).toEqual(2);
@@ -1432,16 +1511,14 @@ test('Dialog.controls for no controls', () => {
 
 test('Dialog.addControl for first control', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   expect(dlg.control('label-id')).toBeDefined();
 });
 
 test('Dialog.addControl for multiple controls', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
-  dlg.addControl(
-    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
-  );
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.pushButton, 'button-id'));
 
   expect(dlg.control('label-id')).toBeDefined();
   expect(dlg.control('button-id')).toBeDefined();
@@ -1449,15 +1526,15 @@ test('Dialog.addControl for multiple controls', () => {
 
 test('Dialog.addControl for existing control', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   expect(() =>
-    dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'))
+    dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'))
   ).toThrow();
 });
 
 test('Dialog.updateControlId', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
 
   dlg.updateControlId('label-id', 'new-id');
   expect(dlg.control('label-id')).toBeUndefined();
@@ -1466,7 +1543,7 @@ test('Dialog.updateControlId', () => {
 
 test('Dialog.updateControlId for not existing control', () => {
   const dlg = new cred.resource.Dialog();
-  dlg.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlg.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
 
   dlg.updateControlId('other-id', 'new-id');
   expect(dlg.control('other-id')).toBeUndefined();
@@ -1496,7 +1573,7 @@ test('DialogResource.copyAs', () => {
       'myid'
     )
   );
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   dlgRes.addLayer(new cred.resource.Layer('test-layer', [1, 2]));
   dlgRes.addIncludedHeader('test-header.h');
 
@@ -1718,7 +1795,7 @@ test('DialogResource.addSerializedProperty for existing property', () => {
 
 test('DialogResource.control for existing control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   expect(dlgRes.control('label-id')).toBeDefined();
 });
 
@@ -1729,10 +1806,8 @@ test('DialogResource.control for not existing control', () => {
 
 test('DialogResource.controls', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
-  dlgRes.addControl(
-    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
-  );
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.pushButton, 'button-id'));
 
   const ctrlArray = Array.from(dlgRes.controls());
   expect(ctrlArray.length).toEqual(2);
@@ -1748,16 +1823,14 @@ test('DialogResource.controls for no controls', () => {
 
 test('DialogResource.addControl for first control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   expect(dlgRes.control('label-id')).toBeDefined();
 });
 
 test('DialogResource.addControl for multiple controls', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
-  dlgRes.addControl(
-    new cred.resource.Control(cred.spec.controlType.pushButton, 'button-id')
-  );
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.pushButton, 'button-id'));
 
   expect(dlgRes.control('label-id')).toBeDefined();
   expect(dlgRes.control('button-id')).toBeDefined();
@@ -1765,9 +1838,9 @@ test('DialogResource.addControl for multiple controls', () => {
 
 test('DialogResource.addControl for existing control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   expect(() =>
-    dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'))
+    dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'))
   ).toThrow();
 });
 
@@ -1893,7 +1966,7 @@ test('DialogResource.updateDialogId for not existing id', () => {
 
 test('DialogResource.updateControlId', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
-  dlgRes.addControl(new cred.resource.Control(cred.spec.controlType.label, 'label-id'));
+  dlgRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
 
   dlgRes.updateControlId('label-id', 'other-id');
   expect(dlgRes.control('other-id')).toBeDefined();
@@ -2538,9 +2611,7 @@ test('DialogResourceSet.updateDialogId', () => {
 
 test('DialogResourceSet.updateControlId', () => {
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
-  masterRes.addControl(
-    new cred.resource.Control(cred.spec.controlType.label, 'label-id')
-  );
+  masterRes.addControl(makeControlHelper(cred.spec.controlType.label, 'label-id'));
   const builder = testutil.makeDialogResourceSetBuilderForNode();
   builder.addResource(masterRes, []);
   const resSet = builder.build();
@@ -2681,7 +2752,7 @@ test('DialogResourceSet.updateProperty for dialog property in some resources', (
 });
 
 test('DialogResourceSet.updateProperty for control property in master resource', () => {
-  const labelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const labelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   labelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
     cred.resource.makeProperty(
@@ -2717,10 +2788,7 @@ test('DialogResourceSet.updateProperty for control property in master resource',
 });
 
 test('DialogResourceSet.updateProperty for control property in multiple resources', () => {
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
     cred.resource.makeProperty(
@@ -2732,7 +2800,7 @@ test('DialogResourceSet.updateProperty for control property in multiple resource
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const deLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const deLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   deLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
     cred.resource.makeProperty(
@@ -2771,10 +2839,7 @@ test('DialogResourceSet.updateProperty for control property in multiple resource
 });
 
 test('DialogResourceSet.updateProperty for control property in some resources', () => {
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
     cred.resource.makeProperty(
@@ -2786,7 +2851,7 @@ test('DialogResourceSet.updateProperty for control property in some resources', 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const deLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const deLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   deLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.left,
     cred.resource.makeProperty(
@@ -2979,10 +3044,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for non-identifier dialog 
 });
 
 test('DialogResourceSet.updateLocalizedStringProperty for control property in resource linked to master', () => {
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
     cred.resource.makeProperty(
@@ -3020,10 +3082,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in re
 });
 
 test('DialogResourceSet.updateLocalizedStringProperty for control property in unlinked resource', () => {
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
     cred.resource.makeProperty(
@@ -3035,7 +3094,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in un
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
   masterRes.addControl(masterLabelCtrl);
 
-  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const enLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
     cred.resource.makeProperty(
@@ -3074,10 +3133,7 @@ test('DialogResourceSet.updateLocalizedStringProperty for control property in un
 });
 
 test('DialogResourceSet.updateLocalizedStringProperty for control property in master resource', () => {
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(
     cred.spec.propertyLabel.text,
     cred.resource.makeProperty(
@@ -3428,7 +3484,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to a control property i
   flagsProp.addFlag('A', 1);
   flagsProp.addFlag('B', 2);
 
-  const labelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const labelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   labelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, flagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3471,7 +3527,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from a control prope
   flagsProp.addFlag('A', 1);
   flagsProp.addFlag('B', 2);
 
-  const labelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const labelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   labelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, flagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3514,10 +3570,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3530,7 +3583,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   );
   enFlagsProp.addFlag('D', 8);
 
-  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const enLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
@@ -3581,10 +3634,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3597,7 +3647,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   );
   enFlagsProp.addFlag('B', 2);
 
-  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const enLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
@@ -3648,10 +3698,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3664,7 +3711,7 @@ test('DialogResourceSet.updateFlagProperty to add a flag to control property in 
   );
   enFlagsProp.addFlag('D', 8);
 
-  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const enLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
@@ -3715,10 +3762,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   masterFlagsProp.addFlag('A', 1);
   masterFlagsProp.addFlag('B', 2);
 
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, masterFlagsProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3731,7 +3775,7 @@ test('DialogResourceSet.updateFlagProperty to remove a flag from control propert
   );
   enFlagsProp.addFlag('B', 2);
 
-  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const enLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.styleFlags, enFlagsProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
@@ -3867,10 +3911,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3910,10 +3951,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -3924,7 +3962,7 @@ test('DialogResourceSet.normalizeLocalizedStrings for control string that is emp
     cred.spec.physicalPropertyType.identifier,
     'enId'
   );
-  const enLabelCtrl = new cred.resource.Control(cred.spec.controlType.label, 'label-id');
+  const enLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   enLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, enTextProp);
 
   const enRes = new cred.resource.DialogResource(cred.locale.english);
@@ -4066,10 +4104,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -4108,10 +4143,7 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
     cred.spec.physicalPropertyType.string,
     ''
   );
-  const masterLabelCtrl = new cred.resource.Control(
-    cred.spec.controlType.label,
-    'label-id'
-  );
+  const masterLabelCtrl = makeControlHelper(cred.spec.controlType.label, 'label-id');
   masterLabelCtrl.addLabeledProperty(cred.spec.propertyLabel.text, masterTextProp);
 
   const masterRes = new cred.resource.DialogResource(cred.locale.any);
@@ -4244,7 +4276,7 @@ function makeMinimalDialogWithControl(skipControlProp) {
     [propLabel.tooltip, propType.string, 'a tip']
   ];
 
-  const ctrl = new cred.resource.Control(cred.spec.controlType.pushButton, 'kCtrlId');
+  const ctrl = makeControlHelper(cred.spec.controlType.pushButton, 'kCtrlId');
   for (const descr of propDescriptions) {
     const skip = typeof skipControlProp !== 'undefined' && descr[0] === skipControlProp;
     if (!skip) {

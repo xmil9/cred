@@ -17,6 +17,7 @@ function tryRequire(file) {
 // Dependencies
 var cred = tryRequire('./cred_types') || cred || {};
 cred.resource = tryRequire('./dlg_resource') || cred.resource || {};
+cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
 var filesys = tryRequire('./filesys') || filesys || {};
 var util = tryRequire('./util') || util || {};
 
@@ -300,13 +301,48 @@ cred.parser = (function() {
       verifyToken(token, cred.tokenKind.keyword, 'declare_control');
       verifyToken(this.nextToken(), cred.tokenKind.openParenthesis);
 
-      let controlType = parseIdentifier(this.nextToken());
+      const controlType = this._parseControlType(this.nextToken());
       verifyToken(this.nextToken(), cred.tokenKind.comma);
 
-      let controlId = parseIdentifier(this.nextToken());
+      const controlId = this._parseControlId(this.nextToken());
       verifyToken(this.nextToken(), cred.tokenKind.closeParenthesis);
 
       this._dlgResource.addControl(new cred.resource.Control(controlType, controlId));
+    }
+
+    // Parse the type of a control.
+    // Returns a property for the parsed type.
+    _parseControlType(token) {
+      return cred.resource.makeProperty(
+        cred.spec.propertyLabel.ctrlType,
+        cred.spec.physicalPropertyType.identifier,
+        parseIdentifier(token)
+      );
+    }
+
+    // Parse the id of a control.
+    // Returns a property for the parsed id.
+    _parseControlId(token) {
+      // The id can be either an identifier or a number (e.g. '-1' for labels).
+      switch (token.kind) {
+        case cred.tokenKind.identifier: {
+          return cred.resource.makeProperty(
+            cred.spec.propertyLabel.id,
+            cred.spec.physicalPropertyType.identifier,
+            parseIdentifier(token)
+          );
+        }
+        case cred.tokenKind.number: {
+          return cred.resource.makeProperty(
+            cred.spec.propertyLabel.id,
+            cred.spec.physicalPropertyType.number,
+            parseNumber(token)
+          );
+        }
+        default: {
+          throw new Error(`Invalid control id: ${token.value}`);
+        }
+      }
     }
 
     // Parses the control definitions of a dialog.
@@ -331,10 +367,9 @@ cred.parser = (function() {
       verifyToken(token, cred.tokenKind.keyword, 'begin_control_ex');
 
       let ctrlIdToken = this.peekAheadBy(6);
-      verifyToken(
+      verifyTokenChoice(
         ctrlIdToken,
-        cred.tokenKind.identifier,
-        undefined,
+        [cred.tokenKind.identifier, cred.tokenKind.number],
         'Syntax error. Control id not found.'
       );
       let ctrlId = ctrlIdToken.value;
@@ -369,7 +404,7 @@ cred.parser = (function() {
         },
         {
           label: propLabel.id,
-          types: [physType.identifier],
+          types: [physType.identifier, physType.number],
           func: parsePositionalProperty,
           divider: cred.tokenKind.comma
         },
@@ -538,11 +573,11 @@ cred.parser = (function() {
     const serializedProps = token.value;
     const labeledValues = deserializeProperties(serializedProps);
     for (let labeledVal of labeledValues) {
-      const type = typeOfSerializedPropertyValue(labeledVal.value);
+      const type = cred.spec.physicalPropertyTypeOfValue(labeledVal.value);
       let property = cred.resource.makeProperty(
         labeledVal.label,
         type,
-        convertSerializedPropertyValueToType(labeledVal.value, type)
+        cred.spec.convertToPhysicalPropertyTypeValue(labeledVal.value, type)
       );
       target.addSerializedProperty(labeledVal.label, property);
     }
@@ -644,53 +679,6 @@ cred.parser = (function() {
         serializedCaption.length - 1
       )
     };
-  }
-
-  // Determines the type of a given string value.
-  // Returns the physical property type.
-  function typeOfSerializedPropertyValue(valueAsStr) {
-    // If it is empty or enclosed in double-quotes, it's a string.
-    if (
-      valueAsStr.length === 0 ||
-      (valueAsStr.startsWith('"') && valueAsStr.endsWith('"'))
-    ) {
-      return cred.spec.physicalPropertyType.string;
-    }
-    // If it does not contain anything but digits, '.', and '-', then it's
-    // a number
-    else if (valueAsStr.search(/[^\d.-]/) === -1) {
-      return cred.spec.physicalPropertyType.number;
-    }
-    // If it contains binary-or characters, it's a flag sequence.
-    else if (valueAsStr.includes('|')) {
-      return cred.spec.physicalPropertyType.flags;
-    }
-    // Anything else is an identifier.
-    else {
-      return cred.spec.physicalPropertyType.identifier;
-    }
-  }
-
-  // Converts the contents of a given string to a given physical property type.
-  // Returns the converted value.
-  function convertSerializedPropertyValueToType(valueAsStr, type) {
-    switch (type) {
-      case cred.spec.physicalPropertyType.string: {
-        return valueAsStr;
-      }
-      case cred.spec.physicalPropertyType.identifier: {
-        return valueAsStr;
-      }
-      case cred.spec.physicalPropertyType.number: {
-        return util.toNumber(valueAsStr);
-      }
-      case cred.spec.physicalPropertyType.flags: {
-        throw new Error('Flags are not supported as serialized properties. Implement!');
-      }
-      default: {
-        throw new Error('Unexpected physical property type to convert to.');
-      }
-    }
   }
 
   ///////////////////
@@ -912,21 +900,39 @@ cred.parser = (function() {
       throw new Error(
         typeof errMsg !== 'undefined'
           ? errMsg
-          : buildErrorMessage(token, expectedKind, expectedValue)
+          : buildErrorMessage(token, [expectedKind], expectedValue)
       );
     }
     return token.value;
   }
 
+  // Verifies that a given token is of a given kind and optionally has a given
+  // value. Throws given error, if not.
+  // Returns the value of the token.
+  function verifyTokenChoice(token, expectedKinds, errMsg) {
+    for (const kind of expectedKinds) {
+      if (token.isKind(kind)) {
+        return token.value;
+      }
+    }
+
+    throw new Error(
+      typeof errMsg !== 'undefined' ? errMsg : buildErrorMessage(token, expectedKinds)
+    );
+  }
+
   // Builds a default error message based on what was expected at the point of the
   // error.
-  function buildErrorMessage(token, expectedTokenKind, expectedValue) {
+  function buildErrorMessage(token, expectedTokenKinds, expectedValue) {
     let msg = 'Syntax error. Expected ';
     if (expectedValue) {
-      msg += `${expectedValue} `;
+      msg += `value: ${expectedValue} with `;
     }
-    const expectedTokenName = cred.tokenKindName(expectedTokenKind);
-    msg += `${expectedTokenName}.`;
+    msg += `type ${cred.tokenKindName(expectedTokenKinds[0])}`;
+    for (let i = 1; i < expectedTokenKinds.length; ++i) {
+      msg += ` or ${cred.tokenKindName(expectedTokenKinds[i])}`;
+    }
+    msg += '.';
     return msg;
   }
 

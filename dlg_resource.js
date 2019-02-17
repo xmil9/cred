@@ -1282,31 +1282,17 @@ cred.resource = (function() {
 
   // Control information read from the dialogs's resource.
   class Control {
-    constructor(type, id) {
-      if (!type || !id) {
+    constructor(typeProp, idProp) {
+      if (!typeProp || !idProp) {
         throw new Error('Invalid arguments. Control must have a type and an identifier.');
       }
       // Map that associates property labels with property objects.
       this._properties = new Map();
       // When editing fields, also edit the copy function below!
 
-      // Add properties for the given type and id.
-      this.addLabeledProperty(
-        cred.spec.propertyLabel.ctrlType,
-        makeProperty(
-          cred.spec.propertyLabel.ctrlType,
-          cred.spec.physicalPropertyType.identifier,
-          type
-        )
-      );
-      this.addLabeledProperty(
-        cred.spec.propertyLabel.id,
-        makeProperty(
-          cred.spec.propertyLabel.id,
-          cred.spec.physicalPropertyType.identifier,
-          id
-        )
-      );
+      // Add properties for the control's type and id.
+      this.addLabeledProperty(cred.spec.propertyLabel.ctrlType, typeProp);
+      this.addLabeledProperty(cred.spec.propertyLabel.id, idProp);
     }
 
     // Returns a deep copy of the control.
@@ -1329,7 +1315,15 @@ cred.resource = (function() {
 
     // Polymorphic function to set the item's identifier.
     set id(value) {
-      return (this.property(cred.spec.propertyLabel.id).value = value);
+      const propType = cred.spec.physicalPropertyTypeOfValue(value.toString());
+      this.setProperty(
+        cred.spec.propertyLabel.id,
+        cred.resource.makeProperty(
+          cred.spec.propertyLabel.id,
+          propType,
+          cred.spec.convertToPhysicalPropertyTypeValue(value.toString(), propType)
+        )
+      );
     }
 
     // Polymorphic function to check if this item is for a dialog.

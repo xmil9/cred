@@ -34,6 +34,58 @@ cred.spec = (function() {
   };
   Object.freeze(physicalPropertyType);
 
+  // Determines the physical property type of a given string value.
+  // The function assumes a preprocessed value that does not contain illegal characters
+  // like commas, etc.
+  function physicalPropertyTypeOfValue(valueAsStr) {
+    // If it is empty or enclosed in double-quotes, it's a string.
+    if (
+      valueAsStr.length === 0 ||
+      (valueAsStr.startsWith('"') && valueAsStr.endsWith('"'))
+    ) {
+      return cred.spec.physicalPropertyType.string;
+    }
+    // If it does not contain anything but digits, '.', and optionally a '-'at the
+    // beginning, then it's a number.
+    else if (
+      valueAsStr.search(/[^\d.]/) === -1 ||
+      (valueAsStr[0] === '-' && valueAsStr.substring(1).search(/[^\d.]/) === -1)
+    ) {
+      return cred.spec.physicalPropertyType.number;
+    }
+    // If it contains binary-or characters, it's a flag sequence.
+    else if (valueAsStr.includes('|')) {
+      return cred.spec.physicalPropertyType.flags;
+    }
+    // Anything else is an identifier.
+    else {
+      return cred.spec.physicalPropertyType.identifier;
+    }
+  }
+
+  // Converts the contents of a given string to a given physical property type.
+  // Will not veridy that the given value is valid for the requested type.
+  // Returns the converted value.
+  function convertToPhysicalPropertyTypeValue(valueAsStr, type) {
+    switch (type) {
+      case cred.spec.physicalPropertyType.string: {
+        return valueAsStr;
+      }
+      case cred.spec.physicalPropertyType.identifier: {
+        return valueAsStr;
+      }
+      case cred.spec.physicalPropertyType.number: {
+        return util.toNumber(valueAsStr);
+      }
+      case cred.spec.physicalPropertyType.flags: {
+        return valueAsStr;
+      }
+      default: {
+        throw new Error('Unexpected physical property type to convert to.');
+      }
+    }
+  }
+
   // Enum of supported logical property types. A logical type specifies how the
   // property is represented in the UI.
   const logicalPropertyType = {
@@ -2844,11 +2896,13 @@ cred.spec = (function() {
   return {
     controlBehavior: controlBehavior,
     controlType: controlType,
+    convertToPhysicalPropertyTypeValue: convertToPhysicalPropertyTypeValue,
     logicalPropertyType: logicalPropertyType,
     makeControlSpec: makeControlSpec,
     makeDialogSpec: makeDialogSpec,
     makePropertySpec: makePropertySpec,
     physicalPropertyType: physicalPropertyType,
+    physicalPropertyTypeOfValue: physicalPropertyTypeOfValue,
     propertyLabel: propertyLabel,
     semanticPropertyTag: semanticPropertyTag
   };

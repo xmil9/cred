@@ -8,6 +8,189 @@ cred.spec = require('../dlg_spec');
 
 ///////////////////
 
+test('physicalPropertyTypeOfValue for value with double-quotes', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('"str"')).toEqual(
+    cred.spec.physicalPropertyType.string
+  );
+});
+
+test('physicalPropertyTypeOfValue for empty value', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('')).toEqual(
+    cred.spec.physicalPropertyType.string
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with digits only', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('123')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with digits and dot', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('123.4')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value starting with dot', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('.123')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value ending with dot', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('123.')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with digits and minus', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('-123')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with digits and dot and minus', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('-123.4')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with digits and dot and minus', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('-123.4')).toEqual(
+    cred.spec.physicalPropertyType.number
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with minus in middle', () => {
+  // Should not happen within the context of the app.
+  expect(cred.spec.physicalPropertyTypeOfValue('1-23')).toEqual(
+    cred.spec.physicalPropertyType.identifier
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with digits and binary-or', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('1|23')).toEqual(
+    cred.spec.physicalPropertyType.flags
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with chars and binary-or', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('WS_CHILD|23')).toEqual(
+    cred.spec.physicalPropertyType.flags
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with binary-or and spaces', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('WS_CHILD | 23')).toEqual(
+    cred.spec.physicalPropertyType.flags
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with letters', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('abc')).toEqual(
+    cred.spec.physicalPropertyType.identifier
+  );
+});
+
+test('physicalPropertyTypeOfValue for value with letters and digits', () => {
+  expect(cred.spec.physicalPropertyTypeOfValue('abc12d')).toEqual(
+    cred.spec.physicalPropertyType.identifier
+  );
+  expect(cred.spec.physicalPropertyTypeOfValue('12abc')).toEqual(
+    cred.spec.physicalPropertyType.identifier
+  );
+  expect(cred.spec.physicalPropertyTypeOfValue('abc12')).toEqual(
+    cred.spec.physicalPropertyType.identifier
+  );
+});
+
+test('convertToPhysicalPropertyTypeValue for string type', () => {
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      'abc',
+      cred.spec.physicalPropertyType.string
+    )
+  ).toEqual('abc');
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '"abc"',
+      cred.spec.physicalPropertyType.string
+    )
+  ).toEqual('"abc"');
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '123',
+      cred.spec.physicalPropertyType.string
+    )
+  ).toEqual('123');
+});
+
+test('convertToPhysicalPropertyTypeValue for identifier type', () => {
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      'abc',
+      cred.spec.physicalPropertyType.identifier
+    )
+  ).toEqual('abc');
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '"abc"',
+      cred.spec.physicalPropertyType.identifier
+    )
+  ).toEqual('"abc"');
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '123',
+      cred.spec.physicalPropertyType.identifier
+    )
+  ).toEqual('123');
+});
+
+test('convertToPhysicalPropertyTypeValue for number type', () => {
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '123',
+      cred.spec.physicalPropertyType.number
+    )
+  ).toEqual(123);
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '-123',
+      cred.spec.physicalPropertyType.number
+    )
+  ).toEqual(-123);
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '123.4',
+      cred.spec.physicalPropertyType.number
+    )
+  ).toEqual(123.4);
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '-123.4',
+      cred.spec.physicalPropertyType.number
+    )
+  ).toEqual(-123.4);
+});
+
+test('convertToPhysicalPropertyTypeValue for flags type', () => {
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      '123|45',
+      cred.spec.physicalPropertyType.flags
+    )
+  ).toEqual('123|45');
+  expect(
+    cred.spec.convertToPhysicalPropertyTypeValue(
+      'AB | CD',
+      cred.spec.physicalPropertyType.flags
+    )
+  ).toEqual('AB | CD');
+});
+
+///////////////////
+
 test('spec.makePropertySpec', () => {
   for (const type of cred.spec.logicalPropertyType) {
     const spec = cred.spec.makePropertySpec(type, {});

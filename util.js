@@ -9,6 +9,16 @@
 var util = (function() {
   ///////////////////
 
+  // Checks if a value is a number. Works for the value being a number type or
+  // a string that holds a number's string representation.
+  function isNumber(val) {
+    // Special case for empty string because isNaN considers it as number zero.
+    if (typeof val === 'string' && val.length === 0) {
+      return false;
+    }
+    return !isNaN(val);
+  }
+
   // Converts a given string to a number.
   function toNumber(str, defaultVal) {
     if (typeof str === 'undefined') {
@@ -105,6 +115,7 @@ var util = (function() {
     hasValue: hasValue,
     insertAfter: insertAfter,
     isHexDigit: isHexDigit,
+    isNumber: isNumber,
     isSurroundedBy: isSurroundedBy,
     isUuid: isUuid,
     isUuidV4: isUuidV4,

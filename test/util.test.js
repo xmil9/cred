@@ -8,6 +8,69 @@ const util = require('../util');
 
 ///////////////////
 
+test('isNumber for integer number', () => {
+  expect(util.isNumber(10)).toBeTruthy();
+});
+
+test('isNumber for negative integer number', () => {
+  expect(util.isNumber(-10)).toBeTruthy();
+});
+
+test('isNumber for number zero', () => {
+  expect(util.isNumber(0)).toBeTruthy();
+});
+
+test('isNumber for floating point number', () => {
+  expect(util.isNumber(10.1)).toBeTruthy();
+});
+
+test('isNumber for negative floating point number', () => {
+  expect(util.isNumber(-10.1)).toBeTruthy();
+});
+
+test('isNumber for floating point number zero', () => {
+  expect(util.isNumber(-0.0)).toBeTruthy();
+});
+
+test('isNumber for string with integer number', () => {
+  expect(util.isNumber('10')).toBeTruthy();
+});
+
+test('isNumber for string with negative integer number', () => {
+  expect(util.isNumber('-10')).toBeTruthy();
+});
+
+test('isNumber for string with number zero', () => {
+  expect(util.isNumber('0')).toBeTruthy();
+});
+
+test('isNumber for string with floating point number', () => {
+  expect(util.isNumber('10.1')).toBeTruthy();
+});
+
+test('isNumber for string with negative floating point number', () => {
+  expect(util.isNumber('-10.1')).toBeTruthy();
+});
+
+test('isNumber for string with floating point number zero', () => {
+  expect(util.isNumber('-0.0')).toBeTruthy();
+});
+
+test('isNumber for empty string', () => {
+  expect(util.isNumber('')).toBeFalsy();
+});
+
+test('isNumber for string with letters', () => {
+  expect(util.isNumber('abc')).toBeFalsy();
+});
+
+test('isNumber for string with letter and digits', () => {
+  expect(util.isNumber('abc10')).toBeFalsy();
+  expect(util.isNumber('10abc')).toBeFalsy();
+});
+
+///////////////////
+
 test('toNumber for integers', () => {
   expect(util.toNumber('1')).toBe(1);
   expect(util.toNumber('0')).toBe(0);

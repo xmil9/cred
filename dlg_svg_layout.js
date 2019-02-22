@@ -212,7 +212,7 @@ cred.svglayout = (function() {
     // The currently selected item is included in the returned array.
     _findLinkedItems(excludeSelectedItem) {
       const selectedItem = this.selectedItem(this._controller.currentLocale);
-      const selectedItemId = selectedItem.id;
+      const selectedItemId = selectedItem.uniqueId;
 
       const linkedItems = [];
       const displays = this._findLinkedDisplays();

@@ -1147,9 +1147,11 @@ test('cred.parser.parseDialog for control declaration', () => {
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId')).toBeDefined();
-  expect(dlgRes.control('ctrlId').id).toEqual('ctrlId');
-  expect(dlgRes.control('ctrlId').type).toEqual(cred.spec.controlType.pushButton);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl).toBeDefined();
+  expect(ctrl.resourceId).toEqual('ctrlId');
+  expect(ctrl.type).toEqual(cred.spec.controlType.pushButton);
 });
 
 test('cred.parser.parseDialog for control declaration with numeric id', () => {
@@ -1178,9 +1180,11 @@ test('cred.parser.parseDialog for control declaration with numeric id', () => {
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control(100)).toBeDefined();
-  expect(dlgRes.control(100).id).toEqual(100);
-  expect(dlgRes.control(100).type).toEqual(cred.spec.controlType.pushButton);
+
+  const ctrl = dlgRes.controlByResourceId(100, 0);
+  expect(ctrl).toBeDefined();
+  expect(ctrl.resourceId).toEqual(100);
+  expect(ctrl.type).toEqual(cred.spec.controlType.pushButton);
 });
 
 test('cred.parser.parseDialog for minimal control definition', () => {
@@ -1211,36 +1215,22 @@ test('cred.parser.parseDialog for minimal control definition', () => {
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId')).toBeDefined();
-  expect(dlgRes.control('ctrlId').id).toEqual('ctrlId');
-  expect(dlgRes.control('ctrlId').type).toEqual(cred.spec.controlType.pushButton);
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.ctrlType).value
-  ).toEqual(cred.spec.controlType.pushButton);
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.resourceClass).value
-  ).toEqual('Button');
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.id).value).toEqual(
-    'ctrlId'
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl).toBeDefined();
+  expect(ctrl.resourceId).toEqual('ctrlId');
+  expect(ctrl.type).toEqual(cred.spec.controlType.pushButton);
+  expect(ctrl.property(cred.spec.propertyLabel.ctrlType).value).toEqual(
+    cred.spec.controlType.pushButton
   );
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.left).value).toEqual(
-    445
-  );
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.top).value).toEqual(
-    360
-  );
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.width).value).toEqual(
-    75
-  );
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.height).value).toEqual(
-    22
-  );
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.styleFlags).value
-  ).toEqual(0);
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.extStyleFlags).value
-  ).toEqual(0);
+  expect(ctrl.property(cred.spec.propertyLabel.resourceClass).value).toEqual('Button');
+  expect(ctrl.property(cred.spec.propertyLabel.id).value).toEqual('ctrlId');
+  expect(ctrl.property(cred.spec.propertyLabel.left).value).toEqual(445);
+  expect(ctrl.property(cred.spec.propertyLabel.top).value).toEqual(360);
+  expect(ctrl.property(cred.spec.propertyLabel.width).value).toEqual(75);
+  expect(ctrl.property(cred.spec.propertyLabel.height).value).toEqual(22);
+  expect(ctrl.property(cred.spec.propertyLabel.styleFlags).value).toEqual(0);
+  expect(ctrl.property(cred.spec.propertyLabel.extStyleFlags).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for minimal control definition with numeric id', () => {
@@ -1271,26 +1261,65 @@ test('cred.parser.parseDialog for minimal control definition with numeric id', (
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control(101)).toBeDefined();
-  expect(dlgRes.control(101).id).toEqual(101);
-  expect(dlgRes.control(101).type).toEqual(cred.spec.controlType.pushButton);
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.ctrlType).value).toEqual(
+
+  const ctrl = dlgRes.controlByResourceId(101, 0);
+  expect(ctrl).toBeDefined();
+  expect(ctrl.resourceId).toEqual(101);
+  expect(ctrl.type).toEqual(cred.spec.controlType.pushButton);
+  expect(ctrl.property(cred.spec.propertyLabel.ctrlType).value).toEqual(
     cred.spec.controlType.pushButton
   );
-  expect(
-    dlgRes.control(101).property(cred.spec.propertyLabel.resourceClass).value
-  ).toEqual('Button');
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.id).value).toEqual(101);
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.left).value).toEqual(445);
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.top).value).toEqual(360);
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.width).value).toEqual(75);
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.height).value).toEqual(22);
-  expect(dlgRes.control(101).property(cred.spec.propertyLabel.styleFlags).value).toEqual(
-    0
-  );
-  expect(
-    dlgRes.control(101).property(cred.spec.propertyLabel.extStyleFlags).value
-  ).toEqual(0);
+  expect(ctrl.property(cred.spec.propertyLabel.resourceClass).value).toEqual('Button');
+  expect(ctrl.property(cred.spec.propertyLabel.id).value).toEqual(101);
+  expect(ctrl.property(cred.spec.propertyLabel.left).value).toEqual(445);
+  expect(ctrl.property(cred.spec.propertyLabel.top).value).toEqual(360);
+  expect(ctrl.property(cred.spec.propertyLabel.width).value).toEqual(75);
+  expect(ctrl.property(cred.spec.propertyLabel.height).value).toEqual(22);
+  expect(ctrl.property(cred.spec.propertyLabel.styleFlags).value).toEqual(0);
+  expect(ctrl.property(cred.spec.propertyLabel.extStyleFlags).value).toEqual(0);
+});
+
+test('cred.parser.parseDialog for two control definitions with same resource id', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(id,"",0,0,10,20,titleId,"",0,"",0)             ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  declare_control(PushButton,ctrlId)                                       ' +
+    '  begin_control_definitions()                                              ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,labelId,445,360,75,22,0,0)   ' +
+    '    end_control_ex()                                                       ' +
+    '    begin_control_ex(PushButton,Button,ctrlId,label2Id,445,390,75,22,0,0)  ' +
+    '    end_control_ex()                                                       ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content);
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+
+  const ctrl1 = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl1).toBeDefined();
+  expect(ctrl1.resourceId).toEqual('ctrlId');
+  expect(ctrl1.property(cred.spec.propertyLabel.top).value).toEqual(360);
+
+  const ctrl2 = dlgRes.controlByResourceId('ctrlId', 1);
+  expect(ctrl2).toBeDefined();
+  expect(ctrl2.resourceId).toEqual('ctrlId');
+  expect(ctrl2.property(cred.spec.propertyLabel.top).value).toEqual(390);
 });
 
 test('cred.parser.parseDialog for serialized control string property', () => {
@@ -1323,7 +1352,8 @@ test('cred.parser.parseDialog for serialized control string property', () => {
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.imageNormal).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.imageNormal)
+      .value
   ).toEqual('SYMP_FIND_BUTTON_ICON');
 });
 
@@ -1357,7 +1387,8 @@ test('cred.parser.parseDialog for serialized control integer number property', (
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.toolBarLike)
+      .value
   ).toEqual(0);
 });
 
@@ -1391,7 +1422,8 @@ test('cred.parser.parseDialog for serialized control floating point number prope
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.toolBarLike)
+      .value
   ).toEqual(3.0);
 });
 
@@ -1425,7 +1457,8 @@ test('cred.parser.parseDialog for serialized control negative number property', 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.toolBarLike)
+      .value
   ).toEqual(-3);
 });
 
@@ -1459,7 +1492,9 @@ test('cred.parser.parseDialog for serialized flag control property not supported
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.extStyleFlags).value
+    dlgRes
+      .controlByResourceId('ctrlId', 0)
+      .property(cred.spec.propertyLabel.extStyleFlags).value
   ).toEqual(0);
 });
 
@@ -1493,7 +1528,8 @@ test('cred.parser.parseDialog for serialized control identifier property', () =>
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.tooltip)
+      .value
   ).toEqual('StringId');
 });
 
@@ -1526,12 +1562,10 @@ test('cred.parser.parseDialog for multiple serialized control properties', () =>
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('StringId');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
-  ).toEqual(0);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('StringId');
+  expect(ctrl.property(cred.spec.propertyLabel.toolBarLike).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for multiple serialized control properties with whitespace around them', () => {
@@ -1563,12 +1597,10 @@ test('cred.parser.parseDialog for multiple serialized control properties with wh
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('StringId');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
-  ).toEqual(0);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('StringId');
+  expect(ctrl.property(cred.spec.propertyLabel.toolBarLike).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for empty serialized control properties', () => {
@@ -1599,8 +1631,10 @@ test('cred.parser.parseDialog for empty serialized control properties', () => {
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId')).toBeDefined();
-  expect(Array.from(dlgRes.control('ctrlId').properties()).length).toEqual(9);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl).toBeDefined();
+  expect(Array.from(ctrl.properties()).length).toEqual(9);
 });
 
 test('cred.parser.parseDialog for serialized control properties with caption', () => {
@@ -1633,15 +1667,11 @@ test('cred.parser.parseDialog for serialized control properties with caption', (
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    'mycaption'
-  );
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('StringId');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
-  ).toEqual(0);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.text).value).toEqual('mycaption');
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('StringId');
+  expect(ctrl.property(cred.spec.propertyLabel.toolBarLike).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for serialized control properties with caption that has spaces', () => {
@@ -1674,15 +1704,13 @@ test('cred.parser.parseDialog for serialized control properties with caption tha
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.text).value).toEqual(
     'my multiword caption'
   );
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('StringId');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
-  ).toEqual(0);
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('StringId');
+  expect(ctrl.property(cred.spec.propertyLabel.toolBarLike).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for serialized control properties with caption that has digits', () => {
@@ -1715,15 +1743,11 @@ test('cred.parser.parseDialog for serialized control properties with caption tha
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    'my caption 3'
-  );
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('StringId');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
-  ).toEqual(0);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.text).value).toEqual('my caption 3');
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('StringId');
+  expect(ctrl.property(cred.spec.propertyLabel.toolBarLike).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for serialized control properties with caption that has a dash', () => {
@@ -1756,9 +1780,9 @@ test('cred.parser.parseDialog for serialized control properties with caption tha
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    'my-caption'
-  );
+  expect(
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.text).value
+  ).toEqual('my-caption');
 });
 
 test('cred.parser.parseDialog for serialized control properties with caption that has a nultiple spaces', () => {
@@ -1791,9 +1815,9 @@ test('cred.parser.parseDialog for serialized control properties with caption tha
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    'my     caption'
-  );
+  expect(
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.text).value
+  ).toEqual('my     caption');
 });
 
 test('cred.parser.parseDialog for serialized control properties with empty caption', () => {
@@ -1825,15 +1849,11 @@ test('cred.parser.parseDialog for serialized control properties with empty capti
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    ''
-  );
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('StringId');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.toolBarLike).value
-  ).toEqual(0);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.text).value).toEqual('');
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('StringId');
+  expect(ctrl.property(cred.spec.propertyLabel.toolBarLike).value).toEqual(0);
 });
 
 test('cred.parser.parseDialog for empty serialized control properties with caption', () => {
@@ -1865,10 +1885,10 @@ test('cred.parser.parseDialog for empty serialized control properties with capti
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    ''
-  );
-  expect(Array.from(dlgRes.control('ctrlId').properties()).length).toEqual(10);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.text).value).toEqual('');
+  expect(Array.from(ctrl.properties()).length).toEqual(10);
 });
 
 test('cred.parser.parseDialog for no serialized control properties but caption', () => {
@@ -1900,10 +1920,10 @@ test('cred.parser.parseDialog for no serialized control properties but caption',
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.text).value).toEqual(
-    'test'
-  );
-  expect(Array.from(dlgRes.control('ctrlId').properties()).length).toEqual(10);
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.text).value).toEqual('test');
+  expect(Array.from(ctrl.properties()).length).toEqual(10);
 });
 
 test('cred.parser.parseDialog for invalid serialized control properties', () => {
@@ -1966,7 +1986,8 @@ test('cred.parser.parseDialog for positional style flags control property', () =
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.styleFlags).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.styleFlags)
+      .value
   ).toEqual(187);
 });
 
@@ -2000,7 +2021,8 @@ test('cred.parser.parseDialog for positional ext style flags control property', 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.styleFlags).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.styleFlags)
+      .value
   ).toEqual(7);
 });
 
@@ -2274,9 +2296,9 @@ test('cred.parser.parseDialog for labeled integer number control property', () =
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(dlgRes.control('ctrlId').property(cred.spec.propertyLabel.group).value).toEqual(
-    1
-  );
+  expect(
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.group).value
+  ).toEqual(1);
 });
 
 test('cred.parser.parseDialog for labeled floating point number control property', () => {
@@ -2309,7 +2331,8 @@ test('cred.parser.parseDialog for labeled floating point number control property
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.maxValue).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.maxValue)
+      .value
   ).toEqual(100.56);
 });
 
@@ -2343,7 +2366,8 @@ test('cred.parser.parseDialog for labeled negtive number control property', () =
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.minValue).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.minValue)
+      .value
   ).toEqual(-1);
 });
 
@@ -2377,7 +2401,9 @@ test('cred.parser.parseDialog for labeled identifier control property', () => {
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.imageSizeType).value
+    dlgRes
+      .controlByResourceId('ctrlId', 0)
+      .property(cred.spec.propertyLabel.imageSizeType).value
   ).toEqual('ImageSizeType::px24');
 });
 
@@ -2411,7 +2437,8 @@ test('cred.parser.parseDialog for labeled string control property', () => {
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
+    dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.tooltip)
+      .value
   ).toEqual('tip');
 });
 
@@ -2445,12 +2472,12 @@ test('cred.parser.parseDialog for multiple labeled control properties', () => {
 
   const tokens = cred.lexer.analyse(content);
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.imageSizeType).value
-  ).toEqual('ImageSizeType::px24');
-  expect(
-    dlgRes.control('ctrlId').property(cred.spec.propertyLabel.tooltip).value
-  ).toEqual('tip');
+
+  const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
+  expect(ctrl.property(cred.spec.propertyLabel.imageSizeType).value).toEqual(
+    'ImageSizeType::px24'
+  );
+  expect(ctrl.property(cred.spec.propertyLabel.tooltip).value).toEqual('tip');
 });
 
 test('cred.parser.parseDialog for labeled control property with missing label', () => {

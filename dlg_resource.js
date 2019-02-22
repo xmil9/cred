@@ -155,7 +155,7 @@ cred.resource = (function() {
       if (layoutItem.isDialog()) {
         this._resourceSet.updateDialogId(id);
       } else {
-        this._resourceSet.updateControlId(layoutItem.id, id);
+        this._resourceSet.updateControlId(layoutItem.uniqueId, id);
       }
     }
 
@@ -406,10 +406,10 @@ cred.resource = (function() {
       }
     }
 
-    // Updates a control's id in all dialog resources.
-    updateControlId(currentId, id) {
+    // Updates a control's resource id in all dialog resources.
+    updateControlId(ctrlId, newResourceId) {
       for (const dlgResource of this._resources.values()) {
-        dlgResource.updateControlId(currentId, id);
+        dlgResource.updateControlId(ctrlId, newResourceId);
       }
     }
 
@@ -496,7 +496,7 @@ cred.resource = (function() {
       if (layoutItem.isDialog()) {
         return resource.dialog;
       }
-      return resource.control(layoutItem.id);
+      return resource.control(layoutItem.uniqueId);
     }
   }
 
@@ -642,7 +642,7 @@ cred.resource = (function() {
     find(dlgItem, prop) {
       for (let elem of this._map) {
         if (this._matches(dlgItem, prop, elem)) {
-          return elem.id;
+          return elem.resourceId;
         }
       }
       return undefined;
@@ -1098,17 +1098,24 @@ cred.resource = (function() {
       this._dlg.addSerializedProperty(label, property);
     }
 
-    control(id) {
-      return this._dlg.control(id);
+    // Returns the control with a given unique control id.
+    control(uniqueId) {
+      return this._dlg.control(uniqueId);
+    }
+
+    // Returns the control with a given resource id and sequence order.
+    controlByResourceId(resourceId, sequenceIdx) {
+      return this._dlg.controlByResourceId(resourceId, sequenceIdx);
     }
 
     *controls() {
       yield* this._dlg.controls();
     }
 
-    // Adds a control to the dialog.
-    addControl(ctrl) {
-      this._dlg.addControl(ctrl);
+    // Adds a control with a given type and resource id to the dialog.
+    // Returns the added control.
+    addControl(ctrlType, resourceId) {
+      return this._dlg.addControl(ctrlType, resourceId);
     }
 
     // Generator function for included headers.
@@ -1143,12 +1150,12 @@ cred.resource = (function() {
 
     // Updates the dialog's id.
     updateDialogId(id) {
-      this._dlg.id = id;
+      this._dlg.resourceId = id;
     }
 
-    // Updates a control's id.
-    updateControlId(currentId, id) {
-      this._dlg.updateControlId(currentId, id);
+    // Updates a control's resource id.
+    updateControlId(ctrlId, newResourceId) {
+      this._dlg.updateControlId(ctrlId, newResourceId);
     }
   }
 
@@ -1159,7 +1166,9 @@ cred.resource = (function() {
     constructor() {
       // Map that associates property labels with properties.
       this._properties = new Map();
-      // Map that associates control ids with controls.
+      // Generator for control ids that are unique within the dialog.
+      this._ctrlIdGen = new UniqueResourceIdGenerator();
+      // Map that associates unique control ids with controls.
       this._controls = new Map();
       // When editing properties, also edit the copy function below!
     }
@@ -1170,14 +1179,22 @@ cred.resource = (function() {
       for (let [label, property] of this._properties) {
         copy._properties.set(label, property.copy());
       }
+      copy._ctrlIdGen = this._ctrlIdGen.copy();
       for (let [id, control] of this._controls) {
         copy._controls.set(id, control.copy());
       }
       return copy;
     }
 
+    // Polymorphic function to returns a unique identifier for the dialog/control.
+    get uniqueId() {
+      // Only one dialog at a time is supported, so hardcode the unique id until
+      // we need something better.
+      return UniqueResourceIdGenerator.generateId('dlg', 0);
+    }
+
     // Polymorphic function to return the item's identifier.
-    get id() {
+    get resourceId() {
       if (!this._properties.has(cred.spec.propertyLabel.id)) {
         throw new Error('Dialog id accessed before being defined.');
       }
@@ -1185,7 +1202,7 @@ cred.resource = (function() {
     }
 
     // Polymorphic function to set the item's identifier.
-    set id(value) {
+    set resourceId(value) {
       let idProp = this.property(cred.spec.propertyLabel.id);
       if (idProp) {
         idProp.value = value;
@@ -1247,8 +1264,15 @@ cred.resource = (function() {
       addSerializedProperty(label, property, this);
     }
 
-    control(id) {
-      return this._controls.get(id);
+    // Returns the control with a given unique control id.
+    control(uniqueId) {
+      return this._controls.get(uniqueId.hash());
+    }
+
+    // Returns the control with a given resource id and sequence order.
+    controlByResourceId(resourceId, sequenceIdx) {
+      const ctrlId = UniqueResourceIdGenerator.generateId(resourceId, sequenceIdx);
+      return this.control(ctrlId);
     }
 
     *controls() {
@@ -1257,23 +1281,24 @@ cred.resource = (function() {
       }
     }
 
-    // Adds a control to the dialog.
-    addControl(ctrl) {
-      if (!this._controls.has(ctrl.id)) {
-        this._controls.set(ctrl.id, ctrl);
-      } else {
-        throw new Error('Control exists already.');
-      }
+    // Adds a control with a given type and resource id to the dialog.
+    // Returns the added control.
+    addControl(ctrlType, resourceId) {
+      // Create control object with a unique id.
+      const ctrl = new Control(
+        this._ctrlIdGen.generateNextId(resourceId),
+        ctrlType,
+        resourceId
+      );
+      this._controls.set(ctrl.uniqueId.hash(), ctrl);
+      return ctrl;
     }
 
-    // Updates the id of a control.
-    updateControlId(currentId, id) {
-      let ctrl = this._controls.get(currentId);
+    // Updates the resource id of a control.
+    updateControlId(ctrlId, newResourceId) {
+      let ctrl = this.control(ctrlId);
       if (ctrl) {
-        ctrl.id = id;
-        // Also, change the control map to associate the new id with the control.
-        this._controls.set(id, ctrl);
-        this._controls.delete(currentId);
+        ctrl.resourceId = newResourceId;
       }
     }
   }
@@ -1282,39 +1307,62 @@ cred.resource = (function() {
 
   // Control information read from the dialogs's resource.
   class Control {
-    constructor(typeProp, idProp) {
-      if (!typeProp || !idProp) {
-        throw new Error('Invalid arguments. Control must have a type and an identifier.');
+    constructor(ctrlId, type, resourceId) {
+      if (!ctrlId || typeof type === 'undefined' || typeof resourceId === 'undefined') {
+        throw new Error('Invalid arguments for creating a Control object.');
       }
+      // Unique id for control within its dialog.
+      this._ctrlId = ctrlId;
       // Map that associates property labels with property objects.
       this._properties = new Map();
       // When editing fields, also edit the copy function below!
 
       // Add properties for the control's type and id.
-      this.addLabeledProperty(cred.spec.propertyLabel.ctrlType, typeProp);
-      this.addLabeledProperty(cred.spec.propertyLabel.id, idProp);
+      this.addLabeledProperty(
+        cred.spec.propertyLabel.ctrlType,
+        makeProperty(
+          cred.spec.propertyLabel.ctrlType,
+          cred.spec.physicalPropertyType.identifier,
+          type
+        )
+      );
+      this.addLabeledProperty(
+        cred.spec.propertyLabel.id,
+        makeProperty(
+          cred.spec.propertyLabel.id,
+          util.isNumber(resourceId)
+            ? cred.spec.physicalPropertyType.number
+            : cred.spec.physicalPropertyType.identifier,
+          resourceId
+        )
+      );
     }
 
     // Returns a deep copy of the control.
     copy() {
-      let copy = new Control(this.type, this.id);
-      for (let [label, property] of this._properties) {
+      const ctrlIdCopy = new UniqueResourceId(
+        this._ctrlId.resourceId,
+        this._ctrlId.sequenceIdx
+      );
+      const copy = new Control(ctrlIdCopy, this.type, this.resourceId);
+      for (const [label, property] of this._properties) {
         copy._properties.set(label, property.copy());
       }
       return copy;
     }
 
-    get type() {
-      return this._properties.get(cred.spec.propertyLabel.ctrlType).value;
+    // Polymorphic function to returns a unique identifier for the control/dialog.
+    get uniqueId() {
+      return this._ctrlId;
     }
 
-    // Polymorphic function to return the control's identifier.
-    get id() {
+    // Polymorphic function to return the control's resource identifier.
+    get resourceId() {
       return this.property(cred.spec.propertyLabel.id).value;
     }
 
-    // Polymorphic function to set the item's identifier.
-    set id(value) {
+    // Polymorphic function to set the item's resource identifier.
+    set resourceId(value) {
       const propType = cred.spec.physicalPropertyTypeOfValue(value.toString());
       this.setProperty(
         cred.spec.propertyLabel.id,
@@ -1324,6 +1372,10 @@ cred.resource = (function() {
           cred.spec.convertToPhysicalPropertyTypeValue(value.toString(), propType)
         )
       );
+    }
+
+    get type() {
+      return this._properties.get(cred.spec.propertyLabel.ctrlType).value;
     }
 
     // Polymorphic function to check if this item is for a dialog.
@@ -1389,7 +1441,89 @@ cred.resource = (function() {
     if (!isDialogOrControl(a) || !isDialogOrControl(b)) {
       return false;
     }
-    return a.isDialog() === b.isDialog() && a.id === b.id;
+    return a.isDialog() === b.isDialog() && a.uniqueId === b.uniqueId;
+  }
+
+  ///////////////////
+
+  // Defines a unique id from a given resource id and sequence index.
+  // This allows to support multiple controls with the same resource
+  // id. The resource id might not be unique but together with a sequence index that
+  // represents the n-th occurrance of the resource id, it defines a unique id.
+  class UniqueResourceId {
+    constructor(resourceId, sequenceIdx) {
+      if (typeof resourceId === 'undefined' || typeof sequenceIdx === 'undefined') {
+        throw new Error('ControlIds must have a resource id and sequence index.');
+      }
+      // The id that is defined for the control in the resource.
+      this._resId = resourceId;
+      // An index representing how often the resource id has occurred so far.
+      this._seqIdx = sequenceIdx;
+    }
+
+    get resourceId() {
+      return this._resId;
+    }
+
+    get sequenceIdx() {
+      return this._seqIdx;
+    }
+
+    // Returns a hash for the control id.
+    hash() {
+      return 'uniqueid_resid_' + this.resourceId + '_seqidx_' + this.sequenceIdx;
+    }
+  }
+
+  // Checks whether two unique resource ids are equal.
+  function areUniqueResourceIdsEqual(a, b) {
+    return a.hash() === b.hash();
+  }
+
+  // Generator for unique resources ids.
+  // Keeps track of how often each resource id occurrs.
+  // The generated ids must be deterministic, i.e. different generator instances must
+  // generate the same unique id for the n-th occurrance of a resource id. This is
+  // necessary in order to match control declarations and definitions in the resource
+  // correctly.
+  class UniqueResourceIdGenerator {
+    constructor() {
+      this._idCounts = new Map();
+      // When editing fields, also edit the copy function below!
+    }
+
+    // Returns a deep copy of the generator.
+    copy() {
+      let copy = new UniqueResourceIdGenerator();
+      for (let [resId, seqIdx] of this._idCounts) {
+        copy._idCounts.set(resId, seqIdx);
+      }
+      return copy;
+    }
+
+    // Counts the number of occurrances of a given resource id.
+    count(resourceId) {
+      if (this._idCounts.has(resourceId)) {
+        return this._idCounts.get(resourceId) + 1;
+      }
+      return 0;
+    }
+
+    // Generates the next unique control id for a given resource id.
+    generateNextId(resourceId) {
+      let seqIdx = 0;
+      if (this._idCounts.has(resourceId)) {
+        seqIdx = this._idCounts.get(resourceId) + 1;
+      }
+      this._idCounts.set(resourceId, seqIdx);
+      return new UniqueResourceId(resourceId, seqIdx);
+    }
+
+    // Deterministically generates the unique control id for the n-th occurrance of a
+    // resource id.
+    static generateId(resourceId, sequenceIdx) {
+      return new UniqueResourceId(resourceId, sequenceIdx);
+    }
   }
 
   ///////////////////
@@ -1787,7 +1921,9 @@ cred.resource = (function() {
 
   // Exports
   return {
+    areUniqueResourceIdsEqual: areUniqueResourceIdsEqual,
     Control: Control,
+    UniqueResourceIdGenerator: UniqueResourceIdGenerator,
     Dialog: Dialog,
     DialogResource: DialogResource,
     DialogResourceSetBuilder: DialogResourceSetBuilder,

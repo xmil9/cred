@@ -5,6 +5,7 @@
 
 const $ = require('jquery');
 var cred = require('../cred_types');
+cred.resource = require('../dlg_resource');
 cred.svglayout = require('../dlg_svg_layout');
 cred.svglayout_internal = require('../dlg_svg_layout_internal');
 const geom = require('../geom');
@@ -83,7 +84,8 @@ class DialogResourceMock {
 // Helper class to mock Dialog objects.
 class DialogMock {
   constructor(id, props) {
-    this.id = id;
+    this.resourceId = id;
+    this.uniqueId = cred.resource.UniqueResourceIdGenerator.generateId(id, 0);
     this._props = props;
   }
 
@@ -99,9 +101,13 @@ class DialogMock {
 // Helper class to mock Control objects.
 class ControlMock {
   constructor(id, type, props) {
-    this.id = id;
+    this.resourceId = id;
     this.type = type;
     this._props = props;
+  }
+
+  get uniqueId() {
+    return cred.resource.UniqueResourceIdGenerator.generateId(this.resourceId, 0);
   }
 
   isDialog() {
@@ -306,8 +312,9 @@ test('SvgLayout.notifyItemBoundsModified for a linked locale', () => {
 
   layout.populate(collectHtmlDisplayElements());
 
+  const uniqueDlgId = cred.resource.UniqueResourceIdGenerator.generateId('mydlg', 0);
   const activeDisplay = spyOnLayoutDisplay(layout, controllerConfig.currentLocale);
-  const activeDlgItem = activeDisplay.findItemWithId('mydlg');
+  const activeDlgItem = activeDisplay.findItemWithId(uniqueDlgId);
   activeDisplay.selectItem(activeDlgItem);
 
   const originalBounds = activeDlgItem.bounds;
@@ -316,7 +323,7 @@ test('SvgLayout.notifyItemBoundsModified for a linked locale', () => {
 
   // Local function that returns the bounds of the dialog item for a given locale.
   const dlgItemBounds = function(locale) {
-    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId('mydlg');
+    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId(uniqueDlgId);
     return dlgItem.bounds;
   };
   // Dialog items of linked locales should have modified bounds. Note that the
@@ -345,8 +352,9 @@ test('SvgLayout.notifyItemBoundsModified for an unlinked locale', () => {
 
   layout.populate(collectHtmlDisplayElements());
 
+  const uniqueDlgId = cred.resource.UniqueResourceIdGenerator.generateId('mydlg', 0);
   const activeDisplay = spyOnLayoutDisplay(layout, controllerConfig.currentLocale);
-  const activeDlgItem = activeDisplay.findItemWithId('mydlg');
+  const activeDlgItem = activeDisplay.findItemWithId(uniqueDlgId);
   activeDisplay.selectItem(activeDlgItem);
 
   const originalBounds = activeDlgItem.bounds;
@@ -355,7 +363,7 @@ test('SvgLayout.notifyItemBoundsModified for an unlinked locale', () => {
 
   // Local function that returns the bounds of the dialog item for a given locale.
   const dlgItemBounds = function(locale) {
-    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId('mydlg');
+    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId(uniqueDlgId);
     return dlgItem.bounds;
   };
   // Dialog items of other locales should have the original bounds. Note that the
@@ -404,8 +412,9 @@ test('SvgLayout.onItemBoundsModifiedNotification for a linked locale', () => {
 
   layout.populate(collectHtmlDisplayElements());
 
+  const uniqueDlgId = cred.resource.UniqueResourceIdGenerator.generateId('mydlg', 0);
   const activeDisplay = spyOnLayoutDisplay(layout, controllerConfig.currentLocale);
-  const activeDlgItem = activeDisplay.findItemWithId('mydlg');
+  const activeDlgItem = activeDisplay.findItemWithId(uniqueDlgId);
   activeDisplay.selectItem(activeDlgItem);
 
   const originalBounds = activeDlgItem.bounds;
@@ -414,7 +423,7 @@ test('SvgLayout.onItemBoundsModifiedNotification for a linked locale', () => {
 
   // Local function that returns the bounds of the dialog item for a given locale.
   const dlgItemBounds = function(locale) {
-    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId('mydlg');
+    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId(uniqueDlgId);
     return dlgItem.bounds;
   };
   // Dialog items of linked locales should have modified bounds. Note that the
@@ -443,8 +452,9 @@ test('SvgLayout.onItemBoundsModifiedNotification for an unlinked locale', () => 
 
   layout.populate(collectHtmlDisplayElements());
 
+  const uniqueDlgId = cred.resource.UniqueResourceIdGenerator.generateId('mydlg', 0);
   const activeDisplay = spyOnLayoutDisplay(layout, controllerConfig.currentLocale);
-  const activeDlgItem = activeDisplay.findItemWithId('mydlg');
+  const activeDlgItem = activeDisplay.findItemWithId(uniqueDlgId);
   activeDisplay.selectItem(activeDlgItem);
 
   const originalBounds = activeDlgItem.bounds;
@@ -453,7 +463,7 @@ test('SvgLayout.onItemBoundsModifiedNotification for an unlinked locale', () => 
 
   // Local function that returns the bounds of the dialog item for a given locale.
   const dlgItemBounds = function(locale) {
-    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId('mydlg');
+    const dlgItem = spyOnLayoutDisplay(layout, locale).findItemWithId(uniqueDlgId);
     return dlgItem.bounds;
   };
   // Dialog items of other locales should have the original bounds. Note that the

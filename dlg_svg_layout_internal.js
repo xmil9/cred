@@ -89,11 +89,11 @@ cred.svglayout_internal = (function() {
     // Return the SVG item that is part of the display and matches a given
     // id.
     // ASSUMPTION: A dialog id is never the same as the id of one of its controls!
-    findItemWithId(id) {
-      if (this._dialogItem.id === id) {
+    findItemWithId(uniqueId) {
+      if (cred.resource.areUniqueResourceIdsEqual(this._dialogItem.uniqueId, uniqueId)) {
         return this._dialogItem;
       }
-      return this._dialogItem.findControlItemWithId(id);
+      return this._dialogItem.findControlItemWithId(uniqueId);
     }
 
     // Creates the root SVG DOM element.
@@ -349,8 +349,18 @@ cred.svglayout_internal = (function() {
       this._dlgResource = dlgResource;
       // Specification for the dialog.
       this._dlgSpec = cred.spec.makeDialogSpec();
-      // Map that associates controls ids with their control SVG items.
+      // Map that associates control's unique  ids with their control SVG items.
       this._controlItems = new Map();
+    }
+
+    // Polymorphic function to return the the dialog's unique id.
+    get uniqueId() {
+      return this.resource().uniqueId;
+    }
+
+    // Polymorphic function to return the the dialog's resource id.
+    get resourceId() {
+      return this.resource().resourceId;
     }
 
     // Polymorphic function to return the resource definition for the dialog.
@@ -363,11 +373,6 @@ cred.svglayout_internal = (function() {
       return this._dlgSpec;
     }
 
-    // Polymorphic function to return the resource id of the item.
-    get id() {
-      return this.resource().id;
-    }
-
     // Polymorphic function to return whether the item represents a dialog.
     isDialog() {
       return this.resource().isDialog();
@@ -376,7 +381,10 @@ cred.svglayout_internal = (function() {
     // Builds the SVG items for the controls of the dialog.
     buildControls() {
       for (let ctrl of this._dlgResource.controls()) {
-        this._controlItems.set(ctrl.id, new SvgControl(ctrl, this.svgDisplay));
+        this._controlItems.set(
+          ctrl.uniqueId.hash(),
+          new SvgControl(ctrl, this.svgDisplay)
+        );
       }
     }
 
@@ -392,13 +400,8 @@ cred.svglayout_internal = (function() {
 
     // Return the control item that is part of the display and matches a given
     // id.
-    findControlItemWithId(id) {
-      for (let [ctrlId, item] of this._controlItems) {
-        if (ctrlId === id) {
-          return item;
-        }
-      }
-      return undefined;
+    findControlItemWithId(uniqueId) {
+      return this._controlItems.get(uniqueId.hash());
     }
 
     // Creates the SVG DOM element for a dialog item.
@@ -433,6 +436,16 @@ cred.svglayout_internal = (function() {
       this._ctrlSpec = new cred.spec.makeControlSpec(ctrlResource.type);
     }
 
+    // Polymorphic function to return the the control's unique id.
+    get uniqueId() {
+      return this.resource().uniqueId;
+    }
+
+    // Polymorphic function to return the the control's resource id.
+    get resourceId() {
+      return this.resource().resourceId;
+    }
+
     // Polymorphic function to return the resource definition for the control.
     resource() {
       return this._ctrlResource;
@@ -441,11 +454,6 @@ cred.svglayout_internal = (function() {
     // Polymorphic function to return the specification for the control's type.
     itemSpec() {
       return this._ctrlSpec;
-    }
-
-    // Polymorphic function to return the resource id of the item.
-    get id() {
-      return this.resource().id;
     }
 
     // Polymorphic function to return whether the item represents a dialog.

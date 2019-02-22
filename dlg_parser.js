@@ -304,40 +304,28 @@ cred.parser = (function() {
       const controlType = this._parseControlType(this.nextToken());
       verifyToken(this.nextToken(), cred.tokenKind.comma);
 
-      const controlId = this._parseControlId(this.nextToken());
+      const resourceId = this._parseControlId(this.nextToken());
       verifyToken(this.nextToken(), cred.tokenKind.closeParenthesis);
 
-      this._dlgResource.addControl(new cred.resource.Control(controlType, controlId));
+      this._dlgResource.addControl(controlType, resourceId);
     }
 
-    // Parse the type of a control.
-    // Returns a property for the parsed type.
+    // Parses the type of a control.
+    // Returns the parsed type.
     _parseControlType(token) {
-      return cred.resource.makeProperty(
-        cred.spec.propertyLabel.ctrlType,
-        cred.spec.physicalPropertyType.identifier,
-        parseIdentifier(token)
-      );
+      return parseIdentifier(token);
     }
 
-    // Parse the id of a control.
-    // Returns a property for the parsed id.
+    // Parses the resource id of a control.
+    // Returns the parsed id.
     _parseControlId(token) {
       // The id can be either an identifier or a number (e.g. '-1' for labels).
       switch (token.kind) {
         case cred.tokenKind.identifier: {
-          return cred.resource.makeProperty(
-            cred.spec.propertyLabel.id,
-            cred.spec.physicalPropertyType.identifier,
-            parseIdentifier(token)
-          );
+          return parseIdentifier(token);
         }
         case cred.tokenKind.number: {
-          return cred.resource.makeProperty(
-            cred.spec.propertyLabel.id,
-            cred.spec.physicalPropertyType.number,
-            parseNumber(token)
-          );
+          return parseNumber(token);
         }
         default: {
           throw new Error(`Invalid control id: ${token.value}`);
@@ -351,9 +339,12 @@ cred.parser = (function() {
       verifyToken(this.nextToken(), cred.tokenKind.openParenthesis);
       verifyToken(this.nextToken(), cred.tokenKind.closeParenthesis);
 
+      // Map that counts the occurrences of resource ids for controls.
+      const ctrlIdCounter = new Map();
+
       token = this.nextToken();
       while (token.isMatch(cred.tokenKind.keyword, 'begin_control_ex')) {
-        this._parseControlDefinition(token);
+        this._parseControlDefinition(token, ctrlIdCounter);
         token = this.nextToken();
       }
 
@@ -363,17 +354,28 @@ cred.parser = (function() {
     }
 
     // Parses a control definition.
-    _parseControlDefinition(token) {
+    _parseControlDefinition(token, ctrlIdCounter) {
+      // Local helper function to increase the occurrence count of a resource id.
+      // Returns the increased count.
+      const incIdCounter = function(resourceId) {
+        ctrlIdCounter.set(
+          resourceId,
+          ctrlIdCounter.has(resourceId) ? ctrlIdCounter.get(resourceId) + 1 : 1
+        );
+        return ctrlIdCounter.get(resourceId);
+      };
+
       verifyToken(token, cred.tokenKind.keyword, 'begin_control_ex');
 
-      let ctrlIdToken = this.peekAheadBy(6);
+      const resourceIdToken = this.peekAheadBy(6);
       verifyTokenChoice(
-        ctrlIdToken,
+        resourceIdToken,
         [cred.tokenKind.identifier, cred.tokenKind.number],
         'Syntax error. Control id not found.'
       );
-      let ctrlId = ctrlIdToken.value;
-      let ctrl = this._dlgResource.control(ctrlId);
+      const resourceId = resourceIdToken.value;
+      const sequenceIdx = incIdCounter(resourceId) - 1;
+      const ctrl = this._dlgResource.controlByResourceId(resourceId, sequenceIdx);
 
       this._parsePositionalControlProperties(this.nextToken(), ctrl);
       this._parseLabeledControlProperties(this.nextToken(), ctrl);

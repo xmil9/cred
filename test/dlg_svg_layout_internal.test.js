@@ -5,6 +5,7 @@
 
 const $ = require('jquery');
 var cred = require('../cred_types');
+cred.resource = require('../dlg_resource');
 cred.spec = require('../dlg_spec');
 cred.svglayout_internal = require('../dlg_svg_layout_internal');
 const geom = require('../geom');
@@ -148,8 +149,12 @@ class DialogResourceMock {
 // Helper class to mock Dialog objects.
 class DialogMock {
   constructor(id, props) {
-    this.id = id;
+    this.resourceId = id;
     this._props = props;
+  }
+
+  get uniqueId() {
+    return cred.resource.UniqueResourceIdGenerator.generateId(this.resourceId, 0);
   }
 
   isDialog() {
@@ -164,9 +169,13 @@ class DialogMock {
 // Helper class to mock Control objects.
 class ControlMock {
   constructor(id, type, props) {
-    this.id = id;
+    this.resourceId = id;
     this.type = type;
     this._props = props;
+  }
+
+  get uniqueId() {
+    return cred.resource.UniqueResourceIdGenerator.generateId(this.resourceId, 0);
   }
 
   isDialog() {
@@ -675,6 +684,16 @@ test('SvgDialog - creation of SVG element for dialog', () => {
   expect(svgDlg.htmlElement).toBeDefined();
 });
 
+test('SvgDialog.uniqueId', () => {
+  const [svgDlg] = setupSvgDialogTestEnv();
+  expect(svgDlg.uniqueId).toBeDefined();
+});
+
+test('SvgDialog.resourceId', () => {
+  const [svgDlg] = setupSvgDialogTestEnv();
+  expect(svgDlg.resourceId).toEqual('mydlg');
+});
+
 test('SvgDialog.resource', () => {
   const [svgDlg, dlgMock] = setupSvgDialogTestEnv();
   expect(svgDlg.resource()).toBe(dlgMock);
@@ -683,11 +702,6 @@ test('SvgDialog.resource', () => {
 test('SvgDialog.itemSpec', () => {
   const [svgDlg] = setupSvgDialogTestEnv();
   expect(svgDlg.itemSpec()).toBeDefined();
-});
-
-test('SvgDialog.id', () => {
-  const [svgDlg] = setupSvgDialogTestEnv();
-  expect(svgDlg.id).toEqual('mydlg');
 });
 
 test('SvgDialog.isDialog', () => {
@@ -720,8 +734,8 @@ test('SvgDialog.buildControls', () => {
   ];
   const [svgDlg] = setupSvgDialogTestEnv(ctrls);
   svgDlg.buildControls();
-  expect(svgDlg.findControlItemWithId('ctrl1')).toBeDefined();
-  expect(svgDlg.findControlItemWithId('ctrl2')).toBeDefined();
+  expect(svgDlg.findControlItemWithId(ctrls[0].uniqueId)).toBeDefined();
+  expect(svgDlg.findControlItemWithId(ctrls[1].uniqueId)).toBeDefined();
 });
 
 test('SvgDialog.resourceBounds', () => {
@@ -761,7 +775,7 @@ test('SvgDialog.findControlItemWithId for existing control', () => {
   const [svgDlg] = setupSvgDialogTestEnv([ctrl]);
   svgDlg.buildControls();
 
-  const svgCtrl = svgDlg.findControlItemWithId('myctrl');
+  const svgCtrl = svgDlg.findControlItemWithId(ctrl.uniqueId);
   expect(svgCtrl).toBeDefined();
   expect(svgCtrl.resource()).toBe(ctrl);
 });
@@ -780,7 +794,8 @@ test('SvgDialog.findControlItemWithId for not existing control', () => {
   const [svgDlg] = setupSvgDialogTestEnv([ctrl]);
   svgDlg.buildControls();
 
-  expect(svgDlg.findControlItemWithId('other')).toBeUndefined();
+  const unknownId = cred.resource.UniqueResourceIdGenerator.generateId('other', 0);
+  expect(svgDlg.findControlItemWithId(unknownId)).toBeUndefined();
 });
 
 ///////////////////
@@ -812,6 +827,16 @@ test('SvgControl - creation of SVG element for control', () => {
   expect(svgCtrl.htmlElement).toBeDefined();
 });
 
+test('SvgControl.uniqueId', () => {
+  const [svgCtrl] = setupSvgControlTestEnv();
+  expect(svgCtrl.uniqueId).toBeDefined();
+});
+
+test('SvgControl.resourceId', () => {
+  const [svgCtrl] = setupSvgControlTestEnv();
+  expect(svgCtrl.resourceId).toEqual('myctrl');
+});
+
 test('SvgControl.resource', () => {
   const [svgCtrl, ctrlMock] = setupSvgControlTestEnv();
   expect(svgCtrl.resource()).toBe(ctrlMock);
@@ -820,11 +845,6 @@ test('SvgControl.resource', () => {
 test('SvgControl.itemSpec', () => {
   const [svgCtrl] = setupSvgControlTestEnv();
   expect(svgCtrl.itemSpec()).toBeDefined();
-});
-
-test('SvgControl.id', () => {
-  const [svgCtrl] = setupSvgControlTestEnv();
-  expect(svgCtrl.id).toEqual('myctrl');
 });
 
 test('SvgControl.isDialog', () => {
@@ -1937,7 +1957,7 @@ test('SvgDisplay.findItemWithId for dialog item', () => {
   const [svgDisplay] = setupSvgDisplayTestEnv();
   const dlgItem = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
 
-  expect(svgDisplay.findItemWithId('mydlg')).toBe(dlgItem);
+  expect(svgDisplay.findItemWithId(dlgItem.uniqueId)).toBe(dlgItem);
 });
 
 test('SvgDisplay.findItemWithId for control item', () => {
@@ -1955,7 +1975,7 @@ test('SvgDisplay.findItemWithId for control item', () => {
   const svgDlg = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests([ctrl]));
   svgDlg.buildControls();
 
-  expect(svgDisplay.findItemWithId('myctrl')).toBeDefined();
+  expect(svgDisplay.findItemWithId(ctrl.uniqueId)).toBeDefined();
 });
 
 test('SvgDisplay.findItemWithId for not existing item', () => {
@@ -1973,5 +1993,6 @@ test('SvgDisplay.findItemWithId for not existing item', () => {
   const svgDlg = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests([ctrl]));
   svgDlg.buildControls();
 
-  expect(svgDisplay.findItemWithId('missing')).toBeUndefined();
+  const unknownId = cred.resource.UniqueResourceIdGenerator.generateId('unknown', 0);
+  expect(svgDisplay.findItemWithId(unknownId)).toBeUndefined();
 });

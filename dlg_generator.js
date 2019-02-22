@@ -103,6 +103,8 @@ cred.gen = (function() {
       let dlg = resource.dialog;
       const indent = 0;
       const indented_1 = indentLevel(indent, 1);
+      // Will be populated with the ordered sequence of generated control declarations.
+      let ctrlOrder = [];
 
       let text = '';
       text += generateCppIncludes(indent);
@@ -111,8 +113,8 @@ cred.gen = (function() {
       text += newline;
       text += generateDialogDefintionBeginning(dlg, indent);
       text += generateLabeledDialogProperties(dlg, indented_1);
-      text += generateControlDeclarations(dlg, indented_1);
-      text += generateControlDefinitions(dlg, indented_1);
+      text += generateControlDeclarations(dlg, indented_1, ctrlOrder);
+      text += generateControlDefinitions(dlg, indented_1, ctrlOrder);
       text += generateDialogDefintionEnding(indent);
       text += newline;
       text += generateLayers(resource, indent);
@@ -251,7 +253,7 @@ cred.gen = (function() {
   // Generates the positional properties of a given dialog.
   function generatePositionalDialogProperties(dlg) {
     let text = '';
-    text += dlg.id + ',';
+    text += dlg.resourceId + ',';
     text +=
       `"${generateSerializedItemProperties(dlg, cred.spec.makeDialogSpec())}"` + ',';
     text += generatePropertyValue(dlg, cred.spec.propertyLabel.left) + ',';
@@ -267,10 +269,14 @@ cred.gen = (function() {
   }
 
   // Generates the control declaration section for a given dialog.
-  function generateControlDeclarations(dlg, indent) {
+  // Populates the control order parameter with an array of unique control ids that
+  // represents the order in which the controls were generated. This is used to
+  // generate the control definitions in the same order as the declarations.
+  function generateControlDeclarations(dlg, indent, ctrlOrder) {
     let text = '';
     for (const ctrl of dlg.controls()) {
       text += makeLine(indent, generateControlDeclaration(ctrl));
+      ctrlOrder.push(ctrl.uniqueId);
     }
     return text;
   }
@@ -281,17 +287,21 @@ cred.gen = (function() {
       'declare_control(' +
       generatePropertyValue(ctrl, cred.spec.propertyLabel.ctrlType) +
       ',' +
-      ctrl.id +
+      ctrl.resourceId +
       ')'
     );
   }
 
   // Generates the control definition section for a given dialog.
-  function generateControlDefinitions(dlg, indent) {
+  // The control definitions need to be in the same order as their declarations
+  // because for duplicate resource ids the control order determines which
+  // definition is matched with which declaration.
+  function generateControlDefinitions(dlg, indent, ctrlOrder) {
     const indented_1 = indentLevel(indent, 1);
     let text = '';
     text += makeLine(indent, 'begin_control_definitions()');
-    for (const ctrl of dlg.controls()) {
+    for (const ctrlId of ctrlOrder) {
+      const ctrl = dlg.control(ctrlId);
       text += generateControlDefinition(ctrl, indented_1);
     }
     text += makeLine(indent, 'end_control_definitions()');
@@ -326,7 +336,7 @@ cred.gen = (function() {
     let text = '';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.ctrlType) + ',';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.resourceClass) + ',';
-    text += ctrl.id + ',';
+    text += ctrl.resourceId + ',';
     text += generateControlCaption(ctrl) + ',';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.left) + ',';
     text += generatePropertyValue(ctrl, cred.spec.propertyLabel.top) + ',';
@@ -371,7 +381,7 @@ cred.gen = (function() {
     let numSerizalizedProps = 0;
     for (let propSpec of itemSpec.propertySpecs()) {
       let serialized = generateSerializedItemProperty(
-        item.id,
+        item.resourceId,
         item.property(propSpec.label),
         propSpec
       );
@@ -456,7 +466,7 @@ cred.gen = (function() {
     let text = '';
     for (const label of sortedLabels) {
       let labeled = generateLabeledItemProperty(
-        item.id,
+        item.resourceId,
         item.property(label),
         itemSpec.propertySpec(label),
         keyword

@@ -1,0 +1,4 @@
+TODO
+----
+
+- Remove dlg_ and cred_ prefixed from files.

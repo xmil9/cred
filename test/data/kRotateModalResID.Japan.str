@@ -1,0 +1,8 @@
+#define	DLGPROP_kRotateModalResID_10_Text	"方向:"
+#define	DLGPROP_kRotateModalResID_11_Text	"回転角度:"
+#define	DLGPROP_kRotateModalResID_12_Text	"中心:"
+#define	DLGPROP_kRotateModalResID_5_Text	"ｲﾒｰｼﾞを強制回転"
+#define	DLGPROP_kRotateModalResID_6_Text	"ｲﾒｰｼﾞをｱﾝﾁｴｲﾘｱｽ"
+#define	DLGPROP_kRotateModalResID_7_Text	"適用"
+#define	DLGPROP_kRotateModalResID_8_Text	"OK"
+#define	DLGPROP_kRotateModalResID_9_Text	"ｷｬﾝｾﾙ"

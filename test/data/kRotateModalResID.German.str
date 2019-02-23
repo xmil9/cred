@@ -1,0 +1,8 @@
+#define	DLGPROP_kRotateModalResID_10_Text	"Richtung:"
+#define	DLGPROP_kRotateModalResID_11_Text	"Winkel:"
+#define	DLGPROP_kRotateModalResID_12_Text	"Mitte:"
+#define	DLGPROP_kRotateModalResID_5_Text	"Nur Bild drehen"
+#define	DLGPROP_kRotateModalResID_6_Text	"Bild glätten"
+#define	DLGPROP_kRotateModalResID_7_Text	"Anwednen"
+#define	DLGPROP_kRotateModalResID_8_Text	"OK"
+#define	DLGPROP_kRotateModalResID_9_Text	"Abbrechen"

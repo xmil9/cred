@@ -1,0 +1,8 @@
+#define	DLGPROP_kRotateModalResID_10_Text	"Direction:"
+#define	DLGPROP_kRotateModalResID_11_Text	"Angle:"
+#define	DLGPROP_kRotateModalResID_12_Text	"Center:"
+#define	DLGPROP_kRotateModalResID_5_Text	"Hard rotate for image"
+#define	DLGPROP_kRotateModalResID_6_Text	"Anti-alias image"
+#define	DLGPROP_kRotateModalResID_7_Text	"Apply"
+#define	DLGPROP_kRotateModalResID_8_Text	"OK"
+#define	DLGPROP_kRotateModalResID_9_Text	"Cancel"

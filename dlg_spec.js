@@ -809,7 +809,8 @@ cred.spec = (function() {
     pushButton: 'PushButton',
     radioButton: 'RadioButton',
     slider: 'Slider',
-    textBox: 'TextBox'
+    textBox: 'TextBox',
+    verticalLine: 'VerticalLine'
   };
   Object.freeze(controlType);
 
@@ -2680,68 +2681,7 @@ cred.spec = (function() {
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
           writeSerializedCaption: false,
-          enums: [
-            {
-              value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
-              display: 'Alphanumeric'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Numeric',
-              display: 'Numeric'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Percentage',
-              display: 'Percentage'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Angle',
-              display: 'Angle'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Canvas',
-              display: 'Canvas'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasXCoord',
-              display: 'Canvas X-Coordinate'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasYCoord',
-              display: 'Canvas Y-Coordinate'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasXDist',
-              display: 'Canvas X-Distance'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasYDist',
-              display: 'Canvas Y-Distance'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Password',
-              display: 'Password'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_PaperSpace',
-              display: 'Paper Space'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Latitude',
-              display: 'Latitude'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Longitude',
-              display: 'Longitude'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_DMSAngle',
-              display: 'Angle in Degrees Minutes Seconds'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Custom',
-              display: 'Custom'
-            }
-          ]
+          enums: makeStandardUnitEnums()
         })
       );
       this._propertySpecs.set(
@@ -2754,6 +2694,53 @@ cred.spec = (function() {
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
+  // Specification for vertical line controls.
+  class VerticalLineSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'VerticalLine';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
           writeLabeled: true,
           writeAsStringWhenLabeled: false,
           writeSerialized: false,
@@ -2950,68 +2937,7 @@ cred.spec = (function() {
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
           writeSerializedCaption: false,
-          enums: [
-            {
-              value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
-              display: 'Alphanumeric'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Numeric',
-              display: 'Numeric'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Percentage',
-              display: 'Percentage'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Angle',
-              display: 'Angle'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Canvas',
-              display: 'Canvas'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasXCoord',
-              display: 'Canvas X-Coordinate'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasYCoord',
-              display: 'Canvas Y-Coordinate'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasXDist',
-              display: 'Canvas X-Distance'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_CanvasYDist',
-              display: 'Canvas Y-Distance'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Password',
-              display: 'Password'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_PaperSpace',
-              display: 'Paper Space'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Latitude',
-              display: 'Latitude'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Longitude',
-              display: 'Longitude'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_DMSAngle',
-              display: 'Angle in Degrees Minutes Seconds'
-            },
-            {
-              value: 'ACDSystems::UI::UnitType::type_Custom',
-              display: 'Custom'
-            }
-          ]
+          enums: makeStandardUnitEnums()
         })
       );
     }
@@ -3554,13 +3480,16 @@ cred.spec = (function() {
       case controlType.textBox: {
         return new TextBoxSpec();
       }
+      case controlType.verticalLine: {
+        return new VerticalLineSpec();
+      }
       default: {
         throw new Error('Unexpected control type.');
       }
     }
   }
 
-  // Creates an array of enum specs for the standard image size options.
+  // Creates an array of enum specs for the standard image size choices.
   function makeStandardImageSizeEnums() {
     return [
       {
@@ -3593,6 +3522,72 @@ cred.spec = (function() {
       },
       {
         value: 'ACDSystems::UI::ImageSizeType::Custom',
+        display: 'Custom'
+      }
+    ];
+  }
+
+  // Creates an array of enum specs for the standard unit choices.
+  function makeStandardUnitEnums() {
+    return [
+      {
+        value: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
+        display: 'Alphanumeric'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Numeric',
+        display: 'Numeric'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Percentage',
+        display: 'Percentage'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Angle',
+        display: 'Angle'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Canvas',
+        display: 'Canvas'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_CanvasXCoord',
+        display: 'Canvas X-Coordinate'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_CanvasYCoord',
+        display: 'Canvas Y-Coordinate'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_CanvasXDist',
+        display: 'Canvas X-Distance'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_CanvasYDist',
+        display: 'Canvas Y-Distance'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Password',
+        display: 'Password'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_PaperSpace',
+        display: 'Paper Space'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Latitude',
+        display: 'Latitude'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Longitude',
+        display: 'Longitude'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_DMSAngle',
+        display: 'Angle in Degrees Minutes Seconds'
+      },
+      {
+        value: 'ACDSystems::UI::UnitType::type_Custom',
         display: 'Custom'
       }
     ];

@@ -538,7 +538,8 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.pushButton,
     cred.spec.controlType.radioButton,
     cred.spec.controlType.slider,
-    cred.spec.controlType.textBox
+    cred.spec.controlType.textBox,
+    cred.spec.controlType.verticalLine
   ]) {
     const spec = cred.spec.makeControlSpec(type);
     expect(spec).toBeDefined();
@@ -849,6 +850,26 @@ test('TextBoxSpec defined properties', () => {
     cred.spec.propertyLabel.unit,
     cred.spec.propertyLabel.upDownArrows
   ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('VerticalLineSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.verticalLine);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('VerticalLineSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.verticalLine);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('VerticalLineSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.verticalLine);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }
 });

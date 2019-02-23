@@ -129,6 +129,7 @@ cred.spec = (function() {
     group: 'Group',
     height: 'Height',
     id: 'ResourceName',
+    image: 'Image',
     imageChecked: 'ImageChecked',
     imageCheckedDisabled: 'ImageCheckedDisabled',
     imageCheckedHot: 'ImageCheckedHot',
@@ -797,6 +798,7 @@ cred.spec = (function() {
     comboBox: 'ComboBox',
     cornerBox: 'CornerBox',
     groupBox: 'GroupBox',
+    imageBox: 'ImageBox',
     imageCheckBox: 'ImageCheckBox',
     imagePushButton: 'ImagePushButton',
     inkButton: 'InkButton',
@@ -1269,6 +1271,110 @@ cred.spec = (function() {
     _havePropertyFlags(flagsPropertyLabel) {
       let flagsSpec = this.propertySpec(flagsPropertyLabel);
       return flagsSpec && flagsSpec.haveFlags();
+    }
+  }
+
+  // Specification for image box controls.
+  class ImageBoxSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'ImageBox';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      this._propertyDisplayOrder.push(propertyLabel.imageSizeType);
+      this._propertyDisplayOrder.push(propertyLabel.image);
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.image,
+        new IdentifierPropertySpec({
+          label: propertyLabel.image,
+          displayedLabel: 'Image',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageSizeType,
+        new EnumPropertySpec({
+          label: propertyLabel.imageSizeType,
+          displayedLabel: 'Image Size Type',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px16',
+              display: '16x16'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px24',
+              display: '24x24'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px32',
+              display: '32x32'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px48',
+              display: '48x48'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px64',
+              display: '64x64'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px128',
+              display: '128x128'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px256',
+              display: '256x256'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::Custom',
+              display: 'Custom'
+            }
+          ]
+        })
+      );
     }
   }
 
@@ -3196,6 +3302,9 @@ cred.spec = (function() {
       }
       case controlType.groupBox: {
         return new GroupBoxSpec();
+      }
+      case controlType.imageBox: {
+        return new ImageBoxSpec();
       }
       case controlType.imageCheckBox: {
         return new ImageCheckBoxSpec();

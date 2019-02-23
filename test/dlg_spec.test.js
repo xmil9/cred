@@ -527,6 +527,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.comboBox,
     cred.spec.controlType.cornerBox,
     cred.spec.controlType.groupBox,
+    cred.spec.controlType.imageBox,
     cred.spec.controlType.imageCheckBox,
     cred.spec.controlType.imagePushButton,
     cred.spec.controlType.inkButton,
@@ -616,6 +617,29 @@ test('ControlSpec defined properties', () => {
     cred.spec.propertyLabel.tabStop,
     cred.spec.propertyLabel.visible,
     cred.spec.propertyLabel.tooltip
+  ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('ImageBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imageBox);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('ImageBoxSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imageBox);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('ImageBoxSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imageBox);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.imageSizeType,
+    cred.spec.propertyLabel.image
   ]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }

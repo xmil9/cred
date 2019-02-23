@@ -1600,6 +1600,86 @@ test('ResourceGenerator.generateContent for dialog with a ImageCheckBox control'
     });
 });
 
+test('ResourceGenerator.generateContent for dialog with a ImageBox control', done => {
+  const masterDlg =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "kTestDlg.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "kTestDlg.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "kTestDlg.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(kTestDlg,"",0,0,10,20,DLGPROP_kTestDlg_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,20)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"kTestDlg")\n' +
+    '        define_dialog_property(Text,DLGPROP_kTestDlg_0_Text)\n' +
+    '        define_dialog_property(Width,10)\n' +
+    '    end_dialog_properties()\n' +
+    '    declare_control(ImageBox,CanvasIcon)\n' +
+    '    begin_control_definitions()\n' +
+    '        begin_control_ex(ImageBox,IMAGEBOX,CanvasIcon,"{[Image=""Canvas_Image""]}",10,10,48,48,WS_CHILD | WS_GROUP | WS_TABSTOP | WS_VISIBLE | 1342373888,0)\n' +
+    '            define_property(AnchorBottom,0)\n' +
+    '            define_property(AnchorLeft,0)\n' +
+    '            define_property(AnchorRight,0)\n' +
+    '            define_property(AnchorTop,0)\n' +
+    '            define_property(Enabled,1)\n' +
+    '            define_property(Group,1)\n' +
+    '            define_property(Height,48)\n' +
+    '            define_property(Image,"Canvas_Image")\n' +
+    '            define_property(ImageSizeType,UI::ImageSizeType::px48)\n' +
+    '            define_property(KillPopup,1)\n' +
+    '            define_property(Left,10)\n' +
+    '            define_property(ResourceName,"CanvasIcon")\n' +
+    '            define_property(TabStop,1)\n' +
+    '            define_property(Tooltip,"")\n' +
+    '            define_property(Top,10)\n' +
+    '            define_property(Visible,1)\n' +
+    '            define_property(Width,48)\n' +
+    '        end_control_ex()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    '    BEGIN_LAYER "MasterLayer"\n' +
+    '        0\n' +
+    '        1\n' +
+    '        2\n' +
+    '        3\n' +
+    '    END_LAYER\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const enStrings = '#define DLGPROP_kTestDlg_0_Text "Title"\n';
+  const deStrings = '#define DLGPROP_kTestDlg_0_Text "Ueberschrift"\n';
+  const jpStrings = '#define DLGPROP_kTestDlg_0_Text "jp-word"\n';
+  const contentMap = new Map([
+    [cred.locale.any, { dialog: masterDlg, strings: undefined }],
+    [cred.locale.english, { dialog: undefined, strings: enStrings }],
+    [cred.locale.german, { dialog: undefined, strings: deStrings }],
+    [cred.locale.japanese, { dialog: undefined, strings: jpStrings }]
+  ]);
+
+  generateContentAsync('kTestDlg', contentMap)
+    .then(generatedContentMap => {
+      expect(generatedContentMap).toEqual(contentMap);
+      done();
+    })
+    .catch(err => {
+      // Will fail.
+      expect(err).toBeUndefined();
+    });
+});
+
 test('ResourceGenerator.generateContent for dialog with a control that has a numeric id', done => {
   const masterDlg =
     '#include "ResourceDefines.h" // Version [1.1] //\n' +

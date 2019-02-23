@@ -1,0 +1,4 @@
+#define	DLGPROP_kSpiralModalResID_3_Text	"OK"
+#define	DLGPROP_kSpiralModalResID_4_Text	"Cancel"
+#define	DLGPROP_kSpiralModalResID_5_Text	"Number of Spirals:"
+#define	DLGPROP_kSpiralModalResID_6_Text	"Direction:"

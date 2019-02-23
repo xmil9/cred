@@ -527,6 +527,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.comboBox,
     cred.spec.controlType.cornerBox,
     cred.spec.controlType.groupBox,
+    cred.spec.controlType.imageCheckBox,
     cred.spec.controlType.imagePushButton,
     cred.spec.controlType.inkButton,
     cred.spec.controlType.label,
@@ -622,6 +623,42 @@ test('ControlSpec defined properties', () => {
 
 ///////////////////
 
+test('ImageCheckBoxSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imageCheckBox);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('ImageCheckBoxSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imageCheckBox);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('ImageCheckBoxSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imageCheckBox);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.toolBarLike,
+    cred.spec.propertyLabel.ownerDrawn,
+    cred.spec.propertyLabel.imageSizeType,
+    cred.spec.propertyLabel.imageNormal,
+    cred.spec.propertyLabel.imagePressed,
+    cred.spec.propertyLabel.imageDisabled,
+    cred.spec.propertyLabel.imageHot,
+    cred.spec.propertyLabel.imageChecked,
+    cred.spec.propertyLabel.imageCheckedPressed,
+    cred.spec.propertyLabel.imageCheckedDisabled,
+    cred.spec.propertyLabel.imageCheckedHot,
+    cred.spec.propertyLabel.imageTriState,
+    cred.spec.propertyLabel.imageTriStatePressed,
+    cred.spec.propertyLabel.imageTriStateDisabled,
+    cred.spec.propertyLabel.imageTriStateHot
+  ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
 test('ImagePushButtonSpec creation', () => {
   const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imagePushButton);
   expect(ctrlSpec).toBeDefined();
@@ -639,6 +676,7 @@ test('ImagePushButtonSpec defined properties', () => {
     cred.spec.propertyLabel.pushButtonLike,
     cred.spec.propertyLabel.splitButtonLike,
     cred.spec.propertyLabel.toolBarLike,
+    cred.spec.propertyLabel.ownerDrawn,
     cred.spec.propertyLabel.imageSizeType,
     cred.spec.propertyLabel.imageNormal,
     cred.spec.propertyLabel.imagePressed,

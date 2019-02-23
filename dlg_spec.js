@@ -797,6 +797,7 @@ cred.spec = (function() {
     comboBox: 'ComboBox',
     cornerBox: 'CornerBox',
     groupBox: 'GroupBox',
+    imageCheckBox: 'ImageCheckBox',
     imagePushButton: 'ImagePushButton',
     inkButton: 'InkButton',
     label: 'Label',
@@ -1271,6 +1272,344 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for image checkbox controls.
+  class ImageCheckBoxSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'ImageCheckBox';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      this._propertyDisplayOrder.push(propertyLabel.toolBarLike);
+      this._propertyDisplayOrder.push(propertyLabel.ownerDrawn);
+      this._propertyDisplayOrder.push(propertyLabel.imageSizeType);
+      this._propertyDisplayOrder.push(propertyLabel.imageNormal);
+      this._propertyDisplayOrder.push(propertyLabel.imagePressed);
+      this._propertyDisplayOrder.push(propertyLabel.imageDisabled);
+      this._propertyDisplayOrder.push(propertyLabel.imageHot);
+      this._propertyDisplayOrder.push(propertyLabel.imageChecked);
+      this._propertyDisplayOrder.push(propertyLabel.imageCheckedPressed);
+      this._propertyDisplayOrder.push(propertyLabel.imageCheckedDisabled);
+      this._propertyDisplayOrder.push(propertyLabel.imageCheckedHot);
+      this._propertyDisplayOrder.push(propertyLabel.imageTriState);
+      this._propertyDisplayOrder.push(propertyLabel.imageTriStatePressed);
+      this._propertyDisplayOrder.push(propertyLabel.imageTriStateDisabled);
+      this._propertyDisplayOrder.push(propertyLabel.imageTriStateHot);
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.imageChecked,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageChecked,
+          displayedLabel: 'Image Checked',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageCheckedDisabled,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageCheckedDisabled,
+          displayedLabel: 'Checked Disabled',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageCheckedHot,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageCheckedHot,
+          displayedLabel: 'Checked Hot',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageCheckedPressed,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageCheckedPressed,
+          displayedLabel: 'Checked Pressed',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageDisabled,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageDisabled,
+          displayedLabel: 'Image Disabled',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageHot,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageHot,
+          displayedLabel: 'Image Hot',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageNormal,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageNormal,
+          displayedLabel: 'Image Normal',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imagePressed,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imagePressed,
+          displayedLabel: 'Image Pressed',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageTriState,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageTriState,
+          displayedLabel: 'Image Tri-state',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageTriStateDisabled,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageTriStateDisabled,
+          displayedLabel: 'Tri-State Disabled',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageTriStateHot,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageTriStateHot,
+          displayedLabel: 'Tri-State Hot',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageTriStatePressed,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageTriStatePressed,
+          displayedLabel: 'Tri-State Pressed',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageSizeType,
+        new EnumPropertySpec({
+          label: propertyLabel.imageSizeType,
+          displayedLabel: 'Image Size Type',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px16',
+              display: '16x16'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px24',
+              display: '24x24'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px32',
+              display: '32x32'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px48',
+              display: '48x48'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px64',
+              display: '64x64'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px128',
+              display: '128x128'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::px256',
+              display: '256x256'
+            },
+            {
+              value: 'ACDSystems::UI::ImageSizeType::Custom',
+              display: 'Custom'
+            }
+          ]
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.ownerDrawn,
+        new BooleanPropertySpec({
+          label: propertyLabel.ownerDrawn,
+          displayedLabel: 'Owner-draw',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.toolBarLike,
+        new BooleanPropertySpec({
+          label: propertyLabel.toolBarLike,
+          displayedLabel: 'Toolbar-like',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
   // Specification for image push button controls.
   class ImagePushButtonSpec extends ControlSpec {
     constructor() {
@@ -1296,6 +1635,7 @@ cred.spec = (function() {
       this._propertyDisplayOrder.push(propertyLabel.pushButtonLike);
       this._propertyDisplayOrder.push(propertyLabel.splitButtonLike);
       this._propertyDisplayOrder.push(propertyLabel.toolBarLike);
+      this._propertyDisplayOrder.push(propertyLabel.ownerDrawn);
       this._propertyDisplayOrder.push(propertyLabel.imageSizeType);
       this._propertyDisplayOrder.push(propertyLabel.imageNormal);
       this._propertyDisplayOrder.push(propertyLabel.imagePressed);
@@ -2856,6 +3196,9 @@ cred.spec = (function() {
       }
       case controlType.groupBox: {
         return new GroupBoxSpec();
+      }
+      case controlType.imageCheckBox: {
+        return new ImageCheckBoxSpec();
       }
       case controlType.imagePushButton: {
         return new ImagePushButtonSpec();

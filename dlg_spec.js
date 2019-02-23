@@ -1296,8 +1296,16 @@ cred.spec = (function() {
     _definePropertyDisplayOrder() {
       super._definePropertyDisplayOrder();
 
-      this._propertyDisplayOrder.push(propertyLabel.imageSizeType);
-      this._propertyDisplayOrder.push(propertyLabel.image);
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.imageSizeType,
+        propertyLabel.id
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.image,
+        propertyLabel.imageSizeType
+      );
     }
 
     // Polymorphic function to set behavior flags for the control.

@@ -1347,40 +1347,7 @@ cred.spec = (function() {
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
           writeSerializedCaption: false,
-          enums: [
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px16',
-              display: '16x16'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px24',
-              display: '24x24'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px32',
-              display: '32x32'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px48',
-              display: '48x48'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px64',
-              display: '64x64'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px128',
-              display: '128x128'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px256',
-              display: '256x256'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::Custom',
-              display: 'Custom'
-            }
-          ]
+          enums: makeStandardImageSizeEnums()
         })
       );
     }
@@ -1651,40 +1618,7 @@ cred.spec = (function() {
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
           writeSerializedCaption: false,
-          enums: [
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px16',
-              display: '16x16'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px24',
-              display: '24x24'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px32',
-              display: '32x32'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px48',
-              display: '48x48'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px64',
-              display: '64x64'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px128',
-              display: '128x128'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px256',
-              display: '256x256'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::Custom',
-              display: 'Custom'
-            }
-          ]
+          enums: makeStandardImageSizeEnums()
         })
       );
       this._propertySpecs.set(
@@ -1991,40 +1925,7 @@ cred.spec = (function() {
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
           writeSerializedCaption: false,
-          enums: [
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px16',
-              display: '16x16'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px24',
-              display: '24x24'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px32',
-              display: '32x32'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px48',
-              display: '48x48'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px64',
-              display: '64x64'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px128',
-              display: '128x128'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::px256',
-              display: '256x256'
-            },
-            {
-              value: 'ACDSystems::UI::ImageSizeType::Custom',
-              display: 'Custom'
-            }
-          ]
+          enums: makeStandardImageSizeEnums()
         })
       );
       this._propertySpecs.set(
@@ -3348,6 +3249,44 @@ cred.spec = (function() {
         throw new Error('Unexpected control type.');
       }
     }
+  }
+
+  // Creates an array of enum specs for the standard image size options.
+  function makeStandardImageSizeEnums() {
+    return [
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px16',
+        display: '16x16'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px24',
+        display: '24x24'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px32',
+        display: '32x32'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px48',
+        display: '48x48'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px64',
+        display: '64x64'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px128',
+        display: '128x128'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::px256',
+        display: '256x256'
+      },
+      {
+        value: 'ACDSystems::UI::ImageSizeType::Custom',
+        display: 'Custom'
+      }
+    ];
   }
 
   ///////////////////

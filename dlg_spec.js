@@ -1132,7 +1132,7 @@ cred.spec = (function() {
         new BooleanPropertySpec({
           label: propertyLabel.enabled,
           displayedLabel: 'Enabled',
-          required: true,
+          required: false,
           nullable: false,
           context: cred.editContext.globalDefault,
           modifiable: true,
@@ -1149,7 +1149,7 @@ cred.spec = (function() {
         new BooleanPropertySpec({
           label: propertyLabel.group,
           displayedLabel: 'Group',
-          required: true,
+          required: false,
           nullable: false,
           context: cred.editContext.globalDefault,
           modifiable: true,
@@ -1183,7 +1183,7 @@ cred.spec = (function() {
         new BooleanPropertySpec({
           label: propertyLabel.tabStop,
           displayedLabel: 'Tab Stop',
-          required: true,
+          required: false,
           nullable: false,
           context: cred.editContext.globalDefault,
           modifiable: true,

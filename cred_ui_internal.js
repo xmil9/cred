@@ -255,16 +255,24 @@ cred.ui_internal = (function() {
       let $containerElem = $('#property-list');
 
       for (const label of spec.propertyDisplayOrder()) {
-        // Build the appropriate DOM structure using double-dispatch between
-        // the property spec and property builder classes.
-        let component = spec
-          .propertySpec(label)
-          .buildDomComponent(
+        const propSpec = spec.propertySpec(label);
+        const propDefinition = definition.property(label);
+        if (propDefinition) {
+          // Build the appropriate DOM structure using double-dispatch between
+          // the property spec and property builder classes.
+          let component = propSpec.buildDomComponent(
             this._propertyBuilder,
-            definition.property(label),
+            propDefinition,
             $containerElem
           );
-        this._propertyComponents.set(label, component);
+          this._propertyComponents.set(label, component);
+        } else if (propSpec.isRequired()) {
+          throw new Error(
+            `Defintion for required property ${label} for control ${
+              spec.title
+            } is missing.`
+          );
+        }
       }
     }
   }

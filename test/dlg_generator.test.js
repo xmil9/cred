@@ -1630,15 +1630,12 @@ test('ResourceGenerator.generateContent for dialog with a ImageBox control', don
     '            define_property(AnchorLeft,0)\n' +
     '            define_property(AnchorRight,0)\n' +
     '            define_property(AnchorTop,0)\n' +
-    '            define_property(Enabled,1)\n' +
-    '            define_property(Group,1)\n' +
     '            define_property(Height,48)\n' +
     '            define_property(Image,"Canvas_Image")\n' +
     '            define_property(ImageSizeType,UI::ImageSizeType::px48)\n' +
     '            define_property(KillPopup,1)\n' +
     '            define_property(Left,10)\n' +
     '            define_property(ResourceName,"CanvasIcon")\n' +
-    '            define_property(TabStop,1)\n' +
     '            define_property(Tooltip,"")\n' +
     '            define_property(Top,10)\n' +
     '            define_property(Visible,1)\n' +

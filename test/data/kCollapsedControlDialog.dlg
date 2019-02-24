@@ -1,0 +1,163 @@
+#include "ResourceDefines.h" // Version [1.1] //
+
+#ifdef RES_US
+	#include "kCollapsedControlDialog.English.str"
+#elif defined RES_GERMAN
+	#include "kCollapsedControlDialog.German.str"
+#elif defined RES_JAPAN
+	#include "kCollapsedControlDialog.Japan.str"
+#else
+	#error "Translation"
+#endif
+
+begin_dialog_definition_ex_(kCollapsedControlDialog,"",1000,1000,261,30,DLGPROP_kCollapsedControlDialog_0_Text,"FancyDialogBoxClass",WS_CHILD | WS_VISIBLE | 1342177280,"",0)
+	begin_dialog_properties()
+		define_dialog_property(Height,30)
+		define_dialog_property(KillPopup,1)
+		define_dialog_property(PaddingType,ACDSystems::UI::DialogPaddingTypes::Default)
+		define_dialog_property(ResourceName,"kCollapsedControlDialog")
+		define_dialog_property(Text,"")
+		define_dialog_property(Width,261)
+	end_dialog_properties()
+	declare_control(ExpandButton,kKeyArrowButton)
+	declare_control(PushButton,kTextReplaceButton)
+	declare_control(PushButton,kTextReplaceAllButton)
+	declare_control(PushButton,kTextFindNextButton)
+	declare_control(PushButton,kSelectButton)
+	declare_control(PushButton,kNextPageButton)
+	begin_control_definitions()
+		begin_control_ex(ExpandButton,EXPANDBUTTON,kKeyArrowButton,DLGPROP_kCollapsedControlDialog_1_Text,1,6,18,18,WS_CHILD | WS_GROUP | WS_TABSTOP | WS_VISIBLE | 1342373890,0)
+			define_property(AnchorBottom,0)
+			define_property(AnchorLeft,0)
+			define_property(AnchorRight,0)
+			define_property(AnchorTop,0)
+			define_property(AutoExpand,0)
+			define_property(Enabled,1)
+			define_property(Expanded,0)
+			define_property(Group,1)
+			define_property(Height,18)
+			define_property(KillPopup,1)
+			define_property(Left,1)
+			define_property(ResourceName,"kKeyArrowButton")
+			define_property(TabStop,1)
+			define_property(Text,DLGPROP_kCollapsedControlDialog_1_Text)
+			define_property(Tooltip,DLGPROP_kCollapsedControlDialog_1_Tooltip)
+			define_property(Top,6)
+			define_property(Visible,1)
+			define_property(Width,18)
+		end_control_ex()
+		begin_control_ex(PushButton,Button,kTextReplaceButton,DLGPROP_kCollapsedControlDialog_2_Text,25,4,74,22,WS_CHILD | WS_DISABLED | WS_GROUP | WS_TABSTOP | WS_VISIBLE | BS_PUSHBUTTON | 1476591616,0)
+			define_property(AnchorBottom,0)
+			define_property(AnchorLeft,0)
+			define_property(AnchorRight,0)
+			define_property(AnchorTop,0)
+			define_property(Enabled,0)
+			define_property(Group,1)
+			define_property(Height,22)
+			define_property(KillPopup,1)
+			define_property(Left,25)
+			define_property(ResourceName,"kTextReplaceButton")
+			define_property(TabStop,1)
+			define_property(Text,DLGPROP_kCollapsedControlDialog_2_Text)
+			define_property(Tooltip,DLGPROP_kCollapsedControlDialog_2_Tooltip)
+			define_property(Top,4)
+			define_property(Visible,1)
+			define_property(Width,74)
+		end_control_ex()
+		begin_control_ex(PushButton,Button,kTextReplaceAllButton,DLGPROP_kCollapsedControlDialog_3_Text,105,4,74,22,WS_CHILD | WS_DISABLED | WS_GROUP | WS_TABSTOP | WS_VISIBLE | BS_PUSHBUTTON | 1476591616,0)
+			define_property(AnchorBottom,0)
+			define_property(AnchorLeft,0)
+			define_property(AnchorRight,0)
+			define_property(AnchorTop,0)
+			define_property(Enabled,0)
+			define_property(Group,1)
+			define_property(Height,22)
+			define_property(KillPopup,1)
+			define_property(Left,105)
+			define_property(ResourceName,"kTextReplaceAllButton")
+			define_property(TabStop,1)
+			define_property(Text,DLGPROP_kCollapsedControlDialog_3_Text)
+			define_property(Tooltip,DLGPROP_kCollapsedControlDialog_3_Tooltip)
+			define_property(Top,4)
+			define_property(Visible,1)
+			define_property(Width,74)
+		end_control_ex()
+		begin_control_ex(PushButton,Button,kTextFindNextButton,DLGPROP_kCollapsedControlDialog_4_Text,185,4,74,22,WS_CHILD | WS_DISABLED | WS_GROUP | WS_TABSTOP | WS_VISIBLE | BS_DEFPUSHBUTTON | 1476591617,0)
+			define_property(AnchorBottom,0)
+			define_property(AnchorLeft,0)
+			define_property(AnchorRight,0)
+			define_property(AnchorTop,0)
+			define_property(Enabled,0)
+			define_property(Group,1)
+			define_property(Height,22)
+			define_property(KillPopup,1)
+			define_property(Left,185)
+			define_property(ResourceName,"kTextFindNextButton")
+			define_property(TabStop,1)
+			define_property(Text,DLGPROP_kCollapsedControlDialog_4_Text)
+			define_property(Tooltip,DLGPROP_kCollapsedControlDialog_4_Tooltip)
+			define_property(Top,4)
+			define_property(Visible,1)
+			define_property(Width,74)
+		end_control_ex()
+		begin_control_ex(PushButton,Button,kSelectButton,DLGPROP_kCollapsedControlDialog_5_Text,184,4,75,22,WS_CHILD | WS_GROUP | WS_TABSTOP | WS_VISIBLE | BS_PUSHBUTTON | 1342373888,0)
+			define_property(AnchorBottom,0)
+			define_property(AnchorLeft,0)
+			define_property(AnchorRight,0)
+			define_property(AnchorTop,0)
+			define_property(Enabled,1)
+			define_property(Group,1)
+			define_property(Height,22)
+			define_property(KillPopup,1)
+			define_property(Left,184)
+			define_property(ResourceName,"kSelectButton")
+			define_property(TabStop,1)
+			define_property(Text,DLGPROP_kCollapsedControlDialog_5_Text)
+			define_property(Tooltip,DLGPROP_kCollapsedControlDialog_5_Tooltip)
+			define_property(Top,4)
+			define_property(Visible,1)
+			define_property(Width,75)
+		end_control_ex()
+		begin_control_ex(PushButton,Button,kNextPageButton,DLGPROP_kCollapsedControlDialog_6_Text,101,4,75,22,WS_CHILD | WS_DISABLED | WS_GROUP | WS_TABSTOP | WS_VISIBLE | BS_PUSHBUTTON | 1476591616,0)
+			define_property(AnchorBottom,0)
+			define_property(AnchorLeft,0)
+			define_property(AnchorRight,0)
+			define_property(AnchorTop,0)
+			define_property(Enabled,0)
+			define_property(Group,1)
+			define_property(Height,22)
+			define_property(KillPopup,1)
+			define_property(Left,101)
+			define_property(ResourceName,"kNextPageButton")
+			define_property(TabStop,1)
+			define_property(Text,DLGPROP_kCollapsedControlDialog_6_Text)
+			define_property(Tooltip,DLGPROP_kCollapsedControlDialog_6_Tooltip)
+			define_property(Top,4)
+			define_property(Visible,1)
+			define_property(Width,75)
+		end_control_ex()
+	end_control_definitions()
+end_dialog_definition_ex_()
+
+#if 0
+
+BEGIN_LAYERS
+	BEGIN_LAYER "MasterLayer"
+		0
+	END_LAYER
+	BEGIN_LAYER "Objects Layer"
+		4
+		5
+	END_LAYER
+	BEGIN_LAYER "Text Layer"
+		1
+		2
+		3
+	END_LAYER
+END_LAYERS
+
+#endif
+
+
+
+

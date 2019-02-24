@@ -118,11 +118,13 @@ cred.spec = (function() {
     anchorLeft: 'AnchorLeft',
     anchorRight: 'AnchorRight',
     anchorTop: 'AnchorTop',
+    autoExpand: 'AutoExpand',
     checked: 'Checked',
     commandDelay: 'CommandDelay',
     ctrlType: 'Type',
     customUnitIndex: 'CustomUnitIndex',
     enabled: 'Enabled',
+    expanded: 'Expanded',
     extStyleFlags: 'ExtStyleFlags',
     font: 'Font',
     fontSize: 'FontSize',
@@ -797,6 +799,7 @@ cred.spec = (function() {
     checkBox: 'CheckBox',
     comboBox: 'ComboBox',
     cornerBox: 'CornerBox',
+    expandButton: 'ExpandButton',
     groupBox: 'GroupBox',
     imageBox: 'ImageBox',
     imageCheckBox: 'ImageCheckBox',
@@ -3219,6 +3222,102 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for expand button controls.
+  class ExpandButtonSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'ExpandButton';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.autoExpand,
+        propertyLabel.text
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.expanded,
+        propertyLabel.autoExpand
+      );
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: true
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.autoExpand,
+        new IntegerPropertySpec({
+          label: propertyLabel.autoExpand,
+          displayedLabel: 'AutoExpand',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.expanded,
+        new BooleanPropertySpec({
+          label: propertyLabel.expanded,
+          displayedLabel: 'Expanded',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
   // Specification for groupbox controls.
   class GroupBoxSpec extends ControlSpec {
     constructor() {
@@ -3440,6 +3539,9 @@ cred.spec = (function() {
       }
       case controlType.cornerBox: {
         return new CornerBoxSpec();
+      }
+      case controlType.expandButton: {
+        return new ExpandButtonSpec();
       }
       case controlType.groupBox: {
         return new GroupBoxSpec();

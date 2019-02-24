@@ -526,6 +526,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.checkBox,
     cred.spec.controlType.comboBox,
     cred.spec.controlType.cornerBox,
+    cred.spec.controlType.expandButton,
     cred.spec.controlType.groupBox,
     cred.spec.controlType.imageBox,
     cred.spec.controlType.imageCheckBox,
@@ -1050,6 +1051,30 @@ test('CornerBoxSpec defined properties', () => {
   const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.cornerBox);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('ExpandButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.expandButton);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('ExpandButtonSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.expandButton);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('ExpandButtonSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.expandButton);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.expanded,
+    cred.spec.propertyLabel.autoExpand
+  ]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }
 });

@@ -119,10 +119,12 @@ cred.spec = (function() {
     anchorRight: 'AnchorRight',
     anchorTop: 'AnchorTop',
     autoExpand: 'AutoExpand',
+    autoZoom: 'AutoZoom',
     checked: 'Checked',
     commandDelay: 'CommandDelay',
     ctrlType: 'Type',
     customUnitIndex: 'CustomUnitIndex',
+    decimals: 'Decimals',
     enabled: 'Enabled',
     expanded: 'Expanded',
     extStyleFlags: 'ExtStyleFlags',
@@ -150,7 +152,9 @@ cred.spec = (function() {
     killPopup: 'KillPopup',
     left: 'Left',
     maximum: 'Max',
+    maxLevel: 'MaxLevel',
     maxValue: 'MaxValue',
+    minLevel: 'MinLevel',
     minValue: 'MinValue',
     minimum: 'Min',
     ownerDrawn: 'OwnerDrawn',
@@ -173,7 +177,8 @@ cred.spec = (function() {
     unit: 'Unit',
     upDownArrows: 'UpDownArrows',
     visible: 'Visible',
-    width: 'Width'
+    width: 'Width',
+    zoomStyle: 'ZoomStyle'
   };
   Object.freeze(propertyLabel);
 
@@ -813,7 +818,8 @@ cred.spec = (function() {
     radioButton: 'RadioButton',
     slider: 'Slider',
     textBox: 'TextBox',
-    verticalLine: 'VerticalLine'
+    verticalLine: 'VerticalLine',
+    zoomItem: 'ZoomItem'
   };
   Object.freeze(controlType);
 
@@ -3285,7 +3291,7 @@ cred.spec = (function() {
         propertyLabel.autoExpand,
         new IntegerPropertySpec({
           label: propertyLabel.autoExpand,
-          displayedLabel: 'AutoExpand',
+          displayedLabel: 'Auto Expand',
           required: true,
           nullable: true,
           context: cred.editContext.globalDefault,
@@ -3528,6 +3534,158 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for zoom item controls.
+  class ZoomItemSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'ZoomItem';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      this._propertyDisplayOrder.push(propertyLabel.autoZoom);
+      this._propertyDisplayOrder.push(propertyLabel.decimals);
+      this._propertyDisplayOrder.push(propertyLabel.incFactor);
+      this._propertyDisplayOrder.push(propertyLabel.minLevel);
+      this._propertyDisplayOrder.push(propertyLabel.maxLevel);
+      this._propertyDisplayOrder.push(propertyLabel.zoomStyle);
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.autoZoom,
+        new BooleanPropertySpec({
+          label: propertyLabel.autoZoom,
+          displayedLabel: 'Auto Zoom',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.incFactor,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.incFactor,
+          displayedLabel: 'Increment Factor',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.minLevel,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.minLevel,
+          displayedLabel: 'Minimum Level',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.maxLevel,
+        new FloatingPointPropertySpec({
+          label: propertyLabel.maxLevel,
+          displayedLabel: 'Maximum Level',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.zoomStyle,
+        new EnumPropertySpec({
+          label: propertyLabel.zoomStyle,
+          displayedLabel: 'Zoom Style',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: '::UIZoomInfo::kEditItemStyle',
+              display: 'Edit Item Style'
+            },
+            {
+              value: '::UIZoomInfo::kComboBoxStyle',
+              display: 'Combobox Style'
+            }
+          ]
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.decimals,
+        new IntegerPropertySpec({
+          label: propertyLabel.decimals,
+          displayedLabel: 'Decimals',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
   // Factory function for control specs based on a given control type.
   function makeControlSpec(ctrlType) {
     switch (ctrlType) {
@@ -3584,6 +3742,9 @@ cred.spec = (function() {
       }
       case controlType.verticalLine: {
         return new VerticalLineSpec();
+      }
+      case controlType.zoomItem: {
+        return new ZoomItemSpec();
       }
       default: {
         throw new Error('Unexpected control type.');

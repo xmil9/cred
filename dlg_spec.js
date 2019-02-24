@@ -813,6 +813,7 @@ cred.spec = (function() {
     inkButton: 'InkButton',
     label: 'Label',
     menuButton: 'MenuButton',
+    ownerDraw: 'OwnerDraw',
     placeHolder: 'PlaceHolder',
     pushButton: 'PushButton',
     radioButton: 'RadioButton',
@@ -3371,6 +3372,77 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for owner draw controls.
+  class OwnerDrawSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'OwnerDraw';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: true
+        })
+      );
+      // Replace the standard 'killPopup' property spec with a spec that serializes the
+      // property.
+      this._propertySpecs.set(
+        propertyLabel.killPopup,
+        new BooleanPropertySpec({
+          label: propertyLabel.killPopup,
+          displayedLabel: 'Kill Popup',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
   // Specification for menu button controls.
   class MenuButtonSpec extends ControlSpec {
     constructor() {
@@ -3725,6 +3797,9 @@ cred.spec = (function() {
       case controlType.menuButton: {
         return new MenuButtonSpec();
       }
+      case controlType.ownerDraw: {
+        return new OwnerDrawSpec();
+      }
       case controlType.placeHolder: {
         return new PlaceHolderSpec();
       }
@@ -3747,7 +3822,7 @@ cred.spec = (function() {
         return new ZoomItemSpec();
       }
       default: {
-        throw new Error('Unexpected control type.');
+        throw new Error(`Unexpected control type: ${ctrlType}.`);
       }
     }
   }

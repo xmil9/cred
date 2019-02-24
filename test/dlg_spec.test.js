@@ -535,6 +535,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.inkButton,
     cred.spec.controlType.label,
     cred.spec.controlType.menuButton,
+    cred.spec.controlType.ownerDraw,
     cred.spec.controlType.placeHolder,
     cred.spec.controlType.pushButton,
     cred.spec.controlType.radioButton,
@@ -1103,6 +1104,26 @@ test('ZoomItemSpec defined properties', () => {
     cred.spec.propertyLabel.maxLevel,
     cred.spec.propertyLabel.zoomStyle
   ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('OwnerDrawSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.ownerDraw);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('OwnerDrawSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.ownerDraw);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('OwnerDrawSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.ownerDraw);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }
 });

@@ -98,7 +98,7 @@ body {
     position: relative;
     /* Ideally the display would fill the vertical space.
        'height: 100hv' would make sense but it makes the
-       display extend the vertical page size! */
+       display exceed the vertical page size! */
     height: 75vh;
     width: 100vw;
 }
@@ -295,12 +295,12 @@ body {
 }
 
 fieldset > .leftColumn {
-    width: 120px;
+    width: 130px;
     float: left;
 }
 
 fieldset > .rightColumn {
-    width: 120px;
+    width: 130px;
     float: right;
     margin-right: 10px;
 }

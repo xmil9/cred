@@ -1036,6 +1036,11 @@ cred.spec = (function() {
               display: 'WS_CHILD'
             },
             {
+              textValue: 'WS_CLIPCHILDREN',
+              numericValue: 33554432,
+              display: 'WS_CLIPCHILDREN'
+            },
+            {
               textValue: 'WS_GROUP',
               numericValue: 131072,
               display: 'WS_GROUP'
@@ -1068,7 +1073,18 @@ cred.spec = (function() {
           writeSerialized: false,
           writeAsStringWhenSerialized: false,
           writeSerializedCaption: false,
-          flags: []
+          flags: [
+            {
+              textValue: 'WS_EX_CONTROLPARENT',
+              numericValue: 65536,
+              display: 'WS_EX_CONTROLPARENT'
+            },
+            {
+              textValue: 'WS_EX_STATICEDGE',
+              numericValue: 131072,
+              display: 'WS_EX_STATICEDGE'
+            }
+          ]
         })
       );
       this._propertySpecs.set(
@@ -1267,10 +1283,12 @@ cred.spec = (function() {
       this._propertyDisplayOrder.push(propertyLabel.anchorBottom);
       // Don't show the style and ext style flags for now. Their settings are
       // duplicated in other properties, e.g. Visible, Group, etc.
-      // if (this._havePropertyFlags(propertyLabel.styleFlags))
-      //     this._propertyDisplayOrder.push(propertyLabel.styleFlags);
-      // if (this._havePropertyFlags(propertyLabel.extStyleFlags))
-      //     this._propertyDisplayOrder.push(propertyLabel.extStyleFlags);
+      //if (this._havePropertyFlags(propertyLabel.styleFlags)) {
+      //  this._propertyDisplayOrder.push(propertyLabel.styleFlags);
+      //}
+      //if (this._havePropertyFlags(propertyLabel.extStyleFlags)) {
+      //  this._propertyDisplayOrder.push(propertyLabel.extStyleFlags);
+      //}
     }
 
     // Polymorphic function to set behavior flags for the control.

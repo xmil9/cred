@@ -537,6 +537,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.menuButton,
     cred.spec.controlType.ownerDraw,
     cred.spec.controlType.placeHolder,
+    cred.spec.controlType.popupButton,
     cred.spec.controlType.pushButton,
     cred.spec.controlType.radioButton,
     cred.spec.controlType.slider,
@@ -1124,6 +1125,36 @@ test('OwnerDrawSpec defined properties', () => {
   const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.ownerDraw);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('PopupButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.popupButton);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('PopupButtonSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.popupButton);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('PopupButtonSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.popupButton);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.itemCount,
+    cred.spec.propertyLabel.imageNormal,
+    cred.spec.propertyLabel.itemWidth,
+    cred.spec.propertyLabel.itemHeight,
+    cred.spec.propertyLabel.columns,
+    cred.spec.propertyLabel.rows,
+    cred.spec.propertyLabel.selectedItem,
+    cred.spec.propertyLabel.popPosition
+  ]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }
 });

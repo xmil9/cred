@@ -121,6 +121,7 @@ cred.spec = (function() {
     autoExpand: 'AutoExpand',
     autoZoom: 'AutoZoom',
     checked: 'Checked',
+    columns: 'Columns',
     commandDelay: 'CommandDelay',
     ctrlType: 'Type',
     customUnitIndex: 'CustomUnitIndex',
@@ -149,6 +150,9 @@ cred.spec = (function() {
     imageTriStatePressed: 'ImageTriStatePressed',
     incFactor: 'IncFactor',
     incValue: 'IncValue',
+    itemCount: 'ItemCount',
+    itemHeight: 'ItemHeight',
+    itemWidth: 'ItemWidth',
     killPopup: 'KillPopup',
     left: 'Left',
     maximum: 'Max',
@@ -160,10 +164,13 @@ cred.spec = (function() {
     ownerDrawn: 'OwnerDrawn',
     paddingType: 'PaddingType',
     pageIncFactor: 'PageIncFactor',
+    popPosition: 'PopPosition',
     precision: 'Precision',
     pushButtonLike: 'PushButtonLike',
     readOnly: 'ReadOnly',
     resourceClass: 'ResourceClass',
+    rows: 'Rows',
+    selectedItem: 'SelectedItem',
     solidColorsOnly: 'SolidColorsOnly',
     splitButtonLike: 'SplitButtonLike',
     styleFlags: 'StyleFlags',
@@ -815,6 +822,7 @@ cred.spec = (function() {
     menuButton: 'MenuButton',
     ownerDraw: 'OwnerDraw',
     placeHolder: 'PlaceHolder',
+    popupButton: 'PopupButton',
     pushButton: 'PushButton',
     radioButton: 'RadioButton',
     slider: 'Slider',
@@ -2464,6 +2472,212 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for image popup button controls.
+  class PopupButtonSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'PopupButton';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      this._propertyDisplayOrder.push(propertyLabel.imageNormal);
+      this._propertyDisplayOrder.push(propertyLabel.itemCount);
+      this._propertyDisplayOrder.push(propertyLabel.itemWidth);
+      this._propertyDisplayOrder.push(propertyLabel.itemHeight);
+      this._propertyDisplayOrder.push(propertyLabel.columns);
+      this._propertyDisplayOrder.push(propertyLabel.rows);
+      this._propertyDisplayOrder.push(propertyLabel.selectedItem);
+      this._propertyDisplayOrder.push(propertyLabel.popPosition);
+    }
+
+    // Polymorphic function to set behavior flags for the control.
+    _setBehaviorFlags() {
+      this.setBehaviorFlag(cred.spec.controlBehavior.serializeProperties);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: true
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.imageNormal,
+        new IdentifierPropertySpec({
+          label: propertyLabel.imageNormal,
+          displayedLabel: 'Image Normal',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: true,
+          writeSerialized: true,
+          writeAsStringWhenSerialized: true,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.itemCount,
+        new IntegerPropertySpec({
+          label: propertyLabel.itemCount,
+          displayedLabel: 'Item Count',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.itemHeight,
+        new IntegerPropertySpec({
+          label: propertyLabel.itemHeight,
+          displayedLabel: 'Item Height',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.itemWidth,
+        new IntegerPropertySpec({
+          label: propertyLabel.itemWidth,
+          displayedLabel: 'Item Width',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.columns,
+        new IntegerPropertySpec({
+          label: propertyLabel.columns,
+          displayedLabel: 'Columns',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.rows,
+        new IntegerPropertySpec({
+          label: propertyLabel.rows,
+          displayedLabel: 'Rows',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.selectedItem,
+        new IntegerPropertySpec({
+          label: propertyLabel.selectedItem,
+          displayedLabel: 'Selected Item',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.popPosition,
+        new EnumPropertySpec({
+          label: propertyLabel.popPosition,
+          displayedLabel: 'Pop Position',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: '::ACDSystems::UI::PopupButton::TopRight',
+              display: 'Top Right'
+            },
+            {
+              value: '::ACDSystems::UI::PopupButton::BottomLeft',
+              display: 'Bottom Left'
+            }
+          ]
+        })
+      );
+    }
+  }
+
   // Specification for image push button controls.
   class PushButtonSpec extends ControlSpec {
     constructor() {
@@ -3820,6 +4034,9 @@ cred.spec = (function() {
       }
       case controlType.placeHolder: {
         return new PlaceHolderSpec();
+      }
+      case controlType.popupButton: {
+        return new PopupButtonSpec();
       }
       case controlType.pushButton: {
         return new PushButtonSpec();

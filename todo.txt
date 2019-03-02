@@ -2,3 +2,5 @@ TODO
 ----
 
 - Remove dlg_ and cred_ prefixed from files.
+? Remove entries from propertyLabel enum that are only used in one ctrl type.
+  They can just be strings in the spec. Check: Only if they are used in one place (spec).

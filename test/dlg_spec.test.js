@@ -541,6 +541,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.pushButton,
     cred.spec.controlType.radioButton,
     cred.spec.controlType.slider,
+    cred.spec.controlType.strokeButton,
     cred.spec.controlType.textBox,
     cred.spec.controlType.verticalLine,
     cred.spec.controlType.zoomItem
@@ -926,6 +927,30 @@ test('InkButtonSpec defined properties', () => {
   for (const label of [
     cred.spec.propertyLabel.text,
     cred.spec.propertyLabel.solidColorsOnly
+  ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('StrokeButtonSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.strokeButton);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('StrokeButtonSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.strokeButton);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('StrokeButtonSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.strokeButton);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.applyMode,
+    cred.spec.propertyLabel.penType
   ]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }

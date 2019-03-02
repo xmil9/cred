@@ -118,12 +118,13 @@ cred.spec = (function() {
     anchorLeft: 'AnchorLeft',
     anchorRight: 'AnchorRight',
     anchorTop: 'AnchorTop',
+    applyMode: 'ApplyMode',
     autoExpand: 'AutoExpand',
     autoZoom: 'AutoZoom',
     checked: 'Checked',
     columns: 'Columns',
     commandDelay: 'CommandDelay',
-    ctrlType: 'Type',
+    ctrlType: 'ControlType',
     customUnitIndex: 'CustomUnitIndex',
     decimals: 'Decimals',
     enabled: 'Enabled',
@@ -181,6 +182,7 @@ cred.spec = (function() {
     toolBarLike: 'ToolBarLike',
     tooltip: 'Tooltip',
     top: 'Top',
+    penType: 'Type',
     unit: 'Unit',
     upDownArrows: 'UpDownArrows',
     visible: 'Visible',
@@ -826,6 +828,7 @@ cred.spec = (function() {
     pushButton: 'PushButton',
     radioButton: 'RadioButton',
     slider: 'Slider',
+    strokeButton: 'StrokeButton',
     textBox: 'TextBox',
     verticalLine: 'VerticalLine',
     zoomItem: 'ZoomItem'
@@ -3259,6 +3262,149 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for stroke button controls.
+  class StrokeButtonSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'StrokeButton';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.penType,
+        propertyLabel.id
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.applyMode,
+        propertyLabel.penType
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.text,
+        propertyLabel.applyMode
+      );
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.applyMode,
+        new EnumPropertySpec({
+          label: propertyLabel.applyMode,
+          displayedLabel: 'Apply Mode',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: '::kARROW_NONE',
+              display: 'No Arrow'
+            },
+            {
+              value: '::kARROW_LEFT',
+              display: 'Left Arrow'
+            },
+            {
+              value: '::kARROW_RIGHT',
+              display: 'Right Arrow'
+            },
+            {
+              value: '::kARROW_BOTH',
+              display: 'Both Arrows'
+            }
+          ]
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.penType,
+        new EnumPropertySpec({
+          label: propertyLabel.penType,
+          displayedLabel: 'Type',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: '::kAttributeType_SolidPen',
+              display: 'Solid Pens'
+            },
+            {
+              value: '::kAttributeType_CaligraphicPen',
+              display: 'Caligraphic Pens'
+            },
+            {
+              value: '::kAttributeType_NeonPen',
+              display: 'Neon Pens'
+            },
+            {
+              value: '::kAttributeType_ParallelLinePen',
+              display: 'Parallel Pens'
+            },
+            {
+              value: '::kAttributeType_SymbolStrokePen',
+              display: 'Symbol Stroke Pens'
+            },
+            {
+              value: '::kAttributeType_Dash',
+              display: 'Dashes'
+            },
+            {
+              value: '::kAttributeType_Arrow',
+              display: 'Arrows'
+            }
+          ]
+        })
+      );
+    }
+  }
+
   // Specification for slider controls.
   class SliderSpec extends ControlSpec {
     constructor() {
@@ -4046,6 +4192,9 @@ cred.spec = (function() {
       }
       case controlType.slider: {
         return new SliderSpec();
+      }
+      case controlType.strokeButton: {
+        return new StrokeButtonSpec();
       }
       case controlType.textBox: {
         return new TextBoxSpec();

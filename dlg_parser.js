@@ -727,7 +727,9 @@ cred.parser = (function() {
     let [propValue, propType] = determinePropertyValueAndType(token);
     const isTypePermitted = propertySpec.types.indexOf(propType) !== -1;
     if (!isTypePermitted) {
-      throw new Error('Unexpected property type.');
+      throw new Error(
+        `Unexpected property type "${propType}" for property "${propertySpec.label}".`
+      );
     }
 
     let property = cred.resource.makeProperty(propertySpec.label, propType, propValue);

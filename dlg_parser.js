@@ -564,6 +564,17 @@ cred.parser = (function() {
 
   // Parses serialized properties starting with a given token and adds the properties
   // to a given target object.
+  // Unfortunately, there is a special case to allow specifying the caption text
+  // as whose value these properties are encoded. This is done by appending
+  // 'Caption="' (without the single quotes) after the closing curly braces of
+  // the property pairs, e.g.
+  //      {[label1=value1][label2=value2][label2=value2]...}Caption="caption_value
+  // Note that the opened double-quotes are not closed when the caption is specified
+  // this way. The 'Caption="' key is followed by a string identifier or a double-
+  // quoted string, e.g.
+  //    Caption="DLGPROP_kModifyStyleDlgID_1_Text
+  //    Caption=""My text"  -- might not actually occurr but theoretically possible
+  //    Caption="""
   function parseSerializedProperties(parser, token, target) {
     verifyToken(
       token,
@@ -573,7 +584,13 @@ cred.parser = (function() {
     );
 
     const serializedProps = token.value;
-    const labeledValues = deserializeProperties(serializedProps);
+    const [labeledValues, hasCaption] = deserializeProperties(serializedProps);
+
+    if (hasCaption) {
+      // The next token is the caption value.
+      labeledValues.push(deserializeCaption(parser.nextToken()));
+    }
+
     for (let labeledVal of labeledValues) {
       const type = cred.spec.physicalPropertyTypeOfValue(labeledVal.value);
       let property = cred.resource.makeProperty(
@@ -591,45 +608,39 @@ cred.parser = (function() {
   //      {[label1=value1][label2=value2][label2=value2]...}
   // If a value is a string it is enclosed in two double-quotes, e.g.
   //      [label=""strval""].
-  // Unfortunately, there is a special case to allow specifying the caption text
-  // as whose value these properties are encoded. This is done by appending
-  // 'Caption=""' (without the single quotes) after the closing curly braces of
-  // the property pairs, e.g.
-  //      {[label1=value1][label2=value2][label2=value2]...}Caption="caption_value"
+  // Returns an array of two pieces of data:
+  // - an array of label-value objects
+  // - a flag whether a caption is following the serialized properties
   function deserializeProperties(serialized) {
     serialized = serialized.trim();
     let len = serialized.length;
     if (len === 0) {
-      return [];
+      return [[], false];
     }
 
     if (
-      !(
-        serialized.startsWith('{') || serialized.startsWith(cred.serializedCaptionLabel)
-      ) ||
-      !(serialized.endsWith('}') || serialized.endsWith('"'))
+      !serialized.startsWith('{') ||
+      !(serialized.endsWith('}') || serialized.endsWith(cred.serializedCaptionLabel))
     ) {
       throw new Error('Invalid serialized properties.');
     }
 
-    let serializedPairs = undefined;
-    let caption = undefined;
-    if (serialized.startsWith('{')) {
-      [serializedPairs, caption] = serialized.split('}');
-    } else {
-      caption = serialized;
-    }
+    let [serializedPairs, caption] = serialized.split('}');
 
     let props = [];
+    let hasCaption = false;
     if (serializedPairs) {
       // Trim off the starting brace. Note that the closing brace has already been
-      // trimmed off by the splt operation.
+      // trimmed off by the split operation.
       props = deserializePropertySequence(serializedPairs.substring(1));
     }
     if (caption) {
-      props.push(deserializeCaptionProperty(caption));
+      if (caption !== cred.serializedCaptionLabel) {
+        throw 'Invalid serialized caption.';
+      }
+      hasCaption = true;
     }
-    return props;
+    return [props, hasCaption];
   }
 
   // Deserializes a given string holding a sequence of key-value property pairs into
@@ -667,19 +678,16 @@ cred.parser = (function() {
 
   // Deserializes the serialized caption property of a control. Returns the deserialized
   // caption property as an object with 'label' and 'value' fields.
-  // The serialized caption property has the following format:
-  //    Caption="my caption"
-  function deserializeCaptionProperty(serializedCaption) {
-    if (!serializedCaption.startsWith(cred.serializedCaptionLabel)) {
-      throw new Error('Invalid serialized caption.');
-    }
+  function deserializeCaption(captionToken) {
+    verifyTokenChoice(
+      captionToken,
+      [cred.tokenKind.identifier, cred.tokenKind.string],
+      'Syntax error. Serialized caption should be a string or an indentifier.'
+    );
+
     return {
       label: cred.spec.propertyLabel.text,
-      // Trim the label, separator, and the double-quotes around the caption value.
-      value: serializedCaption.substring(
-        cred.serializedCaptionLabel.length + 1,
-        serializedCaption.length - 1
-      )
+      value: captionToken.value
     };
   }
 

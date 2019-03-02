@@ -282,7 +282,7 @@ cred.lexer = (function() {
         } else if (this._isNestedString()) {
           // Start nested string treatment and continue reading the inner string.
           this._insideNestedString = true;
-        } else if (nextChar === '"') {
+        } else if (nextChar === '"' && !this._isSpecialCaseForEmptySerializedCaption()) {
           // If the next character is another double quote then it's an escape
           // sequence. Store both.
           this._value += ch;
@@ -314,9 +314,12 @@ cred.lexer = (function() {
 
     // Checks for situations where nested strings can occurr.
     _isNestedString() {
-      // Within serialized control properties when a caption is following the
-      // property sequence. In this case we should have just read the caption
-      // label.
+      // No special nested string cases right now.
+      return false;
+    }
+
+    // Detect special case where consecutive double-quotes are not an escape sequence.
+    _isSpecialCaseForEmptySerializedCaption() {
       return this._value.endsWith(cred.serializedCaptionLabel);
     }
   }

@@ -63,12 +63,6 @@ test('cred.lexer.analyse empty string', () => {
   expect(tokens[0].isMatch(cred.tokenKind.string, '')).toBeTruthy();
 });
 
-test('cred.lexer.analyse nested string for control captions', () => {
-  const tokens = cred.lexer.analyse('"Caption="my caption""');
-  expect(tokens.length).toEqual(1);
-  expect(tokens[0].isMatch(cred.tokenKind.string, 'Caption="my caption"')).toBeTruthy();
-});
-
 test('cred.lexer.analyse identifier', () => {
   const tokens = cred.lexer.analyse('my_id');
   expect(tokens.length).toEqual(1);
@@ -327,4 +321,18 @@ test('cred.lexer.analyse binary-or separated ids, strings, numbers', () => {
   expect(tokens[4].isMatch(cred.tokenKind.number, 530.6)).toBeTruthy();
   expect(tokens[5].isMatch(cred.tokenKind.binaryOr, '|')).toBeTruthy();
   expect(tokens[6].isMatch(cred.tokenKind.number, 392)).toBeTruthy();
+});
+
+test('cred.lexer.analyse double-quotes for empty caption in serialized properties', () => {
+  const tokens = cred.lexer.analyse('"Caption="""');
+  expect(tokens.length).toEqual(2);
+  expect(tokens[0].isMatch(cred.tokenKind.string, 'Caption=')).toBeTruthy();
+  expect(tokens[1].isMatch(cred.tokenKind.string, '')).toBeTruthy();
+});
+
+test('cred.lexer.analyse identifier for caption in serialized properties', () => {
+  const tokens = cred.lexer.analyse('"Caption="mycaptionid');
+  expect(tokens.length).toEqual(2);
+  expect(tokens[0].isMatch(cred.tokenKind.string, 'Caption=')).toBeTruthy();
+  expect(tokens[1].isMatch(cred.tokenKind.identifier, 'mycaptionid')).toBeTruthy();
 });

@@ -359,15 +359,19 @@ cred.gen = (function() {
       // Append the caption text if configured.
       const captionPropSpec = ctrlSpec.propertySpec(cred.spec.propertyLabel.text);
       if (captionPropSpec && captionPropSpec.writeSerializedCaption()) {
-        let captionText = '';
+        let captionValue = '';
         const captionProp = ctrl.property(cred.spec.propertyLabel.text);
         if (captionProp) {
-          captionText = captionProp.value;
+          captionValue = captionProp.valueAsString();
         }
-        serialized += `Caption="${captionText}"`;
+        // Close the double quotes that were opened earlier before the caption
+        // value!
+        serialized += `${cred.serializedCaptionLabel}"${captionValue}`;
+      } else {
+        // Close the double quotes that were opened earlier.
+        serialized += '"';
       }
 
-      serialized += '"';
       return serialized;
     }
 

@@ -1120,7 +1120,7 @@ test('ResourceGenerator.generateContent for dialog with a InkButton control that
     '    end_dialog_properties()\n' +
     '    declare_control(InkButton,kColorItemID)\n' +
     '    begin_control_definitions()\n' +
-    '        begin_control_ex(InkButton,InkButton,kColorItemID,"{[SolidColorsOnly=1]}Caption="DLGPROP_kTestDlg_1_Text"",10,12,35,22,WS_CHILD | WS_GROUP | WS_TABSTOP | WS_VISIBLE | 1342373888,0)\n' +
+    '        begin_control_ex(InkButton,InkButton,kColorItemID,"{[SolidColorsOnly=1]}Caption="DLGPROP_kTestDlg_1_Text,10,12,35,22,WS_CHILD | WS_GROUP | WS_TABSTOP | WS_VISIBLE | 1342373888,0)\n' +
     '            define_property(AnchorBottom,0)\n' +
     '            define_property(AnchorLeft,0)\n' +
     '            define_property(AnchorRight,0)\n' +

@@ -336,3 +336,13 @@ test('cred.lexer.analyse identifier for caption in serialized properties', () =>
   expect(tokens[0].isMatch(cred.tokenKind.string, 'Caption=')).toBeTruthy();
   expect(tokens[1].isMatch(cred.tokenKind.identifier, 'mycaptionid')).toBeTruthy();
 });
+
+test('cred.lexer.analyse test', () => {
+  const tokens = cred.lexer.analyse('WS_CHILD | WS_VISIBLE | 1342177280');
+  expect(tokens.length).toEqual(5);
+  expect(tokens[0].isMatch(cred.tokenKind.identifier, 'WS_CHILD')).toBeTruthy();
+  expect(tokens[1].isMatch(cred.tokenKind.binaryOr, '|')).toBeTruthy();
+  expect(tokens[2].isMatch(cred.tokenKind.identifier, 'WS_VISIBLE')).toBeTruthy();
+  expect(tokens[3].isMatch(cred.tokenKind.binaryOr, '|')).toBeTruthy();
+  expect(tokens[4].isMatch(cred.tokenKind.number, 1342177280)).toBeTruthy();
+});

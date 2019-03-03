@@ -528,6 +528,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.cornerBox,
     cred.spec.controlType.expandButton,
     cred.spec.controlType.groupBox,
+    cred.spec.controlType.horizontalLine,
     cred.spec.controlType.imageBox,
     cred.spec.controlType.imageCheckBox,
     cred.spec.controlType.imagePushButton,
@@ -873,6 +874,26 @@ test('VerticalLineSpec.title', () => {
 
 test('VerticalLineSpec defined properties', () => {
   const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.verticalLine);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [cred.spec.propertyLabel.text]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('HorizontalLineSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.horizontalLine);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('HorizontalLineSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.horizontalLine);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('HorizontalLineSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.horizontalLine);
   const props = Array.from(ctrlSpec.propertySpecs());
   for (const label of [cred.spec.propertyLabel.text]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);

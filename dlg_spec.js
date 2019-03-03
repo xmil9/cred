@@ -815,6 +815,7 @@ cred.spec = (function() {
     cornerBox: 'CornerBox',
     expandButton: 'ExpandButton',
     groupBox: 'GroupBox',
+    horizontalLine: 'HorizontalLine',
     imageBox: 'ImageBox',
     imageCheckBox: 'ImageCheckBox',
     imagePushButton: 'ImagePushButton',
@@ -2996,6 +2997,53 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for horizontal line controls.
+  class HorizontalLineSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'HorizontalLine';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
   // Specification for combobox controls.
   class ComboBoxSpec extends ControlSpec {
     constructor() {
@@ -4153,6 +4201,9 @@ cred.spec = (function() {
       }
       case controlType.groupBox: {
         return new GroupBoxSpec();
+      }
+      case controlType.horizontalLine: {
+        return new HorizontalLineSpec();
       }
       case controlType.imageBox: {
         return new ImageBoxSpec();

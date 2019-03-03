@@ -1254,7 +1254,7 @@ cred.spec = (function() {
       );
       this._propertySpecs.set(
         propertyLabel.tooltip,
-        new StringPropertySpec({
+        new LocalizedStringPropertySpec({
           label: propertyLabel.tooltip,
           displayedLabel: 'Tooltip',
           required: true,

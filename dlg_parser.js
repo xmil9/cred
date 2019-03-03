@@ -376,6 +376,9 @@ cred.parser = (function() {
       const resourceId = resourceIdToken.value;
       const sequenceIdx = incIdCounter(resourceId) - 1;
       const ctrl = this._dlgResource.controlByResourceId(resourceId, sequenceIdx);
+      if (!ctrl) {
+        throw new Error(`Declaration for control "${resourceId}" not found.`);
+      }
 
       this._parsePositionalControlProperties(this.nextToken(), ctrl);
       this._parseLabeledControlProperties(this.nextToken(), ctrl);

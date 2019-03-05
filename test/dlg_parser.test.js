@@ -20,7 +20,7 @@ test('cred.parser.parseDialog for no tokens', () => {
 });
 
 test('cred.parser.parseDialog for including other dialog file', () => {
-  const tokens = cred.lexer.analyse('#include "kSymbolConvert.dlg"');
+  const tokens = cred.lexer.analyse('#include "kSymbolConvert.dlg"', 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes).toBeUndefined();
 });
@@ -36,7 +36,7 @@ test('cred.parser.parseDialog for including multiple other dialog files', () => 
     '#else                                                                      ' +
     '  #error "Translation"                                                     ' +
     '#endif                                                                     ';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.any);
   expect(dlgRes).toBeUndefined();
 });
@@ -64,7 +64,7 @@ test('cred.parser.parseDialog for minimal dialog', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   expect(dlgRes.version).toEqual('1.1');
@@ -108,7 +108,7 @@ test('cred.parser.parseDialog for missing C++ header', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -135,7 +135,7 @@ test('cred.parser.parseDialog for missing version', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -160,7 +160,7 @@ test('cred.parser.parseDialog for missing English string include', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -185,7 +185,7 @@ test('cred.parser.parseDialog for missing German string include', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -210,7 +210,7 @@ test('cred.parser.parseDialog for missing Japanese string include', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -237,7 +237,7 @@ test('cred.parser.parseDialog for string includes in different order', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes).toBeDefined();
 });
@@ -264,7 +264,7 @@ test('cred.parser.parseDialog for missing string include line', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -289,7 +289,7 @@ test('cred.parser.parseDialog for missing #else-#error', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -315,7 +315,7 @@ test('cred.parser.parseDialog for missing #endif', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -343,7 +343,7 @@ test('cred.parser.parseDialog for serialized dialog string property', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.tooltip)).toEqual('test');
 });
@@ -372,7 +372,7 @@ test('cred.parser.parseDialog for serialized dialog integer number property', ()
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.maxValue)).toEqual(50);
 });
@@ -401,7 +401,7 @@ test('cred.parser.parseDialog for serialized dialog floating point number proper
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.maxValue)).toEqual(50.123);
 });
@@ -430,7 +430,7 @@ test('cred.parser.parseDialog for serialized dialog negative number property', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.maxValue)).toEqual(-50);
 });
@@ -459,7 +459,7 @@ test('cred.parser.parseDialog for serialized flag property not supported', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.extStyleFlags)).toEqual(0);
 });
@@ -488,7 +488,7 @@ test('cred.parser.parseDialog for serialized dialog identifier property', () => 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.tooltip)).toEqual('a_str_id');
 });
@@ -517,7 +517,7 @@ test('cred.parser.parseDialog for multiple serialized dialog properties', () => 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.tooltip)).toEqual('test');
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.minValue)).toEqual(10);
@@ -548,7 +548,7 @@ test('cred.parser.parseDialog for multiple serialized dialog properties with whi
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.tooltip)).toEqual('test');
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.minValue)).toEqual(10);
@@ -579,7 +579,7 @@ test('cred.parser.parseDialog for positional style flags dialog property', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.styleFlags)).toEqual(187);
 });
@@ -607,7 +607,7 @@ test('cred.parser.parseDialog for misspelled begin_dialog_definition_ex_ keyword
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -634,7 +634,7 @@ test('cred.parser.parseDialog for misspelled end_dialog_definition_ex_ keyword',
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -661,7 +661,7 @@ test('cred.parser.parseDialog for missing positional id dialog property', () => 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -688,7 +688,7 @@ test('cred.parser.parseDialog for missing positional coordinate dialog property'
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -715,7 +715,7 @@ test('cred.parser.parseDialog for missing last positional dialog property', () =
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -742,7 +742,7 @@ test('cred.parser.parseDialog for positional id dialog property with wrong type'
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -769,7 +769,7 @@ test('cred.parser.parseDialog for positional font dialog property with wrong typ
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -796,7 +796,7 @@ test('cred.parser.parseDialog for positional text dialog property as string', ()
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.text)).toEqual('string');
 });
@@ -825,7 +825,7 @@ test('cred.parser.parseDialog for labeled integer number dialog property', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.killPopup)).toEqual(1);
 });
@@ -854,7 +854,7 @@ test('cred.parser.parseDialog for labeled floating point number dialog property'
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.precision)).toEqual(3.4);
 });
@@ -883,7 +883,7 @@ test('cred.parser.parseDialog for labeled negtive number dialog property', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.precision)).toEqual(-3.4);
 });
@@ -912,7 +912,7 @@ test('cred.parser.parseDialog for labeled identifier dialog property', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.paddingType)).toEqual(
     'DialogPaddingTypes::Default'
@@ -943,7 +943,7 @@ test('cred.parser.parseDialog for labeled string dialog property', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.tooltip)).toEqual('test');
 });
@@ -974,7 +974,7 @@ test('cred.parser.parseDialog for multiple labeled dialog properties', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.tooltip)).toEqual('test');
   expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.paddingType)).toEqual(
@@ -1007,7 +1007,7 @@ test('cred.parser.parseDialog for labeled dialog property with missing label', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1035,7 +1035,7 @@ test('cred.parser.parseDialog for labeled dialog property with missing value', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1062,7 +1062,7 @@ test('cred.parser.parseDialog for misspelled begin_dialog_properties keyword', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1089,7 +1089,7 @@ test('cred.parser.parseDialog for misspelled end_dialog_properties keyword', () 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1117,7 +1117,7 @@ test('cred.parser.parseDialog for misspelled define_dialog_property keyword', ()
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1145,7 +1145,7 @@ test('cred.parser.parseDialog for control declaration', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1178,7 +1178,7 @@ test('cred.parser.parseDialog for control declaration with numeric id', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId(100, 0);
@@ -1213,7 +1213,7 @@ test('cred.parser.parseDialog for minimal control definition', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1259,7 +1259,7 @@ test('cred.parser.parseDialog for minimal control definition with numeric id', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId(101, 0);
@@ -1308,7 +1308,7 @@ test('cred.parser.parseDialog for two control definitions with same resource id'
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl1 = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1349,7 +1349,7 @@ test('cred.parser.parseDialog for serialized control string property', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.imageNormal)
@@ -1384,7 +1384,7 @@ test('cred.parser.parseDialog for serialized control integer number property', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.toolBarLike)
@@ -1419,7 +1419,7 @@ test('cred.parser.parseDialog for serialized control floating point number prope
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.toolBarLike)
@@ -1454,7 +1454,7 @@ test('cred.parser.parseDialog for serialized control negative number property', 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.toolBarLike)
@@ -1489,7 +1489,7 @@ test('cred.parser.parseDialog for serialized flag control property not supported
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes
@@ -1525,7 +1525,7 @@ test('cred.parser.parseDialog for serialized control identifier property', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.tooltip)
@@ -1560,7 +1560,7 @@ test('cred.parser.parseDialog for multiple serialized control properties', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1595,7 +1595,7 @@ test('cred.parser.parseDialog for multiple serialized control properties with wh
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1629,7 +1629,7 @@ test('cred.parser.parseDialog for empty serialized control properties', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1665,7 +1665,7 @@ test('cred.parser.parseDialog for serialized control properties with caption', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1702,7 +1702,7 @@ test('cred.parser.parseDialog for serialized control properties with caption tha
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1738,7 +1738,7 @@ test('cred.parser.parseDialog for serialized control properties with empty capti
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1774,7 +1774,7 @@ test('cred.parser.parseDialog for empty serialized control properties with capti
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -1808,7 +1808,7 @@ test('cred.parser.parseDialog for invalid serialized control properties', () => 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1839,7 +1839,7 @@ test('cred.parser.parseDialog for positional style flags control property', () =
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.styleFlags)
@@ -1874,7 +1874,7 @@ test('cred.parser.parseDialog for positional ext style flags control property', 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.styleFlags)
@@ -1908,7 +1908,7 @@ test('cred.parser.parseDialog for misspelled begin_control_ex_ keyword', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1938,7 +1938,7 @@ test('cred.parser.parseDialog for misspelled end_control_ex_ keyword', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1968,7 +1968,7 @@ test('cred.parser.parseDialog for missing positional id control property', () =>
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -1998,7 +1998,7 @@ test('cred.parser.parseDialog for missing positional coordinate control property
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2028,7 +2028,7 @@ test('cred.parser.parseDialog for missing last positional control property', () 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2058,7 +2058,7 @@ test('cred.parser.parseDialog for positional id control property with wrong type
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2088,7 +2088,7 @@ test('cred.parser.parseDialog for positional style flags control property with w
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2118,7 +2118,7 @@ test('cred.parser.parseDialog for positional text control property as string', (
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   // Not legal unless the string contains serialized properties!
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
@@ -2150,7 +2150,7 @@ test('cred.parser.parseDialog for labeled integer number control property', () =
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.group).value
@@ -2184,7 +2184,7 @@ test('cred.parser.parseDialog for labeled floating point number control property
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.maxValue)
@@ -2219,7 +2219,7 @@ test('cred.parser.parseDialog for labeled negtive number control property', () =
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.minValue)
@@ -2254,7 +2254,7 @@ test('cred.parser.parseDialog for labeled identifier control property', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes
@@ -2290,7 +2290,7 @@ test('cred.parser.parseDialog for labeled string control property', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   expect(
     dlgRes.controlByResourceId('ctrlId', 0).property(cred.spec.propertyLabel.tooltip)
@@ -2326,7 +2326,7 @@ test('cred.parser.parseDialog for multiple labeled control properties', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
 
   const ctrl = dlgRes.controlByResourceId('ctrlId', 0);
@@ -2363,7 +2363,7 @@ test('cred.parser.parseDialog for labeled control property with missing label', 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2394,7 +2394,7 @@ test('cred.parser.parseDialog for labeled control property with missing value', 
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2425,7 +2425,7 @@ test('cred.parser.parseDialog for misspelled define_property keyword', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2458,7 +2458,7 @@ test('cred.parser.parseDialog for layer with 4 numbers', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   const layers = Array.from(dlgRes.layers());
   expect(layers.length).toEqual(1);
@@ -2490,7 +2490,7 @@ test('cred.parser.parseDialog for layer with no numbers', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   const layers = Array.from(dlgRes.layers());
   expect(layers.length).toEqual(1);
@@ -2527,7 +2527,7 @@ test('cred.parser.parseDialog for multiple layers', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
   const layers = Array.from(dlgRes.layers());
   expect(layers.length).toEqual(2);
@@ -2561,7 +2561,7 @@ test('cred.parser.parseDialog for misspelled BEGIN_LAYERS keyword', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2591,7 +2591,7 @@ test('cred.parser.parseDialog for misspelled END_LAYERS keyword', () => {
     'END_LYERS                                                                  ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2621,7 +2621,7 @@ test('cred.parser.parseDialog for misspelled BEGIN_LAYER keyword', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2651,7 +2651,7 @@ test('cred.parser.parseDialog for misspelled END_LAYER keyword', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2681,7 +2681,7 @@ test('cred.parser.parseDialog for missing layer name', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2711,7 +2711,7 @@ test('cred.parser.parseDialog for non-number layer number', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2740,7 +2740,7 @@ test('cred.parser.parseDialog for missing #if 0 in layer section', () => {
     'END_LAYERS                                                                 ' +
     '#endif                                                                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2769,7 +2769,7 @@ test('cred.parser.parseDialog for missing #endif in layer section', () => {
     '  END_LAYER                                                                ' +
     'END_LAYERS                                                                 ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
@@ -2786,7 +2786,7 @@ test('cred.parser.parseStrings for no tokens', () => {
 
 test('cred.parser.parseStrings for one string', () => {
   const content = '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const strMap = cred.parser.parseStrings(tokens, cred.language.english);
   const strArray = Array.from(strMap);
   expect(strArray.length).toEqual(1);
@@ -2799,7 +2799,7 @@ test('cred.parser.parseStrings for one string', () => {
 
 test('cred.parser.parseStrings for empty string', () => {
   const content = '#define	DLGPROP_kChooseSymbolDlg_1_Text	""';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const strMap = cred.parser.parseStrings(tokens, cred.language.english);
   const strArray = Array.from(strMap);
   expect(strArray.length).toEqual(1);
@@ -2816,7 +2816,7 @@ test('cred.parser.parseStrings for multiple strings', () => {
     '#define	DLGPROP_kChooseSymbolDlg_2_Text	"OK"                              ' +
     '#define	DLGPROP_kChooseSymbolDlg_3_Text	"PlaceHolder"                     ';
 
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   const strMap = cred.parser.parseStrings(tokens, cred.language.english);
   const strArray = Array.from(strMap);
   expect(strArray.length).toEqual(3);
@@ -2839,24 +2839,24 @@ test('cred.parser.parseStrings for multiple strings', () => {
 
 test('cred.parser.parseStrings for misspelled #define keyword', () => {
   const content = 'define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
 });
 
 test('cred.parser.parseStrings for missing string identifier', () => {
   const content = '#define	"Cancel"';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
 });
 
 test('cred.parser.parseStrings for missing string text', () => {
   const content = '#define	id';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
 });
 
 test('cred.parser.parseStrings for non-string text', () => {
   const content = '#define	id text';
-  const tokens = cred.lexer.analyse(content);
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
 });

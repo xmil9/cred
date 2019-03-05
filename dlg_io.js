@@ -214,7 +214,7 @@ cred.io = (function() {
           // Parse and verify its contents.
           .then(fileContent => {
             let dlgResource = cred.parser.parseDialog(
-              cred.lexer.analyse(fileContent),
+              cred.lexer.analyse(fileContent, dlgFile.name),
               locale
             );
             let log = undefined;
@@ -248,7 +248,7 @@ cred.io = (function() {
           .then(fileContent => {
             let [convertedContent, resourceEncoding] = self._decodeText(fileContent);
             let stringMap = cred.parser.parseStrings(
-              cred.lexer.analyse(convertedContent),
+              cred.lexer.analyse(convertedContent, strFile.name),
               language
             );
             resolve({

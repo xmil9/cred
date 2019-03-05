@@ -255,6 +255,57 @@ test('isHexDigit for non-char strings', () => {
 
 ///////////////////
 
+test('countSubstring for multiple occurrence of a multi-letter substring', () => {
+  expect(util.countSubstring('this is a test to find "is"', 'is')).toEqual(3);
+});
+
+test('countSubstring for one occurrence of a multi-letter substring', () => {
+  expect(util.countSubstring('this is a test', 'test')).toEqual(1);
+});
+
+test('countSubstring for zero occurrences of a multi-letter substring', () => {
+  expect(util.countSubstring('this is a test', 'xyz')).toEqual(0);
+});
+
+test('countSubstring for multiple occurrence of a single-letter substring', () => {
+  expect(util.countSubstring('this is a test to find "e"', 'e')).toEqual(2);
+});
+
+test('countSubstring for one occurrence of a single-letter substring', () => {
+  expect(util.countSubstring('this is a test', 'h')).toEqual(1);
+});
+
+test('countSubstring for zero occurrences of a single-letter substring', () => {
+  expect(util.countSubstring('this is a test', '3')).toEqual(0);
+});
+
+test('countSubstring for match at beginning', () => {
+  expect(util.countSubstring('this is a test', 'this')).toEqual(1);
+});
+
+test('countSubstring for match at end', () => {
+  expect(util.countSubstring('this is a test', 'test')).toEqual(1);
+});
+
+test('countSubstring for consecutive occurrences', () => {
+  expect(util.countSubstring('atesttestb', 'test')).toEqual(2);
+});
+
+test('countSubstring for overlapping occurrences', () => {
+  // Does not count overlapped occurrences.
+  expect(util.countSubstring('ababab', 'aba')).toEqual(1);
+});
+
+test('countSubstring for empty text', () => {
+  expect(util.countSubstring('', 'aba')).toEqual(0);
+});
+
+test('countSubstring for empty substring', () => {
+  expect(util.countSubstring('test', '')).toEqual(0);
+});
+
+///////////////////
+
 test('makeUuidV4 format', () => {
   const cryptoAdapter = testutil.makeCryptoNodeAdapter();
 

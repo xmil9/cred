@@ -26,9 +26,11 @@ cred.lexer = (function() {
 
   // Represents a token produced by the lexer.
   class Token {
-    constructor(kind, value) {
+    constructor(kind, value, fileName, lineNum) {
       this._kind = kind;
       this._value = value;
+      this._fileName = fileName;
+      this._lineNum = lineNum;
     }
 
     // Check token kind.
@@ -56,6 +58,11 @@ cred.lexer = (function() {
     // Access the value.
     get value() {
       return this._value;
+    }
+
+    // Returns string indicating the location of the token in the source file.
+    location() {
+      return `File: ${this._fileName}, Line: ${this._lineNum}`;
     }
   }
 
@@ -113,7 +120,11 @@ cred.lexer = (function() {
         return new IdentifierState(this._lexer, ch);
       }
 
-      throw new Error(`Unexpected character ${ch}`);
+      throw new Error(
+        `Unexpected character "${ch}" in file ${this._lexer.fileName} on line ${
+          this._lexer.lineNumber
+        }.`
+      );
     }
 
     // Called when the the input text has ended while this state is active.
@@ -179,7 +190,11 @@ cred.lexer = (function() {
     _storeToken() {
       let matchedKeyword = DirectiveState._findMatch(this._value);
       if (!matchedKeyword) {
-        throw new Error(`Illegal directive: ${this._value}`);
+        throw new Error(
+          `Illegal directive "${this._value}" in file ${this._lexer.fileName} on line ${
+            this._lexer.lineNumber
+          }.`
+        );
       }
       this._lexer.storeToken(cred.tokenKind.directive, matchedKeyword);
     }
@@ -195,12 +210,19 @@ cred.lexer = (function() {
     // Processes the next character.
     // Returns the state to continue with.
     next(ch) {
+      if (this._value === '/' && ch !== '/') {
+        throw new Error(
+          `Comment must start with "//" in file ${this._lexer.fileName} on line ${
+            this._lexer.lineNumber
+          }.`
+        );
+      }
+
       // Check if the comment has ended.
       if (isEOL(ch)) {
-        let comment = this._value.trim();
-        if (!CommentState._isValidComment(comment)) {
-          throw new Error(`Illegal comment: ${comment}`);
-        }
+        // Put EOL char back before storing the token to make sure the line count is
+        // accurate.
+        this._lexer.backUpBy(1);
         this._storeToken();
         return new UndecidedState(this._lexer);
       }
@@ -212,14 +234,7 @@ cred.lexer = (function() {
 
     // Called when the the input text has ended while this state is active.
     terminate() {
-      if (CommentState._isValidComment(this._value)) {
-        this._storeToken();
-      }
-    }
-
-    // Checks if a given comment is valid.
-    static _isValidComment(comment) {
-      return comment.startsWith('//');
+      this._storeToken();
     }
 
     _storeToken() {
@@ -239,8 +254,10 @@ cred.lexer = (function() {
     next(ch) {
       // Check if the number has ended.
       if (!isValidNumberChar(ch)) {
-        this._storeToken();
+        // Put EOL char back before storing the token to make sure the line count is
+        // accurate.
         this._lexer.backUpBy(1);
+        this._storeToken();
         return new UndecidedState(this._lexer);
       }
 
@@ -336,8 +353,10 @@ cred.lexer = (function() {
     next(ch) {
       // Check if the identifier has ended.
       if (!isValidIdentifierChar(ch)) {
-        this._storeToken();
+        // Put EOL char back before storing the token to make sure the line count is
+        // accurate.
         this._lexer.backUpBy(1);
+        this._storeToken();
         return new UndecidedState(this._lexer);
       }
 
@@ -388,8 +407,10 @@ cred.lexer = (function() {
 
   // Lexer for processing CV dialogs.
   class Lexer {
-    constructor(text) {
+    constructor(text, fileName) {
       this._text = text;
+      this._fileName = fileName;
+      this._lineNum = 1;
       this._pos = 0;
       this._tokens = [];
     }
@@ -400,7 +421,8 @@ cred.lexer = (function() {
       let currentState = new UndecidedState(this);
 
       while (this._pos < this._text.length && typeof currentState !== 'undefined') {
-        let ch = this._text.charAt(this._pos++);
+        let ch = this._text.charAt(this._pos);
+        this.skipAheadBy(1);
         currentState = currentState.next(ch);
       }
 
@@ -414,23 +436,33 @@ cred.lexer = (function() {
 
     // Stores a token.
     storeToken(id, value) {
-      this._tokens.push(new Token(id, value));
-    }
-
-    // Backs up a given number of characters.
-    backUpBy(numChars) {
-      this._pos -= numChars;
-      if (this._pos < 0) {
-        this._pos = 0;
-      }
+      this._tokens.push(new Token(id, value, this._fileName, this._lineNum));
     }
 
     // Skips ahead by a given number of characters.
     skipAheadBy(numChars) {
+      const prevPos = this._pos;
       this._pos += numChars;
       if (this._pos > this._text.length) {
         this._pos = this._text.length;
       }
+      // Pass the consumed text to the line counting code. The char at the new current pos
+      // hasn't been consumed yet, so it is excluded from the consumed text!
+      this._incLineCount(this._text.substring(prevPos, this._pos));
+      return this._pos;
+    }
+
+    // Backs up a given number of characters.
+    backUpBy(numChars) {
+      const prevPos = this._pos;
+      this._pos -= numChars;
+      if (this._pos < 0) {
+        this._pos = 0;
+      }
+      // Pass the un-consumed text to the line counting code. The char at the new current pos
+      // hasn't been consumed yet, so it need to be part of the un-consumed text!
+      this._decLineCount(this._text.substring(this._pos, prevPos));
+      return this._pos;
     }
 
     // Returns the next few characters. Will not change the read position of the
@@ -440,12 +472,32 @@ cred.lexer = (function() {
       let endIdx = this._pos + Math.min(numChars, numCharsLeft);
       return this._text.substring(this._pos, endIdx);
     }
+
+    // Returns name of the currently processed file.
+    get fileName() {
+      return this._fileName;
+    }
+
+    // Returns the current line number.
+    get lineNumber() {
+      return this._lineNum;
+    }
+
+    // Increases the line count according to the given text that was consumed by the lexer.
+    _incLineCount(consumedText) {
+      this._lineNum += util.countSubstring(consumedText, '\n');
+    }
+
+    // Decreases the line count according to the given text that was un-consumed by the lexer.
+    _decLineCount(unconsumedText) {
+      this._lineNum -= util.countSubstring(unconsumedText, '\n');
+    }
   }
 
   // Runs lexical analysis on the given text.
   // Returns the identified tokens.
-  function analyse(text) {
-    let lexer = new Lexer(text);
+  function analyse(text, fileName) {
+    let lexer = new Lexer(text, fileName);
     return lexer.analyse();
   }
 

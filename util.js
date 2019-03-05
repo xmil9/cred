@@ -66,6 +66,20 @@ var util = (function() {
     return char.length == 1 && '0123456789abcdefABCDEF'.indexOf(char) !== -1;
   }
 
+  // Counts the number of occurrences of a given substring in a given text.
+  function countSubstring(text, substr) {
+    if (substr.length === 0) {
+      return 0;
+    }
+    let count = 0;
+    let pos = text.indexOf(substr);
+    while (pos !== -1) {
+      ++count;
+      pos = text.indexOf(substr, pos + substr.length);
+    }
+    return count;
+  }
+
   // Generates a UUID. The UUID conforms to RFC4122 since the spec allows UUIDs
   // created randomly. However, since the time and machine are not accounted for
   // there is a (small) chance of collisions.
@@ -112,6 +126,7 @@ var util = (function() {
   // Exports for util module.
   return {
     copyArrayShallow: copyArrayShallow,
+    countSubstring: countSubstring,
     hasValue: hasValue,
     insertAfter: insertAfter,
     isHexDigit: isHexDigit,

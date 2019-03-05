@@ -162,11 +162,15 @@ cred.parser = (function() {
       } else if (token.isMatch(cred.tokenKind.directive, '#elif')) {
         cvLangMacro = parseElifDirective(this, token);
       } else {
-        throw new Error('Syntax error. Expected ifdef- or elif-directive.');
+        throw new Error(
+          buildErrorMessage('Syntax error. Expected ifdef- or elif-directive.', token)
+        );
       }
       const lang = languageFromCanvasLanguageMacro(cvLangMacro);
       if (!lang) {
-        throw new Error('Syntax error. Expected language identifier.');
+        throw new Error(
+          buildErrorMessage('Syntax error. Expected language identifier.', token)
+        );
       }
 
       // Read the file name from the include-directive.
@@ -328,7 +332,7 @@ cred.parser = (function() {
           return parseNumber(token);
         }
         default: {
-          throw new Error(`Invalid control id: ${token.value}`);
+          throw new Error(buildErrorMessage(`Invalid control id: ${token.value}`, token));
         }
       }
     }
@@ -377,7 +381,9 @@ cred.parser = (function() {
       const sequenceIdx = incIdCounter(resourceId) - 1;
       const ctrl = this._dlgResource.controlByResourceId(resourceId, sequenceIdx);
       if (!ctrl) {
-        throw new Error(`Declaration for control "${resourceId}" not found.`);
+        throw new Error(
+          buildErrorMessage(`Declaration for control "${resourceId}" not found.`, token)
+        );
       }
 
       this._parsePositionalControlProperties(this.nextToken(), ctrl);
@@ -587,7 +593,7 @@ cred.parser = (function() {
     );
 
     const serializedProps = token.value;
-    const [labeledValues, hasCaption] = deserializeProperties(serializedProps);
+    const [labeledValues, hasCaption] = deserializeProperties(serializedProps, token);
 
     if (hasCaption) {
       // The next token is the caption value.
@@ -614,7 +620,7 @@ cred.parser = (function() {
   // Returns an array of two pieces of data:
   // - an array of label-value objects
   // - a flag whether a caption is following the serialized properties
-  function deserializeProperties(serialized) {
+  function deserializeProperties(serialized, token) {
     serialized = serialized.trim();
     let len = serialized.length;
     if (len === 0) {
@@ -625,7 +631,7 @@ cred.parser = (function() {
       !serialized.startsWith('{') ||
       !(serialized.endsWith('}') || serialized.endsWith(cred.serializedCaptionLabel))
     ) {
-      throw new Error('Invalid serialized properties.');
+      throw new Error(buildErrorMessage('Invalid serialized properties.', token));
     }
 
     let [serializedPairs, caption] = serialized.split('}');
@@ -639,7 +645,7 @@ cred.parser = (function() {
     }
     if (caption) {
       if (caption !== cred.serializedCaptionLabel) {
-        throw 'Invalid serialized caption.';
+        throw new Error(buildErrorMessage('Invalid serialized caption.', token));
       }
       hasCaption = true;
     }
@@ -707,7 +713,7 @@ cred.parser = (function() {
     verifyToken(token, cred.tokenKind.comment);
     let version = findVersionSpecifier(token.value);
     if (!version) {
-      throw new Error('Syntax error. Expected format version.');
+      throw new Error(buildErrorMessage('Syntax error. Expected format version.', token));
     }
     return version;
   }
@@ -731,7 +737,10 @@ cred.parser = (function() {
     const isTypePermitted = propertySpec.types.indexOf(propType) !== -1;
     if (!isTypePermitted) {
       throw new Error(
-        `Unexpected property type "${propType}" for property "${propertySpec.label}".`
+        buildErrorMessage(
+          `Unexpected property type "${propType}" for property "${propertySpec.label}".`,
+          token
+        )
       );
     }
 
@@ -772,7 +781,7 @@ cred.parser = (function() {
     } else if (token.isKind(cred.tokenKind.string)) {
       parseSerializedProperties(parser, token, ctrl);
     } else {
-      throw new Error('Control has invalid caption field.');
+      throw new Error(buildErrorMessage('Control has invalid caption field.', token));
     }
   }
 
@@ -807,7 +816,10 @@ cred.parser = (function() {
       }
       default: {
         throw new Error(
-          'Syntax error. Expected a number, string, or identifier as property value.'
+          buildErrorMessage(
+            'Syntax error. Expected a number, string, or identifier as property value.',
+            token
+          )
         );
       }
     }
@@ -915,7 +927,7 @@ cred.parser = (function() {
       throw new Error(
         typeof errMsg !== 'undefined'
           ? errMsg
-          : buildErrorMessage(token, [expectedKind], expectedValue)
+          : buildVerifyTokenErrorMessage(token, [expectedKind], expectedValue)
       );
     }
     return token.value;
@@ -932,23 +944,31 @@ cred.parser = (function() {
     }
 
     throw new Error(
-      typeof errMsg !== 'undefined' ? errMsg : buildErrorMessage(token, expectedKinds)
+      typeof errMsg !== 'undefined'
+        ? errMsg
+        : buildVerifyTokenErrorMessage(token, expectedKinds)
     );
   }
 
-  // Builds a default error message based on what was expected at the point of the
+  // Builds an error message about what kind of value was expected at the point of the
   // error.
-  function buildErrorMessage(token, expectedTokenKinds, expectedValue) {
-    let msg = 'Syntax error. Expected ';
+  function buildVerifyTokenErrorMessage(token, expectedTokenKinds, expectedValue) {
+    let text = 'Syntax error. Expected ';
     if (expectedValue) {
-      msg += `value: ${expectedValue} with `;
+      text += `value: ${expectedValue} with `;
     }
-    msg += `type ${cred.tokenKindName(expectedTokenKinds[0])}`;
+    text += `type ${cred.tokenKindName(expectedTokenKinds[0])}`;
     for (let i = 1; i < expectedTokenKinds.length; ++i) {
-      msg += ` or ${cred.tokenKindName(expectedTokenKinds[i])}`;
+      text += ` or ${cred.tokenKindName(expectedTokenKinds[i])}`;
     }
-    msg += '.';
-    return msg;
+    text += '.';
+
+    return buildErrorMessage(text, token);
+  }
+
+  // Builds an error message from a given text and token.
+  function buildErrorMessage(text, token) {
+    return `${text}\n${token.location()}.`;
   }
 
   ///////////////////

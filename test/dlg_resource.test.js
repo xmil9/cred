@@ -1342,6 +1342,12 @@ test('Dialog.resourceId getter when id is defined', () => {
   expect(dlg.resourceId).toEqual('myid');
 });
 
+test('Dialog.resourceId getter for numeric id', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.resourceId = 100;
+  expect(dlg.resourceId).toEqual(100);
+});
+
 test('Dialog.resourceId setter when id is undefined', () => {
   const dlg = new cred.resource.Dialog();
   dlg.resourceId = 'myid';
@@ -1354,6 +1360,14 @@ test('Dialog.resourceId setter when id is defined', () => {
 
   dlg.resourceId = 'new-id';
   expect(dlg.resourceId).toEqual('new-id');
+});
+
+test('Dialog.resourceId setter for numeric id', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.resourceId = 'myid';
+
+  dlg.resourceId = 100;
+  expect(dlg.resourceId).toEqual(100);
 });
 
 test('Dialog.isDialog', () => {
@@ -2768,6 +2782,17 @@ test('DialogResourceSet.updateDialogId', () => {
 
   resSet.updateDialogId('new-id');
   expect(resSet.dialogId).toEqual('new-id');
+});
+
+test('DialogResourceSet.updateDialogId to numeric id', () => {
+  const resSet = makeDialogResourceSet([
+    makeDialogResource(cred.locale.any, 'myid'),
+    makeDialogResource(cred.locale.german, 'myid'),
+    makeDialogResource(cred.locale.japanese, 'myid')
+  ]);
+
+  resSet.updateDialogId(1000);
+  expect(resSet.dialogId).toEqual(1000);
 });
 
 test('DialogResourceSet.updateControlId', () => {

@@ -202,7 +202,7 @@ cred.parser = (function() {
       const positionalSpec = [
         {
           label: propLabel.id,
-          types: [physType.identifier],
+          types: [physType.identifier, physType.number],
           func: parsePositionalProperty,
           divider: cred.tokenKind.comma
         },

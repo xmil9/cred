@@ -311,6 +311,60 @@ test('ResourceGenerator.generateContent for unlinked languages', done => {
     });
 });
 
+test('ResourceGenerator.generateContent for dialog with numeric id', done => {
+  const masterDlg =
+    '#include "ResourceDefines.h" // Version [1.1] //\n' +
+    '\n' +
+    '#ifdef RES_US\n' +
+    '    #include "100.English.str"\n' +
+    '#elif defined RES_GERMAN\n' +
+    '    #include "100.German.str"\n' +
+    '#elif defined RES_JAPAN\n' +
+    '    #include "100.Japan.str"\n' +
+    '#else\n' +
+    '    #error "Translation"\n' +
+    '#endif\n' +
+    '\n' +
+    'begin_dialog_definition_ex_(100,"",0,0,10,20,DLGPROP_100_0_Text,"ClassName",WS_CHILD | WS_VISIBLE | 1342177280,"",0)\n' +
+    '    begin_dialog_properties()\n' +
+    '        define_dialog_property(Height,20)\n' +
+    '        define_dialog_property(KillPopup,1)\n' +
+    '        define_dialog_property(PaddingType,DialogPaddingTypes::Default)\n' +
+    '        define_dialog_property(ResourceName,"100")\n' +
+    '        define_dialog_property(Text,DLGPROP_100_0_Text)\n' +
+    '        define_dialog_property(Width,10)\n' +
+    '    end_dialog_properties()\n' +
+    '    begin_control_definitions()\n' +
+    '    end_control_definitions()\n' +
+    'end_dialog_definition_ex_()\n' +
+    '\n' +
+    '#if 0\n' +
+    '\n' +
+    'BEGIN_LAYERS\n' +
+    'END_LAYERS\n' +
+    '\n' +
+    '#endif\n';
+  const enStrings = '#define DLGPROP_100_0_Text "Title"\n';
+  const deStrings = '#define DLGPROP_100_0_Text "Ueberschrift"\n';
+  const jpStrings = '#define DLGPROP_100_0_Text "jp-word"\n';
+  const contentMap = new Map([
+    [cred.locale.any, { dialog: masterDlg, strings: undefined }],
+    [cred.locale.english, { dialog: undefined, strings: enStrings }],
+    [cred.locale.german, { dialog: undefined, strings: deStrings }],
+    [cred.locale.japanese, { dialog: undefined, strings: jpStrings }]
+  ]);
+
+  generateContentAsync('100', contentMap)
+    .then(generatedContentMap => {
+      expect(generatedContentMap).toEqual(contentMap);
+      done();
+    })
+    .catch(err => {
+      // Will fail.
+      expect(err).toBeUndefined();
+    });
+});
+
 test('ResourceGenerator.generateContent for dialog with a PushButton control', done => {
   const masterDlg =
     '#include "ResourceDefines.h" // Version [1.1] //\n' +

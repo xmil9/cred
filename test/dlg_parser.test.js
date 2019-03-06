@@ -319,6 +319,35 @@ test('cred.parser.parseDialog for missing #endif', () => {
   expect(() => cred.parser.parseDialog(tokens, cred.locale.english)).toThrow();
 });
 
+test('cred.parser.parseDialog for numeric dialog id', () => {
+  const content =
+    '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
+    '#ifdef RES_US                                                              ' +
+    '  #include "kSymbolConvert.English.str"                                    ' +
+    '#elif defined RES_GERMAN                                                   ' +
+    '  #include "kSymbolConvert.German.str"                                     ' +
+    '#elif defined RES_JAPAN                                                    ' +
+    '  #include "kSymbolConvert.Japan.str"                                      ' +
+    '#else                                                                      ' +
+    '  #error "Translation"                                                     ' +
+    '#endif                                                                     ' +
+    'begin_dialog_definition_ex_(100,"",0,0,10,20,strId,                        ' +
+    '"",0,"",0)                                                                 ' +
+    '  begin_dialog_properties()                                                ' +
+    '  end_dialog_properties()                                                  ' +
+    '  begin_control_definitions()                                              ' +
+    '  end_control_definitions()                                                ' +
+    'end_dialog_definition_ex_()                                                ' +
+    '#if 0                                                                      ' +
+    'BEGIN_LAYERS                                                               ' +
+    'END_LAYERS                                                                 ' +
+    '#endif                                                                     ';
+
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
+  const dlgRes = cred.parser.parseDialog(tokens, cred.locale.english);
+  expect(dlgRes.dialogPropertyValue(cred.spec.propertyLabel.id)).toEqual(100);
+});
+
 test('cred.parser.parseDialog for serialized dialog string property', () => {
   const content =
     '#include "ResourceDefines.h" // Version [1.1] //\n                         ' +
@@ -731,7 +760,7 @@ test('cred.parser.parseDialog for positional id dialog property with wrong type'
     '#else                                                                      ' +
     '  #error "Translation"                                                     ' +
     '#endif                                                                     ' +
-    'begin_dialog_definition_ex_(4,"",0,0,10,20,strId,"",0,"",0)                ' +
+    'begin_dialog_definition_ex_("wrong_type","",0,0,10,20,strId,"",0,"",0)     ' +
     '  begin_dialog_properties()                                                ' +
     '  end_dialog_properties()                                                  ' +
     '  begin_control_definitions()                                              ' +

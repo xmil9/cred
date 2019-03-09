@@ -1,0 +1,6 @@
+#define	DLGPROP_kPatternDialog_10_Text	"ｸﾞﾚｰｽｹｰﾙ"
+#define	DLGPROP_kPatternDialog_11_Text	"100%"
+#define	DLGPROP_kPatternDialog_13_Text	"適用"
+#define	DLGPROP_kPatternDialog_4_Text	"ﾊﾟﾀｰﾝ"
+#define	DLGPROP_kPatternDialog_8_Text	"描画色:"
+#define	DLGPROP_kPatternDialog_9_Text	"背景色:"

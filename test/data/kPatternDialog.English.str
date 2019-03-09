@@ -1,0 +1,6 @@
+#define	DLGPROP_kPatternDialog_10_Text	"Grayscale:"
+#define	DLGPROP_kPatternDialog_11_Text	"100%"
+#define	DLGPROP_kPatternDialog_13_Text	"Apply"
+#define	DLGPROP_kPatternDialog_4_Text	"Pattern"
+#define	DLGPROP_kPatternDialog_8_Text	"Foreground:"
+#define	DLGPROP_kPatternDialog_9_Text	"Background:"

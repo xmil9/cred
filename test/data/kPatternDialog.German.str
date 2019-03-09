@@ -1,0 +1,6 @@
+#define	DLGPROP_kPatternDialog_10_Text	"Graustufen"
+#define	DLGPROP_kPatternDialog_11_Text	"100%"
+#define	DLGPROP_kPatternDialog_13_Text	"Anwenden"
+#define	DLGPROP_kPatternDialog_4_Text	"Muster"
+#define	DLGPROP_kPatternDialog_8_Text	"Vordergrund:"
+#define	DLGPROP_kPatternDialog_9_Text	"Hintergrund:"

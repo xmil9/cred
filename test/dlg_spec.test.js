@@ -543,6 +543,7 @@ test('spec.makeControlSpec', () => {
     cred.spec.controlType.radioButton,
     cred.spec.controlType.slider,
     cred.spec.controlType.strokeButton,
+    cred.spec.controlType.toolbar,
     cred.spec.controlType.textBox,
     cred.spec.controlType.verticalLine,
     cred.spec.controlType.zoomItem
@@ -1200,6 +1201,32 @@ test('PopupButtonSpec defined properties', () => {
     cred.spec.propertyLabel.rows,
     cred.spec.propertyLabel.selectedItem,
     cred.spec.propertyLabel.popPosition
+  ]) {
+    expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
+  }
+});
+
+///////////////////
+
+test('ToolbarSpec creation', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.toolbar);
+  expect(ctrlSpec).toBeDefined();
+});
+
+test('ToolbarSpec.title', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.toolbar);
+  expect(ctrlSpec.title).toEqual(expect.any(String));
+});
+
+test('ToolbarSpec defined properties', () => {
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.toolbar);
+  const props = Array.from(ctrlSpec.propertySpecs());
+  for (const label of [
+    cred.spec.propertyLabel.text,
+    cred.spec.propertyLabel.divider,
+    cred.spec.propertyLabel.moveY,
+    cred.spec.propertyLabel.parentAlign,
+    cred.spec.propertyLabel.resize
   ]) {
     expect(props.findIndex(prop => prop.label === label)).not.toEqual(-1);
   }

@@ -113,7 +113,11 @@ cred.spec = (function() {
   Object.freeze(logicalPropertyType);
 
   // Enum of lables for standard properties.
+  // Note that property labels do not need to be in this enum! In the code property
+  // labels simply are strings. This enum only serves to abstract the string, e.g.
+  // to avoid misspellings.
   const propertyLabel = {
+    alignment: 'Alignment',
     anchorBottom: 'AnchorBottom',
     anchorLeft: 'AnchorLeft',
     anchorRight: 'AnchorRight',
@@ -127,6 +131,7 @@ cred.spec = (function() {
     ctrlType: 'ControlType',
     customUnitIndex: 'CustomUnitIndex',
     decimals: 'Decimals',
+    divider: 'Divider',
     enabled: 'Enabled',
     expanded: 'Expanded',
     extStyleFlags: 'ExtStyleFlags',
@@ -162,13 +167,16 @@ cred.spec = (function() {
     minLevel: 'MinLevel',
     minValue: 'MinValue',
     minimum: 'Min',
+    moveY: 'MoveY',
     ownerDrawn: 'OwnerDrawn',
     paddingType: 'PaddingType',
     pageIncFactor: 'PageIncFactor',
+    parentAlign: 'ParentAlign',
     popPosition: 'PopPosition',
     precision: 'Precision',
     pushButtonLike: 'PushButtonLike',
     readOnly: 'ReadOnly',
+    resize: 'Resize',
     resourceClass: 'ResourceClass',
     rows: 'Rows',
     selectedItem: 'SelectedItem',
@@ -831,6 +839,7 @@ cred.spec = (function() {
     slider: 'Slider',
     strokeButton: 'StrokeButton',
     textBox: 'TextBox',
+    toolbar: 'Toolbar',
     verticalLine: 'VerticalLine',
     zoomItem: 'ZoomItem'
   };
@@ -4032,6 +4041,185 @@ cred.spec = (function() {
     }
   }
 
+  // Specification for toolbar controls.
+  class ToolbarSpec extends ControlSpec {
+    constructor() {
+      super();
+    }
+
+    // Polymorphic function that returns a description of what the spec is for.
+    get title() {
+      return 'Toolbar';
+    }
+
+    // Polymorphic function that populates the collection of supported property
+    // specs.
+    _populatePropertySpecs() {
+      super._populatePropertySpecs();
+      this._addPropertySpecs();
+    }
+
+    // Polymorphic function that populates the display order array.
+    _definePropertyDisplayOrder() {
+      super._definePropertyDisplayOrder();
+
+      util.insertAfter(this._propertyDisplayOrder, propertyLabel.text, propertyLabel.id);
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.alignment,
+        propertyLabel.text
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.divider,
+        propertyLabel.killPopup
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.moveY,
+        propertyLabel.divider
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.parentAlign,
+        propertyLabel.moveY
+      );
+      util.insertAfter(
+        this._propertyDisplayOrder,
+        propertyLabel.resize,
+        propertyLabel.parentAlign
+      );
+    }
+
+    // Add control-specific properties.
+    _addPropertySpecs() {
+      this._propertySpecs.set(
+        propertyLabel.text,
+        new LocalizedStringPropertySpec({
+          label: propertyLabel.text,
+          displayedLabel: 'Text',
+          required: true,
+          nullable: true,
+          context: cred.editContext.localOnly,
+          modifiable: true,
+          localized: true,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.alignment,
+        new EnumPropertySpec({
+          label: propertyLabel.alignment,
+          displayedLabel: 'Alignment',
+          required: true,
+          nullable: false,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false,
+          enums: [
+            {
+              value: 'ACDSystems::UI::ToolbarAlignment::None',
+              display: 'None'
+            },
+            {
+              value: 'ACDSystems::UI::ToolbarAlignment::Top',
+              display: 'Top'
+            },
+            {
+              value: 'ACDSystems::UI::ToolbarAlignment::Bottom',
+              display: 'Bottom'
+            },
+            {
+              value: 'ACDSystems::UI::ToolbarAlignment::Left',
+              display: 'Left'
+            },
+            {
+              value: 'ACDSystems::UI::ToolbarAlignment::Right',
+              display: 'Right'
+            }
+          ]
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.divider,
+        new BooleanPropertySpec({
+          label: propertyLabel.divider,
+          displayedLabel: 'Divider',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.moveY,
+        new BooleanPropertySpec({
+          label: propertyLabel.moveY,
+          displayedLabel: 'Move Y',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.parentAlign,
+        new BooleanPropertySpec({
+          label: propertyLabel.parentAlign,
+          displayedLabel: 'Parent Align',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+      this._propertySpecs.set(
+        propertyLabel.resize,
+        new BooleanPropertySpec({
+          label: propertyLabel.resize,
+          displayedLabel: 'Resize',
+          required: true,
+          nullable: true,
+          context: cred.editContext.globalDefault,
+          modifiable: true,
+          localized: false,
+          writeLabeled: true,
+          writeAsStringWhenLabeled: false,
+          writeSerialized: false,
+          writeAsStringWhenSerialized: false,
+          writeSerializedCaption: false
+        })
+      );
+    }
+  }
+
   // Specification for zoom item controls.
   class ZoomItemSpec extends ControlSpec {
     constructor() {
@@ -4249,6 +4437,9 @@ cred.spec = (function() {
       }
       case controlType.textBox: {
         return new TextBoxSpec();
+      }
+      case controlType.toolbar: {
+        return new ToolbarSpec();
       }
       case controlType.verticalLine: {
         return new VerticalLineSpec();

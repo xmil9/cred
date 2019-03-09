@@ -540,11 +540,14 @@ cred.parser = (function() {
 
     // Starts the parsing process.
     parse() {
+      this._skipComments();
+
       let id, text;
       while (this.haveToken()) {
         [id, text] = this._parseStringDefinition(this.nextToken());
         this._stringMap.add(id, text, this._language);
       }
+
       return this._stringMap;
     }
 
@@ -553,7 +556,20 @@ cred.parser = (function() {
       verifyToken(token, cred.tokenKind.directive, '#define');
       let id = verifyToken(this.nextToken(), cred.tokenKind.identifier);
       let text = verifyToken(this.nextToken(), cred.tokenKind.string);
+      this._skipComments();
       return [id, text];
+    }
+
+    // Skip comments.
+    // They will not be stored and therefore not written back out.
+    _skipComments() {
+      while (this.haveToken()) {
+        let token = this.nextToken();
+        if (!token.isKind(cred.tokenKind.comment)) {
+          this.backUpToken();
+          break;
+        }
+      }
     }
   }
 

@@ -2889,3 +2889,96 @@ test('cred.parser.parseStrings for non-string text', () => {
   const tokens = cred.lexer.analyse(content, 'someFile.txt');
   expect(() => cred.parser.parseStrings(tokens, cred.language.english)).toThrow();
 });
+
+test('cred.parser.parseStrings for string with comment', () => {
+  const content = '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"  // test  ';
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(1);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    'Cancel',
+    cred.language.english
+  ]);
+});
+
+test('cred.parser.parseStrings for comment before strings', () => {
+  const content =
+    '// starts with comment                             \n' +
+    '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"  \n';
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(1);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    'Cancel',
+    cred.language.english
+  ]);
+});
+
+test('cred.parser.parseStrings for comment between strings', () => {
+  const content =
+    '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel"                         \n' +
+    '// comment                                                                \n' +
+    '#define	DLGPROP_kChooseSymbolDlg_2_Text	"OK"                             \n' +
+    '// comment                                                                \n' +
+    '#define	DLGPROP_kChooseSymbolDlg_3_Text	"PlaceHolder"                    \n' +
+    '// comment                                                                \n';
+
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(3);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    'Cancel',
+    cred.language.english
+  ]);
+  expect(strArray[1]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_2_Text',
+    'OK',
+    cred.language.english
+  ]);
+  expect(strArray[2]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_3_Text',
+    'PlaceHolder',
+    cred.language.english
+  ]);
+});
+
+test('cred.parser.parseStrings for consecutive comments', () => {
+  const content =
+    '// comment                                                                \n' +
+    '// comment                                                                \n' +
+    '#define	DLGPROP_kChooseSymbolDlg_1_Text	"Cancel" // inline comment       \n' +
+    '// comment                                                                \n' +
+    '// comment                                                                \n' +
+    '#define	DLGPROP_kChooseSymbolDlg_2_Text	"OK"     // inline comment       \n' +
+    '// comment                                                                \n' +
+    '// comment                                                                \n' +
+    '#define	DLGPROP_kChooseSymbolDlg_3_Text	"PlaceHolder"  // inline comment \n' +
+    '// comment                                                                \n' +
+    '// comment                                                                \n';
+
+  const tokens = cred.lexer.analyse(content, 'someFile.txt');
+  const strMap = cred.parser.parseStrings(tokens, cred.language.english);
+  const strArray = Array.from(strMap);
+  expect(strArray.length).toEqual(3);
+  expect(strArray[0]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_1_Text',
+    'Cancel',
+    cred.language.english
+  ]);
+  expect(strArray[1]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_2_Text',
+    'OK',
+    cred.language.english
+  ]);
+  expect(strArray[2]).toEqual([
+    'DLGPROP_kChooseSymbolDlg_3_Text',
+    'PlaceHolder',
+    cred.language.english
+  ]);
+});

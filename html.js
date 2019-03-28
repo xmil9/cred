@@ -98,6 +98,16 @@ var html = (function() {
     return $span;
   }
 
+  // Creates a link element.
+  // Returns the element in jQuery representation.
+  function makeLinkElement(text) {
+    let $link = $(document.createElement('a'));
+    if (typeof text !== 'undefined') {
+      $link.text(text);
+    }
+    return $link;
+  }
+
   // Adds given class names to a given HTML element.
   function addClasses($elem, classNames) {
     for (let i = 0; i < classNames.length; ++i) {
@@ -115,6 +125,7 @@ var html = (function() {
     makeFieldsetElement: makeFieldsetElement,
     makeInputElement: makeInputElement,
     makeLabelElement: makeLabelElement,
+    makeLinkElement: makeLinkElement,
     makeOptionElement: makeOptionElement,
     makeSelectElement: makeSelectElement,
     makeSpanElement: makeSpanElement

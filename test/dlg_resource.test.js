@@ -1160,7 +1160,7 @@ test('Control.properties', () => {
   );
 
   const propArray = Array.from(ctrl.properties());
-  expect(propArray.length).toEqual(4);
+  expect(propArray.length).toBeGreaterThan(0);
   expect(
     propArray.findIndex(elem => elem.label === cred.spec.propertyLabel.ctrlType)
   ).not.toEqual(-1);
@@ -1711,6 +1711,38 @@ test('Dialog.updateControlId for not existing control', () => {
   expect(dlg.control(ctrl.uniqueId).resourceId).toEqual('label-id');
 });
 
+test('Dialog.generateUnusedControlResourceId for not existing id', () => {
+  const dlg = new cred.resource.Dialog();
+  const id = dlg.generateUnusedControlResourceId('test');
+  expect(id).toEqual('test1');
+});
+
+test('Dialog.generateUnusedControlResourceId for existing id', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(cred.spec.controlType.label, 'test1');
+
+  const id = dlg.generateUnusedControlResourceId('test');
+
+  expect(id).toEqual('test2');
+});
+
+test('Dialog.generateUnusedControlResourceId for id with existing sequence', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(cred.spec.controlType.label, 'test1');
+  dlg.addControl(cred.spec.controlType.label, 'test2');
+  dlg.addControl(cred.spec.controlType.label, 'test3');
+
+  const id = dlg.generateUnusedControlResourceId('test');
+
+  expect(id).toEqual('test4');
+});
+
+test('Dialog.generateUnusedControlResourceId for empty prefix', () => {
+  const dlg = new cred.resource.Dialog();
+  const id = dlg.generateUnusedControlResourceId('');
+  expect(id).toEqual('_1');
+});
+
 ///////////////////
 
 test('DialogResource construction', () => {
@@ -2012,6 +2044,38 @@ test('DialogResource.addControl for existing control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addControl(cred.spec.controlType.label, 'label-id');
   expect(() => dlgRes.addControl(cred.spec.controlType.label, 'label-id')).toBeDefined();
+});
+
+test('DialogResource.generateUnusedControlResourceId for not existing id', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const id = dlgRes.generateUnusedControlResourceId('test');
+  expect(id).toEqual('test1');
+});
+
+test('DialogResource.generateUnusedControlResourceId for existing id', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControl(cred.spec.controlType.label, 'test1');
+
+  const id = dlgRes.generateUnusedControlResourceId('test');
+
+  expect(id).toEqual('test2');
+});
+
+test('DialogResource.generateUnusedControlResourceId for id with existing sequence', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControl(cred.spec.controlType.label, 'test1');
+  dlgRes.addControl(cred.spec.controlType.label, 'test2');
+  dlgRes.addControl(cred.spec.controlType.label, 'test3');
+
+  const id = dlgRes.generateUnusedControlResourceId('test');
+
+  expect(id).toEqual('test4');
+});
+
+test('DialogResource.generateUnusedControlResourceId for empty prefix', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const id = dlgRes.generateUnusedControlResourceId('');
+  expect(id).toEqual('_1');
 });
 
 test('DialogResource.includedHeaders', () => {

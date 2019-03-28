@@ -9,3 +9,7 @@ TODO
   They can just be strings in the spec. Check: Only if they are used in one place (spec).
 ? Remove label param from functions to add/set a property for dialogs/controls b/can
   the label can be read from the given property object.
+- Remove addLabeledProperty, addPositionalProperty, and addSerializedProperty from Control
+  and Dialog classes. Instead init the classes with all properties from the spec and used
+  builder classes in the parser to collect the parsed properties and then apply them to
+  the control/dialog.

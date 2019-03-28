@@ -86,6 +86,15 @@ var geom = (function() {
       return new Point(this._horzCenter(), this._vertCenter());
     }
 
+    round() {
+      return new Rect(
+        Math.round(this._left),
+        Math.round(this._top),
+        Math.round(this._width),
+        Math.round(this._height)
+      );
+    }
+
     _horzCenter() {
       return this._left + this._width / 2;
     }

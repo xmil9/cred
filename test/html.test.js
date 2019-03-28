@@ -141,6 +141,20 @@ test('makeSpanElement without text', () => {
 
 ///////////////////
 
+test('makeLinkElement with text', () => {
+  const $link = html.makeLinkElement('some text');
+  expect($link).toBeDefined();
+  expect($link.text()).toBe('some text');
+});
+
+test('makeLinkElement without text', () => {
+  const $link = html.makeLinkElement();
+  expect($link).toBeDefined();
+  expect($link.text()).toBe('');
+});
+
+///////////////////
+
 test('addClasses for one class', () => {
   document.body.innerHTML =
     '<div id="myelem">                                        ' +

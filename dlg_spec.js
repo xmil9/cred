@@ -43,7 +43,7 @@ cred.spec = (function() {
       valueAsStr.length === 0 ||
       (valueAsStr.startsWith('"') && valueAsStr.endsWith('"'))
     ) {
-      return cred.spec.physicalPropertyType.string;
+      return physicalPropertyType.string;
     }
     // If it does not contain anything but digits, '.', and optionally a '-'at the
     // beginning, then it's a number.
@@ -51,15 +51,15 @@ cred.spec = (function() {
       valueAsStr.search(/[^\d.]/) === -1 ||
       (valueAsStr[0] === '-' && valueAsStr.substring(1).search(/[^\d.]/) === -1)
     ) {
-      return cred.spec.physicalPropertyType.number;
+      return physicalPropertyType.number;
     }
     // If it contains binary-or characters, it's a flag sequence.
     else if (valueAsStr.includes('|')) {
-      return cred.spec.physicalPropertyType.flags;
+      return physicalPropertyType.flags;
     }
     // Anything else is an identifier.
     else {
-      return cred.spec.physicalPropertyType.identifier;
+      return physicalPropertyType.identifier;
     }
   }
 
@@ -68,16 +68,16 @@ cred.spec = (function() {
   // Returns the converted value.
   function convertToPhysicalPropertyTypeValue(valueAsStr, type) {
     switch (type) {
-      case cred.spec.physicalPropertyType.string: {
+      case physicalPropertyType.string: {
         return valueAsStr;
       }
-      case cred.spec.physicalPropertyType.identifier: {
+      case physicalPropertyType.identifier: {
         return valueAsStr;
       }
-      case cred.spec.physicalPropertyType.number: {
+      case physicalPropertyType.number: {
         return util.toNumber(valueAsStr);
       }
-      case cred.spec.physicalPropertyType.flags: {
+      case physicalPropertyType.flags: {
         return valueAsStr;
       }
       default: {
@@ -111,6 +111,32 @@ cred.spec = (function() {
     }
   };
   Object.freeze(logicalPropertyType);
+
+  // Determines by which physical property type a logical property type is represented
+  // in the resources.
+  function physicalFromLogicalPropertyType(logicalType) {
+    switch (logicalType) {
+      case logicalPropertyType.integer:
+      case logicalPropertyType.float:
+      case logicalPropertyType.bool: {
+        return physicalPropertyType.number;
+      }
+      case logicalPropertyType.string:
+      case logicalPropertyType.localizedString: {
+        return physicalPropertyType.string;
+      }
+      case logicalPropertyType.identifier: {
+        return physicalPropertyType.identifier;
+      }
+      case logicalPropertyType.enum:
+      case logicalPropertyType.flags: {
+        return physicalPropertyType.flags;
+      }
+      default: {
+        throw new Error('Unexpected logical property type.');
+      }
+    }
+  }
 
   // Enum of lables for standard properties.
   // Note that property labels do not need to be in this enum! In the code property
@@ -228,6 +254,9 @@ cred.spec = (function() {
       this._required = typeof config.required !== 'undefined' ? config.required : true;
       // Can the property be empty, i.e. without a value?
       this._nullable = typeof config.nullable !== 'undefined' ? config.nullable : false;
+      // The default value for the property.
+      this._defaultValue =
+        typeof config.defaultValue !== 'undefined' ? config.defaultValue : undefined;
       // The context that modifications to the property apply to.
       this._editContext = config.context || cred.editContext.globalDefault;
       // Can the property's value be modified?
@@ -279,6 +308,10 @@ cred.spec = (function() {
 
     isNullable() {
       return this._nullable;
+    }
+
+    get defaultValue() {
+      return this._defaultValue;
     }
 
     get editContext() {
@@ -554,6 +587,7 @@ cred.spec = (function() {
             displayedLabel: 'Identifier',
             required: true,
             nullable: false,
+            defaultValue: 'PLEASE_ENTER_ID',
             context: cred.editContext.globalOnly,
             modifiable: true,
             localized: false,
@@ -572,6 +606,7 @@ cred.spec = (function() {
             displayedLabel: 'Left',
             required: true,
             nullable: false,
+            defaultValue: 0,
             context: cred.editContext.localOnly,
             modifiable: false,
             localized: false,
@@ -590,6 +625,7 @@ cred.spec = (function() {
             displayedLabel: 'Top',
             required: true,
             nullable: false,
+            defaultValue: 0,
             context: cred.editContext.localOnly,
             modifiable: false,
             localized: false,
@@ -608,6 +644,7 @@ cred.spec = (function() {
             displayedLabel: 'Width',
             required: true,
             nullable: false,
+            defaultValue: 1,
             context: cred.editContext.localOnly,
             modifiable: true,
             localized: false,
@@ -626,6 +663,7 @@ cred.spec = (function() {
             displayedLabel: 'Height',
             required: true,
             nullable: false,
+            defaultValue: 1,
             context: cred.editContext.localOnly,
             modifiable: true,
             localized: false,
@@ -644,6 +682,7 @@ cred.spec = (function() {
             displayedLabel: 'Title',
             required: true,
             nullable: true,
+            defaultValue: '',
             context: cred.editContext.localOnly,
             modifiable: true,
             localized: true,
@@ -661,6 +700,7 @@ cred.spec = (function() {
             displayedLabel: 'Resource Class',
             required: true,
             nullable: false,
+            defaultValue: 'FancyDialogBoxClass',
             context: cred.editContext.globalOnly,
             modifiable: true,
             localized: false,
@@ -678,6 +718,7 @@ cred.spec = (function() {
             displayedLabel: 'Font',
             required: true,
             nullable: true,
+            defaultValue: '',
             context: cred.editContext.localDefault,
             modifiable: true,
             localized: false,
@@ -695,6 +736,7 @@ cred.spec = (function() {
             displayedLabel: 'Font Size',
             required: true,
             nullable: true,
+            defaultValue: 0,
             context: cred.editContext.localDefault,
             modifiable: true,
             localized: false,
@@ -712,6 +754,7 @@ cred.spec = (function() {
             displayedLabel: 'Kill Popup',
             required: true,
             nullable: false,
+            defaultValue: 1,
             context: cred.editContext.globalDefault,
             modifiable: true,
             localized: false,
@@ -729,6 +772,7 @@ cred.spec = (function() {
             displayedLabel: 'Padding Type',
             required: true,
             nullable: false,
+            defaultValue: 'ACDSystems::UI::DialogPaddingTypes::Default',
             context: cred.editContext.globalDefault,
             modifiable: true,
             localized: false,
@@ -764,6 +808,7 @@ cred.spec = (function() {
             displayedLabel: 'Style Flags',
             required: true,
             nullable: false,
+            defaultValue: 0,
             context: cred.editContext.globalDefault,
             modifiable: true,
             localized: false,
@@ -841,7 +886,35 @@ cred.spec = (function() {
     textBox: 'TextBox',
     toolbar: 'Toolbar',
     verticalLine: 'VerticalLine',
-    zoomItem: 'ZoomItem'
+    zoomItem: 'ZoomItem',
+
+    // Makes the control types iterable.
+    *[Symbol.iterator]() {
+      yield this.checkBox;
+      yield this.comboBox;
+      yield this.cornerBox;
+      yield this.expandButton;
+      yield this.groupBox;
+      yield this.horizontalLine;
+      yield this.imageBox;
+      yield this.imageCheckBox;
+      yield this.imagePushButton;
+      yield this.imageRadioButton;
+      yield this.inkButton;
+      yield this.label;
+      yield this.menuButton;
+      yield this.ownerDraw;
+      yield this.placeHolder;
+      yield this.popupButton;
+      yield this.pushButton;
+      yield this.radioButton;
+      yield this.slider;
+      yield this.strokeButton;
+      yield this.textBox;
+      yield this.toolbar;
+      yield this.verticalLine;
+      yield this.zoomItem;
+    }
   };
   Object.freeze(controlType);
 
@@ -910,7 +983,11 @@ cred.spec = (function() {
 
     // Polymorphic function that populates the collection of supported property
     // specs with the properties that are common to all controls.
-    _populatePropertySpecs() {
+    _populatePropertySpecs(ctrlType, ctrlResourceClass) {
+      if (typeof ctrlType === 'undefined' || typeof ctrlResourceClass === 'undefined') {
+        throw new Error('Invalid arguments. Need control type and resource class');
+      }
+
       this._propertySpecs.set(
         propertyLabel.ctrlType,
         new IdentifierPropertySpec({
@@ -918,6 +995,7 @@ cred.spec = (function() {
           displayedLabel: 'Control Type',
           required: true,
           nullable: false,
+          defaultValue: ctrlType,
           context: cred.editContext.globalOnly,
           modifiable: false,
           localized: false,
@@ -935,6 +1013,7 @@ cred.spec = (function() {
           displayedLabel: 'Identifier',
           required: true,
           nullable: false,
+          defaultValue: 'PLEASE_ENTER_ID',
           context: cred.editContext.globalOnly,
           modifiable: true,
           localized: false,
@@ -953,6 +1032,7 @@ cred.spec = (function() {
           displayedLabel: 'Left',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: false,
@@ -971,6 +1051,7 @@ cred.spec = (function() {
           displayedLabel: 'Top',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: false,
@@ -989,6 +1070,7 @@ cred.spec = (function() {
           displayedLabel: 'Width',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: false,
@@ -1007,6 +1089,7 @@ cred.spec = (function() {
           displayedLabel: 'Height',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: false,
@@ -1025,6 +1108,7 @@ cred.spec = (function() {
           displayedLabel: 'Resource Class',
           required: true,
           nullable: false,
+          defaultValue: ctrlResourceClass,
           context: cred.editContext.globalOnly,
           modifiable: false,
           localized: false,
@@ -1042,6 +1126,7 @@ cred.spec = (function() {
           displayedLabel: 'Style Flags',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1086,6 +1171,7 @@ cred.spec = (function() {
           displayedLabel: 'Extended Style Flags',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1115,6 +1201,7 @@ cred.spec = (function() {
           displayedLabel: 'Anchor Left',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.localDefault,
           modifiable: true,
           localized: false,
@@ -1132,6 +1219,7 @@ cred.spec = (function() {
           displayedLabel: 'Anchor Top',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.localDefault,
           modifiable: true,
           localized: false,
@@ -1149,6 +1237,7 @@ cred.spec = (function() {
           displayedLabel: 'Anchor Right',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.localDefault,
           modifiable: true,
           localized: false,
@@ -1166,6 +1255,7 @@ cred.spec = (function() {
           displayedLabel: 'Anchor Bottom',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.localDefault,
           modifiable: true,
           localized: false,
@@ -1183,6 +1273,7 @@ cred.spec = (function() {
           displayedLabel: 'Enabled',
           required: false,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1200,6 +1291,7 @@ cred.spec = (function() {
           displayedLabel: 'Group',
           required: false,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1217,6 +1309,7 @@ cred.spec = (function() {
           displayedLabel: 'Kill Popup',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1234,6 +1327,7 @@ cred.spec = (function() {
           displayedLabel: 'Tab Stop',
           required: false,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1251,6 +1345,7 @@ cred.spec = (function() {
           displayedLabel: 'Visible',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1268,6 +1363,7 @@ cred.spec = (function() {
           displayedLabel: 'Tooltip',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localDefault,
           modifiable: true,
           localized: true,
@@ -1339,7 +1435,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.imageBox, 'IMAGEBOX');
       this._addPropertySpecs();
     }
 
@@ -1373,6 +1469,7 @@ cred.spec = (function() {
           displayedLabel: 'Image',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1390,6 +1487,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Size Type',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::ImageSizeType::px24',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1418,7 +1516,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.imageCheckBox, 'IMAGEBUTTON');
       this._addPropertySpecs();
     }
 
@@ -1457,6 +1555,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Checked',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1474,6 +1573,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1491,6 +1591,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1508,6 +1609,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1525,6 +1627,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1542,6 +1645,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1559,6 +1663,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Normal',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1576,6 +1681,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1593,6 +1699,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Tri-state',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1610,6 +1717,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1627,6 +1735,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1644,6 +1753,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1661,6 +1771,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Size Type',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::ImageSizeType::px24',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1676,9 +1787,10 @@ cred.spec = (function() {
         propertyLabel.ownerDrawn,
         new BooleanPropertySpec({
           label: propertyLabel.ownerDrawn,
-          displayedLabel: 'Owner-draw',
+          displayedLabel: 'Owner-drawn',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1696,6 +1808,7 @@ cred.spec = (function() {
           displayedLabel: 'Toolbar-like',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1723,7 +1836,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.imagePushButton, 'IMAGEBUTTON');
       this._addPropertySpecs();
     }
 
@@ -1764,6 +1877,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Checked',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1781,6 +1895,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1798,6 +1913,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1815,6 +1931,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1832,6 +1949,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1849,6 +1967,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1866,6 +1985,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Normal',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1883,6 +2003,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1900,6 +2021,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Tri-state',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1917,6 +2039,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1934,6 +2057,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1951,6 +2075,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1968,6 +2093,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Size Type',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::ImageSizeType::px24',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -1983,9 +2109,10 @@ cred.spec = (function() {
         propertyLabel.ownerDrawn,
         new BooleanPropertySpec({
           label: propertyLabel.ownerDrawn,
-          displayedLabel: 'Owner-draw',
+          displayedLabel: 'Owner-drawn',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2003,6 +2130,7 @@ cred.spec = (function() {
           displayedLabel: 'Pushbutton-like',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2020,6 +2148,7 @@ cred.spec = (function() {
           displayedLabel: 'Splitbutton-like',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2037,6 +2166,7 @@ cred.spec = (function() {
           displayedLabel: 'Toolbar-like',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2064,7 +2194,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.imageRadioButton, 'IMAGEBUTTON');
       this._addPropertySpecs();
     }
 
@@ -2103,6 +2233,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Checked',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2120,6 +2251,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2137,6 +2269,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2154,6 +2287,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2171,6 +2305,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2188,6 +2323,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2205,6 +2341,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Normal',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2222,6 +2359,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2239,6 +2377,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Tri-state',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2256,6 +2395,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Disabled',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2273,6 +2413,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Hot',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2290,6 +2431,7 @@ cred.spec = (function() {
           displayedLabel: 'Tri-State Pressed',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2307,6 +2449,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Size Type',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::ImageSizeType::px24',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2322,9 +2465,10 @@ cred.spec = (function() {
         propertyLabel.ownerDrawn,
         new BooleanPropertySpec({
           label: propertyLabel.ownerDrawn,
-          displayedLabel: 'Owner-draw',
+          displayedLabel: 'Owner-drawn',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2342,6 +2486,7 @@ cred.spec = (function() {
           displayedLabel: 'Toolbar-like',
           required: true,
           nullable: false,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2369,7 +2514,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.label, 'Static');
       this._addPropertySpecs();
     }
 
@@ -2394,6 +2539,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -2411,6 +2557,7 @@ cred.spec = (function() {
           displayedLabel: 'Text Align',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::TextAlign::Left',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2452,7 +2599,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.placeHolder, 'PLACEHOLDER');
       this._addPropertySpecs();
     }
 
@@ -2472,6 +2619,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -2499,7 +2647,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.popupButton, 'POPUPBUTTON');
       this._addPropertySpecs();
     }
 
@@ -2532,6 +2680,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -2549,6 +2698,7 @@ cred.spec = (function() {
           displayedLabel: 'Image Normal',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2566,6 +2716,7 @@ cred.spec = (function() {
           displayedLabel: 'Item Count',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2583,6 +2734,7 @@ cred.spec = (function() {
           displayedLabel: 'Item Height',
           required: true,
           nullable: true,
+          defaultValue: 24,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2600,6 +2752,7 @@ cred.spec = (function() {
           displayedLabel: 'Item Width',
           required: true,
           nullable: true,
+          defaultValue: 24,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2617,6 +2770,7 @@ cred.spec = (function() {
           displayedLabel: 'Columns',
           required: true,
           nullable: true,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2634,6 +2788,7 @@ cred.spec = (function() {
           displayedLabel: 'Rows',
           required: true,
           nullable: true,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2651,6 +2806,7 @@ cred.spec = (function() {
           displayedLabel: 'Selected Item',
           required: true,
           nullable: true,
+          defaultValue: -1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2668,6 +2824,7 @@ cred.spec = (function() {
           displayedLabel: 'Pop Position',
           required: true,
           nullable: false,
+          defaultValue: '::ACDSystems::UI::PopupButton::TopRight',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2705,7 +2862,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.pushButton, 'Button');
       this._addPropertySpecs();
       this._addStyleFlags();
     }
@@ -2726,6 +2883,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -2763,7 +2921,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.textBox, 'CVEditClass');
       this._addPropertySpecs();
     }
 
@@ -2792,6 +2950,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -2809,6 +2968,7 @@ cred.spec = (function() {
           displayedLabel: 'Command Delay',
           required: true,
           nullable: true,
+          defaultValue: 5000,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2826,6 +2986,7 @@ cred.spec = (function() {
           displayedLabel: 'Custom Unit Index',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2843,6 +3004,7 @@ cred.spec = (function() {
           displayedLabel: 'Increment Value',
           required: true,
           nullable: true,
+          defaultValue: 1.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2860,6 +3022,7 @@ cred.spec = (function() {
           displayedLabel: 'Max Value',
           required: true,
           nullable: true,
+          defaultValue: 9999.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2877,6 +3040,7 @@ cred.spec = (function() {
           displayedLabel: 'Min Value',
           required: true,
           nullable: true,
+          defaultValue: -9999.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2894,6 +3058,7 @@ cred.spec = (function() {
           displayedLabel: 'Precison',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2911,6 +3076,7 @@ cred.spec = (function() {
           displayedLabel: 'Read-Only',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2928,6 +3094,7 @@ cred.spec = (function() {
           displayedLabel: 'Unit',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2946,6 +3113,7 @@ cred.spec = (function() {
           displayedLabel: 'Up/Down Arrows',
           required: true,
           nullable: true,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -2973,7 +3141,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.verticalLine, 'Static');
       this._addPropertySpecs();
     }
 
@@ -2993,6 +3161,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3020,7 +3189,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.horizontalLine, 'Static');
       this._addPropertySpecs();
     }
 
@@ -3040,6 +3209,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3067,7 +3237,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.comboBox, 'COMBOBOXCLASS');
       this._addPropertySpecs();
     }
 
@@ -3095,6 +3265,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3112,6 +3283,7 @@ cred.spec = (function() {
           displayedLabel: 'Command Delay',
           required: true,
           nullable: true,
+          defaultValue: 600.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3129,6 +3301,7 @@ cred.spec = (function() {
           displayedLabel: 'Custom Unit Index',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3146,6 +3319,7 @@ cred.spec = (function() {
           displayedLabel: 'Increment Value',
           required: true,
           nullable: true,
+          defaultValue: 1.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3163,6 +3337,7 @@ cred.spec = (function() {
           displayedLabel: 'Max Value',
           required: true,
           nullable: true,
+          defaultValue: 0.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3180,6 +3355,7 @@ cred.spec = (function() {
           displayedLabel: 'Min Value',
           required: true,
           nullable: true,
+          defaultValue: 0.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3197,6 +3373,7 @@ cred.spec = (function() {
           displayedLabel: 'Precison',
           required: true,
           nullable: true,
+          defaultValue: -1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3214,6 +3391,7 @@ cred.spec = (function() {
           displayedLabel: 'Read-Only',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3231,6 +3409,7 @@ cred.spec = (function() {
           displayedLabel: 'Unit',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::UnitType::type_AlphaNumeric',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3259,7 +3438,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.inkButton, 'InkButton');
       this._addPropertySpecs();
     }
 
@@ -3289,6 +3468,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3306,6 +3486,7 @@ cred.spec = (function() {
           displayedLabel: 'Solid Colors Only',
           required: true,
           nullable: true,
+          defaultValue: 1,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3333,7 +3514,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.strokeButton, 'StrokeButton');
       this._addPropertySpecs();
     }
 
@@ -3367,6 +3548,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3384,6 +3566,7 @@ cred.spec = (function() {
           displayedLabel: 'Apply Mode',
           required: true,
           nullable: false,
+          defaultValue: '::kARROW_NONE',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3419,6 +3602,7 @@ cred.spec = (function() {
           displayedLabel: 'Type',
           required: true,
           nullable: false,
+          defaultValue: '::kAttributeType_SolidPen',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3476,7 +3660,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.slider, 'SliderClass');
       this._addPropertySpecs();
     }
 
@@ -3501,6 +3685,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3518,6 +3703,7 @@ cred.spec = (function() {
           displayedLabel: 'Increment Factor',
           required: true,
           nullable: false,
+          defaultValue: 1.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3535,6 +3721,7 @@ cred.spec = (function() {
           displayedLabel: 'Maximum',
           required: true,
           nullable: false,
+          defaultValue: 100.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3552,6 +3739,7 @@ cred.spec = (function() {
           displayedLabel: 'Minimum',
           required: true,
           nullable: false,
+          defaultValue: 0.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3569,6 +3757,7 @@ cred.spec = (function() {
           displayedLabel: 'Page Inc Factor',
           required: true,
           nullable: false,
+          defaultValue: 10.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3586,6 +3775,7 @@ cred.spec = (function() {
           displayedLabel: 'Tick Marks',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::Slider::None',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3631,7 +3821,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.checkBox, 'Button');
       this._addPropertySpecs();
     }
 
@@ -3651,6 +3841,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3678,7 +3869,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.expandButton, 'EXPANDBUTTON');
       this._addPropertySpecs();
     }
 
@@ -3713,6 +3904,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3730,6 +3922,7 @@ cred.spec = (function() {
           displayedLabel: 'Auto Expand',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3747,6 +3940,7 @@ cred.spec = (function() {
           displayedLabel: 'Expanded',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3774,7 +3968,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.groupBox, 'Button');
       this._addPropertySpecs();
     }
 
@@ -3794,6 +3988,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3821,7 +4016,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.ownerDraw, 'OwnerDraw');
       this._addPropertySpecs();
     }
 
@@ -3846,6 +4041,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3865,6 +4061,7 @@ cred.spec = (function() {
           displayedLabel: 'Kill Popup',
           required: true,
           nullable: false,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -3892,7 +4089,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.menuButton, 'MenuButton');
       this._addPropertySpecs();
     }
 
@@ -3912,6 +4109,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3939,7 +4137,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.radioButton, 'Button');
       this._addPropertySpecs();
     }
 
@@ -3964,6 +4162,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -3981,6 +4180,7 @@ cred.spec = (function() {
           displayedLabel: 'Checked',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4008,7 +4208,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.cornerBox, 'CORNERBOX');
       this._addPropertySpecs();
     }
 
@@ -4028,6 +4228,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -4055,7 +4256,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.toolbar, 'ToolbarWindow32');
       this._addPropertySpecs();
     }
 
@@ -4100,6 +4301,7 @@ cred.spec = (function() {
           displayedLabel: 'Text',
           required: true,
           nullable: true,
+          defaultValue: '',
           context: cred.editContext.localOnly,
           modifiable: true,
           localized: true,
@@ -4117,6 +4319,7 @@ cred.spec = (function() {
           displayedLabel: 'Alignment',
           required: true,
           nullable: false,
+          defaultValue: 'ACDSystems::UI::ToolbarAlignment::Left',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4156,6 +4359,7 @@ cred.spec = (function() {
           displayedLabel: 'Divider',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4173,6 +4377,7 @@ cred.spec = (function() {
           displayedLabel: 'Move Y',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4190,6 +4395,7 @@ cred.spec = (function() {
           displayedLabel: 'Parent Align',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4207,6 +4413,7 @@ cred.spec = (function() {
           displayedLabel: 'Resize',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4234,7 +4441,7 @@ cred.spec = (function() {
     // Polymorphic function that populates the collection of supported property
     // specs.
     _populatePropertySpecs() {
-      super._populatePropertySpecs();
+      super._populatePropertySpecs(controlType.zoomItem, 'ZoomItemClass');
       this._addPropertySpecs();
     }
 
@@ -4264,6 +4471,7 @@ cred.spec = (function() {
           displayedLabel: 'Auto Zoom',
           required: true,
           nullable: true,
+          defaultValue: 0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4281,6 +4489,7 @@ cred.spec = (function() {
           displayedLabel: 'Increment Factor',
           required: true,
           nullable: true,
+          defaultValue: 10.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4298,6 +4507,7 @@ cred.spec = (function() {
           displayedLabel: 'Minimum Level',
           required: true,
           nullable: true,
+          defaultValue: 10.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4315,6 +4525,7 @@ cred.spec = (function() {
           displayedLabel: 'Maximum Level',
           required: true,
           nullable: true,
+          defaultValue: 1000.0,
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4332,6 +4543,7 @@ cred.spec = (function() {
           displayedLabel: 'Zoom Style',
           required: true,
           nullable: false,
+          defaultValue: '::UIZoomInfo::kEditItemStyle',
           context: cred.editContext.globalDefault,
           modifiable: true,
           localized: false,
@@ -4568,6 +4780,7 @@ cred.spec = (function() {
     makeControlSpec: makeControlSpec,
     makeDialogSpec: makeDialogSpec,
     makePropertySpec: makePropertySpec,
+    physicalFromLogicalPropertyType: physicalFromLogicalPropertyType,
     physicalPropertyType: physicalPropertyType,
     physicalPropertyTypeOfValue: physicalPropertyTypeOfValue,
     propertyLabel: propertyLabel,

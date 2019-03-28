@@ -16,7 +16,9 @@ function tryRequire(file) {
 
 // Dependencies
 var cred = tryRequire('./cred_types') || cred || {};
+cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
 cred.ui_internal = tryRequire('./ui_internal') || cred.ui_internal || {};
+var html = tryRequire('./html') || html || {};
 
 ///////////////////
 
@@ -37,10 +39,14 @@ cred.ui = (function() {
     // Initializes UI elements.
     setup() {
       let self = this;
+      $(window).on('click', event => self._onWindowClicked(event));
       $('#open-cmd').on('click', event => self._onOpenCmdClicked(event));
       $('#file-input').on('change', event => self._onFilesSelected(event));
       $('#save-cmd').on('click', event => self._onSaveCmdClicked(event));
+      $('#add-ctrl-cmd').on('click', event => self._onAddControlCmdClicked(event));
       $('.tab').on('click', event => self._onLocaleTabClicked(event));
+
+      this._populateAddControlMenu();
 
       this._propertyPane.setup();
       this._displayHeader.setup();
@@ -163,6 +169,10 @@ cred.ui = (function() {
       this.showError(errMsg);
     }
 
+    onControlAddedNotification(ctrlItem) {
+      this._propertyPane.populate(ctrlItem);
+    }
+
     onItemSelectedNotification(item) {
       this._propertyPane.populate(item);
     }
@@ -176,6 +186,11 @@ cred.ui = (function() {
     }
 
     // --- Event handlers ---
+
+    // Handles 'click' events for the entire window.
+    _onWindowClicked() {
+      this._closeDropdownMenus();
+    }
 
     // Handles 'click' events for the 'open' button.
     _onOpenCmdClicked() {
@@ -196,6 +211,19 @@ cred.ui = (function() {
       } else {
         this._controller.notifyFilesChosen(this, files);
       }
+    }
+
+    // Handles 'click' events for the 'add control' button.
+    _onAddControlCmdClicked(event) {
+      // Stop event bubbling because we don't want the window to receive
+      // the event (because it would close the dropdown).
+      event.stopPropagation();
+      $('#add-ctrl-menu').toggleClass('dropped');
+    }
+
+    _onAddControlTypeClicked(event) {
+      const ctrlType = $(event.target).text();
+      this._controller.notifyAddControlChosen(this, ctrlType);
     }
 
     // Handles 'click' events for the locale tabs.
@@ -241,6 +269,24 @@ cred.ui = (function() {
       $('#' + contentId).show();
       // Mark the tab as active.
       tabElement.className += ' active';
+    }
+
+    // Populates the 'add control' menu with entries for each control type.
+    _populateAddControlMenu() {
+      const $menu = $('#add-ctrl-menu');
+      for (const ctrlType of cred.spec.controlType) {
+        const $link = html.makeLinkElement(ctrlType);
+        $link.addClass('add-ctrl-type');
+        $menu.append($link);
+      }
+
+      let self = this;
+      $('.add-ctrl-type').on('click', event => self._onAddControlTypeClicked(event));
+    }
+
+    // Closes all open dropdown menus.
+    _closeDropdownMenus() {
+      $('.dropdown-menu').removeClass('dropped');
     }
   }
 

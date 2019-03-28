@@ -60,6 +60,22 @@ cred.svglayout_internal = (function() {
       return this._dialogItem;
     }
 
+    // Adds a control for a given control type by allowing the user to interactively
+    // place the control.
+    addControlInteractively(ctrlType) {
+      if (this._dialogItem) {
+        this._dialogItem.addControlInteractively(ctrlType);
+      }
+    }
+
+    // Adds a SVG control object for a given control resource definition.
+    // Returns the added SVG control object.
+    addControlFromResource(cltrDefinition) {
+      if (this._dialogItem) {
+        this._dialogItem.addControlFromResource(cltrDefinition);
+      }
+    }
+
     get selectedItem() {
       return this._selection.selectedItem;
     }
@@ -318,7 +334,7 @@ cred.svglayout_internal = (function() {
     }
 
     // Calculates the offset of a given mouse position to the left-top corner
-    // of the item. Keeping track if this offset makes sure that editing the
+    // of the item. Keeping track of this offset makes sure that editing the
     // item is accurate.
     _calcMouseOffset(mouseEvent) {
       const itemScreenPos = svg.screenFromSvgPoint(
@@ -351,6 +367,10 @@ cred.svglayout_internal = (function() {
       this._dlgSpec = cred.spec.makeDialogSpec();
       // Map that associates control's unique  ids with their control SVG items.
       this._controlItems = new Map();
+      // Keeps track of whether a control is added by dragging or clicking.
+      this._isCtrlAddedByDragging = false;
+      // SVG control item that is being added.
+      this._addedControl = undefined;
     }
 
     // Polymorphic function to return the the dialog's unique id.
@@ -381,11 +401,40 @@ cred.svglayout_internal = (function() {
     // Builds the SVG items for the controls of the dialog.
     buildControls() {
       for (let ctrl of this._dlgResource.controls()) {
-        this._controlItems.set(
-          ctrl.uniqueId.hash(),
-          new SvgControl(ctrl, this.svgDisplay)
-        );
+        this.addControlFromResource(ctrl);
       }
+    }
+
+    // Initiates adding a control interatively by clicking or dragging.
+    addControlInteractively(ctrlType) {
+      $(this.svgDisplay.htmlElement).css('cursor', 'crosshair');
+
+      let self = this;
+      $(this.svgDisplay.htmlElement).on('mousedown.addctrl', e =>
+        self._onAddControlMouseDown(e, ctrlType)
+      );
+      $(this.htmlElement).on('mousedown.addctrl', e =>
+        self._onAddControlMouseDown(e, ctrlType)
+      );
+    }
+
+    // Adds a given control.
+    // Returns the added SVG control object.
+    addControl(ctrlType, bounds) {
+      const resIdPrefix = 'k' + ctrlType;
+      const resId = this._dlgResource.generateUnusedControlResourceId(resIdPrefix);
+      this.controller.notifyAddControl(resId, ctrlType, bounds);
+
+      const ctrlDefinition = this._dlgResource.controlByResourceId(resId, 0);
+      return this.addControlFromResource(ctrlDefinition);
+    }
+
+    // Adds a SVG control object for a given control resource definition.
+    // Returns the added SVG control object.
+    addControlFromResource(ctrlDefinition) {
+      const svgCtrl = new SvgControl(ctrlDefinition, this.svgDisplay);
+      this._controlItems.set(ctrlDefinition.uniqueId.hash(), svgCtrl);
+      return svgCtrl;
     }
 
     // Returns the bounds of the dialog as they are defined in the resource.
@@ -414,6 +463,122 @@ cred.svglayout_internal = (function() {
         class: 'dialog',
         'vector-effect': 'non-scaling-stroke'
       });
+    }
+
+    // Handles mouse down events for adding a control.
+    _onAddControlMouseDown(event, ctrlType) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      this._isCtrlAddedByDragging = false;
+      this._startAddControlMouseTracking(event, ctrlType);
+    }
+
+    // Handles mouse move events for adding a control.
+    _onAddControlMouseMove(event, ctrlType, mouseDownPos) {
+      event.preventDefault();
+
+      const mousePos = mousePosition(event);
+      if (this._isCtrlAddedByDragging || isDragMove(mousePos, mouseDownPos)) {
+        // Check for first mouse-move during drag.
+        if (!this._isCtrlAddedByDragging) {
+          this._isCtrlAddedByDragging = true;
+          // Add the control.
+          const dim = mousePos.subtract(mouseDownPos);
+          const ctrlBounds = toDialogCoord(
+            svg.svgFromScreenRect(
+              new geom.Rect(mousePos.x, mousePos.y, dim.x, dim.y),
+              this.htmlElement,
+              this.svgDisplay.htmlElement
+            )
+          );
+          this._addedControl = this.addControl(ctrlType, ctrlBounds);
+        }
+        this._dragAddedControl(event);
+      }
+    }
+
+    // Handles mouse up events for adding a control.
+    _onAddControlMouseUp(event, ctrlType) {
+      event.preventDefault();
+
+      if (this._isCtrlAddedByDragging) {
+        this._dragAddedControl(event);
+      } else {
+        // Coordinate space conversion: screen -> svg (svg space = dialog space).
+        const defaultCtrlWidth = 72;
+        const defaultCtrlHeight = 22;
+        const mousePos = mousePosition(event);
+        const ctrlBounds = toDialogCoord(
+          svg.svgFromScreenRect(
+            new geom.Rect(mousePos.x, mousePos.y, defaultCtrlWidth, defaultCtrlHeight),
+            this.htmlElement,
+            this.svgDisplay.htmlElement
+          )
+        );
+        this._addedControl = this.addControl(ctrlType, ctrlBounds);
+      }
+
+      this._isCtrlAddedByDragging = false;
+      this._stopAddControlMouseTracking();
+
+      this._addedControl.select();
+      this.controller.notifyControlAdded(this._addedControl);
+      this._addedControl = undefined;
+      $(this.svgDisplay.htmlElement).css('cursor', 'default');
+    }
+
+    // Starts tracking mouse events for adding a control.
+    _startAddControlMouseTracking(mouseEvent, ctrlType) {
+      let self = this;
+      const mouseDownPos = mousePosition(mouseEvent);
+
+      $(this.svgDisplay.htmlElement).on('mousemove.addctrl', e =>
+        self._onAddControlMouseMove(e, ctrlType, mouseDownPos)
+      );
+      $(this.htmlElement).on('mousemove.addctrl', e =>
+        self._onAddControlMouseMove(e, ctrlType, mouseDownPos)
+      );
+      $(this.svgDisplay.htmlElement).on('mouseup.addctrl', e =>
+        self._onAddControlMouseUp(e, ctrlType)
+      );
+      $(this.htmlElement).on('mouseup.addctrl', e =>
+        self._onAddControlMouseUp(e, ctrlType)
+      );
+    }
+
+    // Stops tracking mouse events for adding a control.
+    _stopAddControlMouseTracking() {
+      $(this.svgDisplay.htmlElement).off('mousedown.addctrl');
+      $(this.htmlElement).off('mousedown.addctrl');
+      $(this.svgDisplay.htmlElement).off('mousemove.addctrl');
+      $(this.htmlElement).off('mousemove.addctrl');
+      $(this.svgDisplay.htmlElement).off('mouseup.addctrl');
+      $(this.htmlElement).off('mouseup.addctrl');
+    }
+
+    // Manipulates added control for each mouse move.
+    _dragAddedControl(mouseEvent) {
+      const ctrlPos = this._addedControl.position;
+
+      // Calculate new right-bottom corner based on mouse position.
+      const newRightBottom = toDialogCoord(
+        svg.svgFromScreenPoint(
+          mousePosition(mouseEvent),
+          this.htmlElement,
+          this.svgDisplay.htmlElement
+        )
+      );
+
+      const minWidth = 1;
+      const minHeight = 1;
+      const newWidth = Math.max(newRightBottom.x - ctrlPos.x, minWidth);
+      const newHeight = Math.max(newRightBottom.y - ctrlPos.y, minHeight);
+
+      this._addedControl.setBounds(
+        new geom.Rect(ctrlPos.x, ctrlPos.y, newWidth, newHeight),
+        false
+      );
     }
   }
 
@@ -976,6 +1141,8 @@ cred.svglayout_internal = (function() {
   ///////////////////
 
   // Returns the position of the mouse pointer as geom.Point given a mouse event.
+  // The position is relative to the client area of the browser (it is not influenced
+  // by any vert or horiz scrolling of the viewed page).
   function mousePosition(mouseEvent) {
     if (
       typeof mouseEvent.clientX === 'undefined' ||

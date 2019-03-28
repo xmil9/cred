@@ -106,6 +106,10 @@ cred.resource = (function() {
       this._updateLinkingToMasterLocale(this._controller.currentLocale, isLinked);
     }
 
+    onAddControlNotification(resourceId, ctrlType, bounds) {
+      this._addControl(this._controller.currentLocale, resourceId, ctrlType, bounds);
+    }
+
     // Opens a given array of files.
     _openFiles(files) {
       let fileSet = new cred.io.FileSet(files);
@@ -165,12 +169,8 @@ cred.resource = (function() {
       // for each locale, so only the item's resource needs to be changed,
       // the other locales remain untouched (in case they are linked the
       // item resource will be the same!).
-      const propLabel = cred.spec.propertyLabel;
       let resource = layoutItem.resource();
-      resource.property(propLabel.left).value = bounds.left;
-      resource.property(propLabel.top).value = bounds.top;
-      resource.property(propLabel.width).value = bounds.width;
-      resource.property(propLabel.height).value = bounds.height;
+      this._setResourceBounds(resource, bounds);
     }
 
     // Updates a given property of a given layout item.
@@ -212,6 +212,26 @@ cred.resource = (function() {
         this._resourceSet.linkToMaster(locale);
       } else {
         this._resourceSet.unlinkFromMaster(locale);
+      }
+    }
+
+    // Adds a control with given resoucrce id, type, and bounds.
+    _addControl(locale, resourceId, ctrlType, bounds) {
+      const ctrlResource = this._resourceSet.addControl(locale, ctrlType, resourceId);
+      ctrlResource.generatePropertiesWithDefaults();
+      if (typeof bounds !== 'undefined') {
+        this._setResourceBounds(ctrlResource, bounds);
+      }
+    }
+
+    // Sets the properties that contain bounds information of a given resource.
+    _setResourceBounds(resource, bounds) {
+      if (resource) {
+        const propLabel = cred.spec.propertyLabel;
+        resource.setPropertyValue(propLabel.left, bounds.left);
+        resource.setPropertyValue(propLabel.top, bounds.top);
+        resource.setPropertyValue(propLabel.width, bounds.width);
+        resource.setPropertyValue(propLabel.height, bounds.height);
       }
     }
 
@@ -397,6 +417,13 @@ cred.resource = (function() {
     // Returns the source encoding of a given language.
     sourceStringEncoding(language) {
       return this._stringMap.sourceEncoding(language);
+    }
+
+    // Adds a control with a given type and resource id to the dialog resource
+    // for a given locale.
+    // Returns the control resource.
+    addControl(locale, ctrlType, resourceId) {
+      return this.dialogResource(locale).addControl(ctrlType, resourceId);
     }
 
     // Updates the dialog's id in all dialog resources.
@@ -1118,6 +1145,11 @@ cred.resource = (function() {
       return this._dlg.addControl(ctrlType, resourceId);
     }
 
+    // Generates a control resource id that has a given prefix and does not exist yet.
+    generateUnusedControlResourceId(prefix) {
+      return this._dlg.generateUnusedControlResourceId(prefix);
+    }
+
     // Generator function for included headers.
     *includedHeaders() {
       for (const header of this._includedHeaders) {
@@ -1240,6 +1272,16 @@ cred.resource = (function() {
       this._properties.set(label, property);
     }
 
+    // Polymorphic function to set a dialog property's value.
+    setPropertyValue(label, value) {
+      if (!this.haveProperty(label)) {
+        throw new Error(
+          `Attempting to set value of non-existing dialog property '${label}'.`
+        );
+      }
+      this.property(label).value = value;
+    }
+
     *properties() {
       for (let prop of this._properties.values()) {
         yield prop;
@@ -1301,6 +1343,22 @@ cred.resource = (function() {
         ctrl.resourceId = newResourceId;
       }
     }
+
+    // Generates a control resource id that has a given prefix and does not exist yet.
+    generateUnusedControlResourceId(prefix) {
+      // Initially try the prefix without any sequence number. If that fails start
+      // trying with sequence numbers from 2 going up until we find an unused resource
+      // id.
+      let seqNum = 1;
+      // Use default when no prefix is given.
+      let resId = prefix || '_';
+      resId += seqNum;
+      while (this._ctrlIdGen.count(resId) > 0) {
+        ++seqNum;
+        resId = prefix + seqNum;
+      }
+      return resId;
+    }
   }
 
   ///////////////////
@@ -1317,8 +1375,8 @@ cred.resource = (function() {
       this._properties = new Map();
       // When editing fields, also edit the copy function below!
 
-      // Add properties for the control's type and id.
-      this.addLabeledProperty(
+      // Set up the properties for the control type and resource id.
+      this.setProperty(
         cred.spec.propertyLabel.ctrlType,
         makeProperty(
           cred.spec.propertyLabel.ctrlType,
@@ -1326,7 +1384,7 @@ cred.resource = (function() {
           type
         )
       );
-      this.addLabeledProperty(
+      this.setProperty(
         cred.spec.propertyLabel.id,
         makeProperty(
           cred.spec.propertyLabel.id,
@@ -1349,6 +1407,23 @@ cred.resource = (function() {
         copy._properties.set(label, property.copy());
       }
       return copy;
+    }
+
+    // Generates all control properties specified in the spec.
+    generatePropertiesWithDefaults() {
+      const ctrlSpec = cred.spec.makeControlSpec(this.type);
+      for (const propSpec of ctrlSpec.propertySpecs()) {
+        if (!this.haveProperty(propSpec.label)) {
+          this.setProperty(
+            propSpec.label,
+            makeProperty(
+              propSpec.label,
+              cred.spec.physicalFromLogicalPropertyType(propSpec.logicalType),
+              propSpec.defaultValue
+            )
+          );
+        }
+      }
     }
 
     // Polymorphic function to returns a unique identifier for the control/dialog.
@@ -1397,6 +1472,18 @@ cred.resource = (function() {
     // Sets the property straight without considering any policies.
     setProperty(label, property) {
       this._properties.set(label, property);
+    }
+
+    // Polymorphic function to set a dialog property's value.
+    setPropertyValue(label, value) {
+      if (!this.haveProperty(label)) {
+        throw new Error(
+          `Attempting to set value of non-existing property '${label}' for control '${
+            this._ctrlId
+          }'.`
+        );
+      }
+      this.property(label).value = value;
     }
 
     *properties() {

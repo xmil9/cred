@@ -58,13 +58,37 @@ var svg = (function() {
     return new geom.Point(transformedSvgPt.x, transformedSvgPt.y);
   }
 
+  // Converts a rect in SVG coordinates to a rect in screen coordinates for a given
+  // SVG element and SVG root element.
+  function screenFromSvgRect(rect, svgHtmlElement, svgRootHtmlElement) {
+    const leftTop = screenFromSvgPoint(
+      rect.leftTop(),
+      svgHtmlElement,
+      svgRootHtmlElement
+    );
+    return new geom.Rect(leftTop.x, leftTop.y, rect.width, rect.height);
+  }
+
+  // Converts a rect in screen coordinates to a rect in SVG coordinates for a given
+  // SVG element and SVG root element.
+  function svgFromScreenRect(rect, svgHtmlElement, svgRootHtmlElement) {
+    const leftTop = svgFromScreenPoint(
+      rect.leftTop(),
+      svgHtmlElement,
+      svgRootHtmlElement
+    );
+    return new geom.Rect(leftTop.x, leftTop.y, rect.width, rect.height);
+  }
+
   ///////////////////
 
   // Exports for util module.
   return {
     create: create,
     screenFromSvgPoint: screenFromSvgPoint,
-    svgFromScreenPoint: svgFromScreenPoint
+    screenFromSvgRect: screenFromSvgRect,
+    svgFromScreenPoint: svgFromScreenPoint,
+    svgFromScreenRect: svgFromScreenRect
   };
 })();
 

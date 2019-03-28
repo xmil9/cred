@@ -77,7 +77,7 @@ cred.svglayout = (function() {
       return undefined;
     }
 
-    // Notifications
+    // --- Notifications ---
     // These notification funtions are called by objects within the layout module
     // and forwared the calls to the controller. The layout object basically serves
     // as proxy for the controller to all objects within the layout module. It calls
@@ -103,7 +103,21 @@ cred.svglayout = (function() {
       this._setBounds(bounds, true);
     }
 
-    // Notification handlers.
+    // Called from within the layout module to forward a notification to the controller
+    // that a control with given resource id, type and bounds should be added.
+    notifyAddControl(resourceId, ctrlType, bounds) {
+      this._controller.notifyAddControl(this, resourceId, ctrlType, bounds);
+    }
+
+    // Called from within the layout module to forward a notification to the controller
+    // that a control was added.
+    notifyControlAdded(ctrlItem) {
+      this._controller.notifyControlAdded(this, ctrlItem);
+      // Add a control item to all linked SVG displays.
+      this._addControlToLinkedDisplays(ctrlItem);
+    }
+
+    // --- Notification handlers ---
     // These functions are called by the controller to signal certain events in the
     // system. They orchestrate the layouts reaction to the event.
 
@@ -124,6 +138,13 @@ cred.svglayout = (function() {
     onLinkedToMasterModifiedNotification(isLinked) {
       this._updateLinkingToMasterLocale(this._controller.currentLocale, isLinked);
     }
+
+    // Notifies the layout that the user wants to create a control with the given type.
+    onAddControlChosenNotification(ctrlType) {
+      this._addControlInteractively(ctrlType);
+    }
+
+    // --- Internal functions ---
 
     // Builds the display for a given locale
     _buildDisplay(locale, displaySize) {
@@ -209,13 +230,14 @@ cred.svglayout = (function() {
     }
 
     // Returns an array of SVG items that are linked to the currently selected item.
-    // The currently selected item is included in the returned array.
+    // The currently selected item is in-/excluded in the returned array depending on
+    // a passed flag.
     _findLinkedItems(excludeSelectedItem) {
       const selectedItem = this.selectedItem(this._controller.currentLocale);
       const selectedItemId = selectedItem.uniqueId;
 
       const linkedItems = [];
-      const displays = this._findLinkedDisplays();
+      const displays = this._findLinkedDisplays(false);
       for (const display of displays) {
         if (typeof display !== 'undefined') {
           const matchingItem = display.findItemWithId(selectedItemId);
@@ -232,18 +254,23 @@ cred.svglayout = (function() {
     }
 
     // Returns an array of display objects that are linked to the current display.
-    // The current display is included in the returned array.
-    _findLinkedDisplays() {
+    // The current display is in-/excluded in the returned array depending on a passed
+    // flag.
+    _findLinkedDisplays(excludeCurrentDisplay) {
       const linkedDisplays = [];
       const currentLocale = this._controller.currentLocale;
 
       if (this._controller.isLinkedToMaster(currentLocale)) {
         for (const locale of this._controller.linkedLocales()) {
-          linkedDisplays.push(this._svgDisplays.get(locale));
+          if (!(excludeCurrentDisplay && locale === currentLocale)) {
+            linkedDisplays.push(this._svgDisplays.get(locale));
+          }
         }
       } else {
-        const currentDisplay = this._svgDisplays.get(currentLocale);
-        linkedDisplays.push(currentDisplay);
+        if (!excludeCurrentDisplay) {
+          const currentDisplay = this._svgDisplays.get(currentLocale);
+          linkedDisplays.push(currentDisplay);
+        }
       }
 
       return linkedDisplays;
@@ -256,6 +283,22 @@ cred.svglayout = (function() {
       const displaySize = SvgLayout._calcDisplaySize(this._containerHtmlElems);
       this._buildDisplay(locale, displaySize);
       this._buildDisplay(cred.locale.any, displaySize);
+    }
+
+    // Starts the process of adding a control to the dialog.
+    _addControlInteractively(ctrlType) {
+      const display = this._svgDisplays.get(this._controller.currentLocale);
+      if (display) {
+        display.addControlInteractively(ctrlType);
+      }
+    }
+
+    // Adds a given control item to all displays that are linked to the current display.
+    _addControlToLinkedDisplays(ctrlItem) {
+      const displays = this._findLinkedDisplays(true);
+      for (const display of displays) {
+        display.addControlFromResource(ctrlItem.resource());
+      }
     }
   }
 

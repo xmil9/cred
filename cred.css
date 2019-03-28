@@ -33,6 +33,39 @@ body {
     border: 1px solid #aaa;
 }
 
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    /* Hidden by default. */
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-menu.dropped {
+    display: block;
+}
+
+/* Link elements inside dropdown menus. */
+.dropdown-menu a {
+    /* Prevent cursor from switching to a text cursor over the items. */
+    cursor: default;
+    color: black;
+    padding: 6px 8px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-menu a:hover {
+    background-color: #ddd
+}
+
 /* --- File bar --- */
 
 #file-bar {
@@ -60,9 +93,14 @@ body {
 
 /* --- Tool bar --- */
 
-#tools-bar {
+#tool-bar {
     padding-left: 10px;
     padding-bottom: 5px;
+}
+
+#add-ctrl-cmd {
+    background-image: url("resources/add_ctrl.png");
+    width: 35px;
 }
 
 /* --- Tabs --- */

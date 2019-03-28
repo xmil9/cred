@@ -121,6 +121,18 @@ cred.controller = (function() {
       this._dispatch(source, 'onSaveChosenNotification');
     }
 
+    notifyAddControlChosen(source, ctrlType) {
+      this._dispatch(source, 'onAddControlChosenNotification', ctrlType);
+    }
+
+    notifyAddControl(source, resourceId, ctrlType, bounds) {
+      this._dispatch(source, 'onAddControlNotification', resourceId, ctrlType, bounds);
+    }
+
+    notifyControlAdded(source, ctrlItem) {
+      this._dispatch(source, 'onControlAddedNotification', ctrlItem);
+    }
+
     notifyLocaleSwitched(source, locale) {
       this._dispatch(source, 'onLocaleSwitchedNotification', locale);
     }

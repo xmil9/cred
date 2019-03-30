@@ -418,7 +418,10 @@ cred.svglayout_internal = (function() {
       );
     }
 
-    // Adds a given control.
+    // Adds a control of given type and dimensions to the dialog. A control definition
+    // is added to the resource and then a SVG control item for it is added to the UI.
+    // An unused resource id based on the control type's name is generated and used for
+    // the control definition.
     // Returns the added SVG control object.
     addControl(ctrlType, bounds) {
       const resIdPrefix = 'k' + ctrlType;

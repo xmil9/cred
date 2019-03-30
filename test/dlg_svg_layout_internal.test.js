@@ -45,6 +45,14 @@ jest.mock('../svg', () => ({
 
   screenFromSvgPoint: function(pt) {
     return pt;
+  },
+
+  svgFromScreenRect: function(r) {
+    return r;
+  },
+
+  screenFromSvgRect: function(r) {
+    return r;
   }
 }));
 
@@ -72,14 +80,30 @@ function setupHtmlDocument(htmlTemplate) {
 
 // Helper class to mock the controller.
 class ControllerMock {
-  constructor() {
+  constructor(dlgResMock) {
+    this._dlgResMock = dlgResMock;
     this.notifyItemBoundsModifiedCalled = false;
+    this.notifyAddControlCalled = false;
+    this.notifyControlAddedCalled = false;
     this.notifyItemSelectedCalled = false;
     this.notifySelectionClearedCalled = false;
   }
 
   notifyItemBoundsModified() {
     this.notifyItemBoundsModifiedCalled = true;
+  }
+
+  notifyAddControl(resId, ctrlType, bounds) {
+    const ctrlMock = this._dlgResMock.addControl(ctrlType, resId);
+    ctrlMock.props.set(cred.spec.propertyLabel.left, bounds.left);
+    ctrlMock.props.set(cred.spec.propertyLabel.top, bounds.top);
+    ctrlMock.props.set(cred.spec.propertyLabel.width, bounds.width);
+    ctrlMock.props.set(cred.spec.propertyLabel.height, bounds.height);
+    this.notifyAddControlCalled = true;
+  }
+
+  notifyControlAdded() {
+    this.notifyControlAddedCalled = true;
   }
 
   notifyItemSelected() {
@@ -93,9 +117,9 @@ class ControllerMock {
 
 // Helper class to mock SvgDisplay objects.
 class SvgDisplayMock {
-  constructor(htmlElem) {
+  constructor(htmlElem, dlgResMock) {
     this.htmlElement = htmlElem;
-    this.controller = new ControllerMock();
+    this.controller = new ControllerMock(dlgResMock);
     this.updateSelectionCalled = false;
     this.clearSelectionCalled = false;
     this.selectItemCalled = false;
@@ -144,6 +168,29 @@ class DialogResourceMock {
   *controls() {
     yield* this._ctrls;
   }
+
+  generateUnusedControlResourceId(prefix) {
+    return prefix + '1';
+  }
+
+  controlByResourceId(resId, seqIdx) {
+    const targetUniqueId = cred.resource.UniqueResourceIdGenerator.generateId(
+      resId,
+      seqIdx
+    );
+    for (const ctrl of this._ctrls) {
+      if (cred.resource.areUniqueResourceIdsEqual(ctrl.uniqueId, targetUniqueId)) {
+        return ctrl;
+      }
+    }
+    return undefined;
+  }
+
+  addControl(ctrlType, resId) {
+    const ctrlMock = new ControlMock(resId, ctrlType, new Map());
+    this._ctrls.push(ctrlMock);
+    return ctrlMock;
+  }
 }
 
 // Helper class to mock Dialog objects.
@@ -171,7 +218,7 @@ class ControlMock {
   constructor(id, type, props) {
     this.resourceId = id;
     this.type = type;
-    this._props = props;
+    this.props = props;
   }
 
   get uniqueId() {
@@ -184,7 +231,7 @@ class ControlMock {
 
   property(key) {
     // Return a Property object stub.
-    return { value: this._props.get(key) };
+    return { value: this.props.get(key) };
   }
 }
 
@@ -667,13 +714,13 @@ function setupSvgDialogTestEnv(ctrls) {
   setupHtmlDocument(htmlBodyWithSvgRoot);
   svg.injectDocument(document);
 
-  const svgRootElem = document.getElementById('svgRoot');
-  const svgDisplayMock = new SvgDisplayMock(svgRootElem);
   const dlgMock = new DialogMock(
     'mydlg',
     new Map([[cred.spec.propertyLabel.width, 20], [cred.spec.propertyLabel.height, 10]])
   );
   const dlgResMock = new DialogResourceMock(dlgMock, ctrls);
+  const svgRootElem = document.getElementById('svgRoot');
+  const svgDisplayMock = new SvgDisplayMock(svgRootElem, dlgResMock);
   const svgDlg = new cred.svglayout_internal.SvgDialog(dlgResMock, svgDisplayMock);
 
   return [svgDlg, dlgMock];
@@ -736,6 +783,114 @@ test('SvgDialog.buildControls', () => {
   svgDlg.buildControls();
   expect(svgDlg.findControlItemWithId(ctrls[0].uniqueId)).toBeDefined();
   expect(svgDlg.findControlItemWithId(ctrls[1].uniqueId)).toBeDefined();
+});
+
+test('SvgDialog.addControlInteractively by clicking', () => {
+  const ctrls = [
+    new ControlMock(
+      'ctrl1',
+      cred.spec.controlType.label,
+      new Map([
+        [cred.spec.propertyLabel.left, 3],
+        [cred.spec.propertyLabel.top, 5],
+        [cred.spec.propertyLabel.width, 3],
+        [cred.spec.propertyLabel.height, 4]
+      ])
+    )
+  ];
+  const [svgDlg] = setupSvgDialogTestEnv(ctrls);
+
+  const ctrlType = cred.spec.controlType.label;
+  svgDlg.addControlInteractively(ctrlType);
+  const initialMousePos = { x: 25, y: 15 };
+  // Zero distance means click.
+  const dragDist = 0;
+  simulateMouseDrag($('#svgRoot'), initialMousePos, dragDist);
+
+  const expectedResId = 'k' + ctrlType + '1';
+  const expectedId = cred.resource.UniqueResourceIdGenerator.generateId(expectedResId, 0);
+  expect(svgDlg.findControlItemWithId(expectedId)).toBeDefined();
+});
+
+test('SvgDialog.addControlInteractively by dragging', () => {
+  const ctrls = [
+    new ControlMock(
+      'ctrl1',
+      cred.spec.controlType.label,
+      new Map([
+        [cred.spec.propertyLabel.left, 3],
+        [cred.spec.propertyLabel.top, 5],
+        [cred.spec.propertyLabel.width, 3],
+        [cred.spec.propertyLabel.height, 4]
+      ])
+    )
+  ];
+  const [svgDlg] = setupSvgDialogTestEnv(ctrls);
+
+  const ctrlType = cred.spec.controlType.label;
+  svgDlg.addControlInteractively(ctrlType);
+  const initialMousePos = { x: 25, y: 15 };
+  const dragDist = 20;
+  simulateMouseDrag($('#svgRoot'), initialMousePos, dragDist);
+
+  const expectedResId = 'k' + ctrlType + '1';
+  const expectedId = cred.resource.UniqueResourceIdGenerator.generateId(expectedResId, 0);
+  expect(svgDlg.findControlItemWithId(expectedId)).toBeDefined();
+});
+
+test('SvgDialog.addControl', () => {
+  const ctrls = [
+    new ControlMock(
+      'ctrl1',
+      cred.spec.controlType.label,
+      new Map([
+        [cred.spec.propertyLabel.left, 3],
+        [cred.spec.propertyLabel.top, 5],
+        [cred.spec.propertyLabel.width, 3],
+        [cred.spec.propertyLabel.height, 4]
+      ])
+    )
+  ];
+  const [svgDlg] = setupSvgDialogTestEnv(ctrls);
+
+  const svgCtrl = svgDlg.addControl(
+    cred.spec.controlType.label,
+    new geom.Rect(1, 1, 10, 20)
+  );
+
+  expect(svgCtrl).toBeDefined();
+  expect(svgDlg.findControlItemWithId(svgCtrl.uniqueId)).toBeDefined();
+});
+
+test('SvgDialog.addControlFromResource', () => {
+  const ctrls = [
+    new ControlMock(
+      'ctrl1',
+      cred.spec.controlType.label,
+      new Map([
+        [cred.spec.propertyLabel.left, 3],
+        [cred.spec.propertyLabel.top, 5],
+        [cred.spec.propertyLabel.width, 3],
+        [cred.spec.propertyLabel.height, 4]
+      ])
+    )
+  ];
+  const [svgDlg] = setupSvgDialogTestEnv(ctrls);
+
+  const ctrlToAdd = new ControlMock(
+    'ctrl2',
+    cred.spec.controlType.pushButton,
+    new Map([
+      [cred.spec.propertyLabel.left, 13],
+      [cred.spec.propertyLabel.top, 15],
+      [cred.spec.propertyLabel.width, 5],
+      [cred.spec.propertyLabel.height, 6]
+    ])
+  );
+  const svgCtrl = svgDlg.addControlFromResource(ctrlToAdd);
+
+  expect(svgCtrl).toBeDefined();
+  expect(svgDlg.findControlItemWithId(ctrlToAdd.uniqueId)).toBeDefined();
 });
 
 test('SvgDialog.resourceBounds', () => {

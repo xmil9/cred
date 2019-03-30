@@ -998,6 +998,17 @@ test('Control.copy', () => {
   expect(copy.haveProperty(cred.spec.propertyLabel.enabled)).toBeTruthy();
 });
 
+test('Control.generatePropertiesWithDefaults', () => {
+  const ctrl = makeSingleControl(cred.spec.controlType.imagePushButton, 'myid');
+  ctrl.generatePropertiesWithDefaults();
+
+  // Check that all properties got generated.
+  const ctrlSpec = cred.spec.makeControlSpec(cred.spec.controlType.imagePushButton);
+  for (const propSpec of ctrlSpec.propertySpecs()) {
+    expect(ctrl.haveProperty(propSpec.label)).toBeTruthy();
+  }
+});
+
 test('Control.uniqueId', () => {
   const ctrl = makeSingleControl(cred.spec.controlType.imagePushButton, 'myid');
   const uniqueId = ctrl.uniqueId;
@@ -1138,6 +1149,24 @@ test('Control.setProperty for existing property', () => {
   expect(prop).toBeDefined();
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.string);
   expect(prop.value).toEqual('test');
+});
+
+test('Control.setPropertyValue for existing property', () => {
+  const ctrl = makeSingleControl(cred.spec.controlType.imagePushButton, 'myid');
+  ctrl.addLabeledProperty(
+    'my_prop',
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.number, 1)
+  );
+
+  ctrl.setPropertyValue('my_prop', 2);
+
+  const prop = ctrl.property('my_prop');
+  expect(prop.value).toEqual(2);
+});
+
+test('Control.setPropertyValue for not existing property', () => {
+  const ctrl = makeSingleControl(cred.spec.controlType.imagePushButton, 'myid');
+  expect(() => ctrl.setPropertyValue('my_prop', 1)).toThrow();
 });
 
 test('Control.properties', () => {
@@ -1461,6 +1490,24 @@ test('Dialog.setProperty for existing property', () => {
   expect(prop).toBeDefined();
   expect(prop.type).toEqual(cred.spec.physicalPropertyType.string);
   expect(prop.value).toEqual('test');
+});
+
+test('Dialog.setPropertyValue for existing property', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addLabeledProperty(
+    'my_prop',
+    cred.resource.makeProperty('my_prop', cred.spec.physicalPropertyType.number, 1)
+  );
+
+  dlg.setPropertyValue('my_prop', 2);
+
+  const prop = dlg.property('my_prop');
+  expect(prop.value).toEqual(2);
+});
+
+test('Dialog.setPropertyValue for not existing property', () => {
+  const dlg = new cred.resource.Dialog();
+  expect(() => dlg.setPropertyValue('my_prop', 1)).toThrow();
 });
 
 test('Dialog.properties', () => {
@@ -2835,6 +2882,26 @@ test('DialogResourceSet.sourceStringEncoding', () => {
   expect(resSet.sourceStringEncoding(cred.language.english)).toEqual('ANSI');
   expect(resSet.sourceStringEncoding(cred.language.german)).toEqual('UNICODE');
   expect(resSet.sourceStringEncoding(cred.language.japanese)).toEqual('SHIFT_JIS');
+});
+
+test('DialogResourceSet.addControl', () => {
+  const resSet = makeDialogResourceSet([
+    makeDialogResource(cred.locale.any, 'myid'),
+    makeDialogResource(cred.locale.german, 'myid'),
+    makeDialogResource(cred.locale.japanese, 'myid')
+  ]);
+
+  resSet.addControl(cred.locale.any, cred.spec.controlType.checkBox, 'ctrlId');
+
+  expect(
+    resSet.dialogResource(cred.locale.any).controlByResourceId('ctrlId', 0)
+  ).toBeDefined();
+  expect(
+    resSet.dialogResource(cred.locale.english).controlByResourceId('ctrlId', 0)
+  ).toBeDefined();
+  expect(
+    resSet.dialogResource(cred.locale.german).controlByResourceId('ctrlId', 0)
+  ).toBeUndefined();
 });
 
 test('DialogResourceSet.updateDialogId', () => {

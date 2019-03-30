@@ -212,6 +212,23 @@ test('geom.Rect.center for empty rectangle', () => {
   expect(r.center()).toEqual(new geom.Point(0, 0));
 });
 
+test('geom.Rect.round', () => {
+  expect(new geom.Rect(1.0, 2, 10, 20).round()).toEqual(new geom.Rect(1, 2, 10, 20));
+  expect(new geom.Rect(1.1, 2.4, 10.3, 20.2).round()).toEqual(
+    new geom.Rect(1, 2, 10, 20)
+  );
+  expect(new geom.Rect(1.5, 2.7, 10.6, 20.9).round()).toEqual(
+    new geom.Rect(2, 3, 11, 21)
+  );
+  expect(new geom.Rect(-1.0, -2, 10, 20).round()).toEqual(new geom.Rect(-1, -2, 10, 20));
+  expect(new geom.Rect(-1.1, -2.4, 10.2, 20.4).round()).toEqual(
+    new geom.Rect(-1, -2, 10, 20)
+  );
+  expect(new geom.Rect(-1.5, -2.7, 10.6, 20.5).round()).toEqual(
+    new geom.Rect(-1, -3, 11, 21)
+  );
+});
+
 ///////////////////
 
 test('geom.Point x, y for positive coordinates', () => {

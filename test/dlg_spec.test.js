@@ -189,6 +189,13 @@ test('convertToPhysicalPropertyTypeValue for flags type', () => {
   ).toEqual('AB | CD');
 });
 
+test('physicalFromLogicalPropertyType for all logical property types', () => {
+  // Make sure all logical types are handled by the function.
+  for (const logType of cred.spec.logicalPropertyType) {
+    expect(() => cred.spec.physicalFromLogicalPropertyType(logType)).not.toThrow();
+  }
+});
+
 ///////////////////
 
 test('spec.makePropertySpec', () => {
@@ -252,6 +259,20 @@ test('PropertySpec.isNullable', () => {
       nullable: val
     });
     expect(spec.isNullable()).toEqual(val);
+  }
+});
+
+test('PropertySpec.defaultValue default', () => {
+  const spec = cred.spec.makePropertySpec(cred.spec.logicalPropertyType.integer, {});
+  expect(spec.defaultValue).toBeUndefined();
+});
+
+test('PropertySpec.defaultValue', () => {
+  for (const val of [1, 2, 3]) {
+    const spec = cred.spec.makePropertySpec(cred.spec.logicalPropertyType.integer, {
+      defaultValue: val
+    });
+    expect(spec.defaultValue).toEqual(val);
   }
 });
 
@@ -522,32 +543,7 @@ test('FlagsPropertySpec.hasFlag', () => {
 ///////////////////
 
 test('spec.makeControlSpec', () => {
-  for (const type of [
-    cred.spec.controlType.checkBox,
-    cred.spec.controlType.comboBox,
-    cred.spec.controlType.cornerBox,
-    cred.spec.controlType.expandButton,
-    cred.spec.controlType.groupBox,
-    cred.spec.controlType.horizontalLine,
-    cred.spec.controlType.imageBox,
-    cred.spec.controlType.imageCheckBox,
-    cred.spec.controlType.imagePushButton,
-    cred.spec.controlType.imageRadioButton,
-    cred.spec.controlType.inkButton,
-    cred.spec.controlType.label,
-    cred.spec.controlType.menuButton,
-    cred.spec.controlType.ownerDraw,
-    cred.spec.controlType.placeHolder,
-    cred.spec.controlType.popupButton,
-    cred.spec.controlType.pushButton,
-    cred.spec.controlType.radioButton,
-    cred.spec.controlType.slider,
-    cred.spec.controlType.strokeButton,
-    cred.spec.controlType.toolbar,
-    cred.spec.controlType.textBox,
-    cred.spec.controlType.verticalLine,
-    cred.spec.controlType.zoomItem
-  ]) {
+  for (const type of cred.spec.controlType) {
     const spec = cred.spec.makeControlSpec(type);
     expect(spec).toBeDefined();
   }

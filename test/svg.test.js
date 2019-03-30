@@ -68,3 +68,15 @@ test('screenFromSvgPoint', () => {
 test('svgFromScreenPoint', () => {
   // Need to mock Web API calls in svgFromScreenPoint.
 });
+
+///////////////////
+
+test('screenFromSvgRect', () => {
+  // Need to mock Web API calls in screenFromSvgPoint.
+});
+
+///////////////////
+
+test('svgFromScreenRect', () => {
+  // Need to mock Web API calls in svgFromScreenPoint.
+});

@@ -409,6 +409,8 @@ cred.svglayout_internal = (function() {
     addControlInteractively(ctrlType) {
       $(this.svgDisplay.htmlElement).css('cursor', 'crosshair');
 
+      // Register for mouse events of both the display and the dialog
+      // DOM elements to allow controls to be on top of those elements.
       let self = this;
       $(this.svgDisplay.htmlElement).on('mousedown.addctrl', e =>
         self._onAddControlMouseDown(e, ctrlType)
@@ -473,6 +475,10 @@ cred.svglayout_internal = (function() {
       event.preventDefault();
       event.stopPropagation();
 
+      // The select/drag mechanism receives the mouse-down event first and starts
+      // a drag session. Stop that session.
+      this._stopMouseTracking();
+
       this._isCtrlAddedByDragging = false;
       this._startAddControlMouseTracking(event, ctrlType);
     }
@@ -496,6 +502,8 @@ cred.svglayout_internal = (function() {
             )
           );
           this._addedControl = this.addControl(ctrlType, ctrlBounds);
+          this.controller.notifyControlAdded(this._addedControl);
+          this._addedControl.select();
         }
         this._dragAddedControl(event);
       }
@@ -520,13 +528,13 @@ cred.svglayout_internal = (function() {
           )
         );
         this._addedControl = this.addControl(ctrlType, ctrlBounds);
+        this.controller.notifyControlAdded(this._addedControl);
+        this._addedControl.select();
       }
 
       this._isCtrlAddedByDragging = false;
       this._stopAddControlMouseTracking();
 
-      this._addedControl.select();
-      this.controller.notifyControlAdded(this._addedControl);
       this._addedControl = undefined;
       $(this.svgDisplay.htmlElement).css('cursor', 'default');
     }
@@ -580,7 +588,7 @@ cred.svglayout_internal = (function() {
 
       this._addedControl.setBounds(
         new geom.Rect(ctrlPos.x, ctrlPos.y, newWidth, newHeight),
-        false
+        true
       );
     }
   }

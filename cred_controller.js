@@ -133,6 +133,14 @@ cred.controller = (function() {
       this._dispatch(source, 'onControlAddedNotification', ctrlItem);
     }
 
+    notifyRemoveControl(source, uniqueId) {
+      this._dispatch(source, 'onRemoveControlNotification', uniqueId);
+    }
+
+    notifyControlRemoved(source, uniqueId) {
+      this._dispatch(source, 'onControlRemovedNotification', uniqueId);
+    }
+
     notifyLocaleSwitched(source, locale) {
       this._dispatch(source, 'onLocaleSwitchedNotification', locale);
     }

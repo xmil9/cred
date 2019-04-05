@@ -87,6 +87,7 @@ class ControllerMock {
     this.notifyControlAddedCalled = false;
     this.notifyItemSelectedCalled = false;
     this.notifySelectionClearedCalled = false;
+    this.notifyRemoveControlCalled = false;
   }
 
   notifyItemBoundsModified() {
@@ -112,6 +113,10 @@ class ControllerMock {
 
   notifySelectionCleared() {
     this.notifySelectionClearedCalled = true;
+  }
+
+  notifyRemoveControl() {
+    this.notifyRemoveControlCalled = true;
   }
 }
 
@@ -643,6 +648,15 @@ test('SvgItem.deselect', () => {
   expect(svgItem.isSelected()).toBeFalsy();
 });
 
+test('SvgItem.removeHtmlElement', () => {
+  const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
+  const elemId = svgItem.htmlElement.id;
+
+  svgItem.removeHtmlElement();
+
+  expect($(`#${elemId}`)).toEqual({});
+});
+
 test('SvgItem react to mouse-down event', () => {
   const [svgItem] = setupSvgItemTestEnv(cred.editBehavior.selectable);
 
@@ -891,6 +905,40 @@ test('SvgDialog.addControlFromResource', () => {
 
   expect(svgCtrl).toBeDefined();
   expect(svgDlg.findControlItemWithId(ctrlToAdd.uniqueId)).toBeDefined();
+});
+
+test('SvgDialog.removeControl', () => {
+  const [svgDlg] = setupSvgDialogTestEnv([]);
+  const ctrls = [
+    new ControlMock(
+      'ctrl1',
+      cred.spec.controlType.label,
+      new Map([
+        [cred.spec.propertyLabel.left, 3],
+        [cred.spec.propertyLabel.top, 5],
+        [cred.spec.propertyLabel.width, 3],
+        [cred.spec.propertyLabel.height, 4]
+      ])
+    ),
+    new ControlMock(
+      'ctrl2',
+      cred.spec.controlType.pushButton,
+      new Map([
+        [cred.spec.propertyLabel.left, 13],
+        [cred.spec.propertyLabel.top, 15],
+        [cred.spec.propertyLabel.width, 5],
+        [cred.spec.propertyLabel.height, 6]
+      ])
+    )
+  ];
+  for (const ctrl of ctrls) {
+    svgDlg.addControlFromResource(ctrl);
+  }
+
+  svgDlg.removeControl(ctrls[1].uniqueId);
+
+  expect(svgDlg.findControlItemWithId(ctrls[1].uniqueId)).toBeUndefined();
+  expect(svgDlg.findControlItemWithId(ctrls[0].uniqueId)).toBeDefined();
 });
 
 test('SvgDialog.resourceBounds', () => {
@@ -2106,6 +2154,55 @@ test('SvgDisplay.updateSelection', () => {
   // Marker should be offset, too.
   const expectedMarkerPos = prevMarkerPos.add(offset);
   expect(markerItem.position).toEqual(expectedMarkerPos);
+});
+
+test('SvgDisplay.removeItem for control item', () => {
+  const [svgDisplay, mockedController] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  const ctrlMock = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 40],
+      [cred.spec.propertyLabel.height, 22]
+    ])
+  );
+  const ctrlItem = new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplay);
+
+  svgDisplay.removeItem(ctrlItem);
+
+  expect(mockedController.notifyRemoveControlCalled).toBeTruthy();
+});
+
+test('SvgDisplay.removeItem for dialog item', () => {
+  const [svgDisplay, mockedController] = setupSvgDisplayTestEnv();
+  const dlgItem = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+
+  svgDisplay.removeItem(dlgItem);
+
+  expect(mockedController.notifyRemoveControlCalled).toBeFalsy();
+});
+
+test('SvgDisplay.removeControl', () => {
+  const [svgDisplay] = setupSvgDisplayTestEnv();
+  const ctrl = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 3],
+      [cred.spec.propertyLabel.height, 4]
+    ])
+  );
+  const svgDlg = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests([ctrl]));
+  svgDlg.buildControls();
+
+  svgDisplay.removeControl(ctrl.uniqueId);
+
+  expect(svgDisplay.findItemWithId(ctrl.uniqueId)).toBeUndefined();
 });
 
 test('SvgDisplay.findItemWithId for dialog item', () => {

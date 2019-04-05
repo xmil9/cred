@@ -173,6 +173,10 @@ cred.ui = (function() {
       this._propertyPane.populate(ctrlItem);
     }
 
+    onControlRemovedNotification() {
+      this._propertyPane.clear();
+    }
+
     onItemSelectedNotification(item) {
       this._propertyPane.populate(item);
     }

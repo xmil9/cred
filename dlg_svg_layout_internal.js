@@ -102,6 +102,22 @@ cred.svglayout_internal = (function() {
       this._selection.update();
     }
 
+    // Removes a given SVG DOM element.
+    removeItem(svgItem) {
+      if (svgItem) {
+        if (svgItem.isDialog()) {
+          // Deleting the entire dialog is not supported right now.
+        } else {
+          this.controller.notifyRemoveControl(svgItem.uniqueId);
+        }
+      }
+    }
+
+    // Removes a control with a given id.
+    removeControl(uniqueId) {
+      this._dialogItem.removeControl(uniqueId);
+    }
+
     // Return the SVG item that is part of the display and matches a given
     // id.
     // ASSUMPTION: A dialog id is never the same as the id of one of its controls!
@@ -131,11 +147,21 @@ cred.svglayout_internal = (function() {
       this.clearSelection();
     }
 
+    // Handles key down events.
+    _onKeyDown(event) {
+      const key = event.key;
+      if (key === 'Delete' || key === 'Backspace') {
+        this.removeItem(this.selectedItem);
+      }
+    }
+
     // Registers for events that the display processes.
     _registerEvents() {
       let self = this;
       // Register for mouse down events inside the SVG display.
       $(this._htmlElem).on('mousedown', e => self._onMouseDown(e));
+      //$(this._htmlElem).on('keydown', e => self._onKeyDown(e));
+      $(document).on('keydown', e => self._onKeyDown(e));
     }
   }
 
@@ -267,6 +293,11 @@ cred.svglayout_internal = (function() {
         this._isSelected = false;
         this.svgDisplay.deselectItem(this);
       }
+    }
+
+    // Removes the DOM element for the item.
+    removeHtmlElement() {
+      $(this.htmlElement).remove();
     }
 
     // Handles mouse down events.
@@ -440,6 +471,16 @@ cred.svglayout_internal = (function() {
       const svgCtrl = new SvgControl(ctrlDefinition, this.svgDisplay);
       this._controlItems.set(ctrlDefinition.uniqueId.hash(), svgCtrl);
       return svgCtrl;
+    }
+
+    // Removes a control with a given id.
+    removeControl(uniqueId) {
+      const ctrlItem = this._controlItems.get(uniqueId.hash());
+      if (ctrlItem) {
+        ctrlItem.deselect();
+        ctrlItem.removeHtmlElement();
+        this._controlItems.delete(uniqueId.hash());
+      }
     }
 
     // Returns the bounds of the dialog as they are defined in the resource.

@@ -110,6 +110,10 @@ cred.resource = (function() {
       this._addControl(this._controller.currentLocale, resourceId, ctrlType, bounds);
     }
 
+    onRemoveControlNotification(uniqueId) {
+      this._removeControl(this._controller.currentLocale, uniqueId);
+    }
+
     // Opens a given array of files.
     _openFiles(files) {
       let fileSet = new cred.io.FileSet(files);
@@ -221,6 +225,13 @@ cred.resource = (function() {
       ctrlResource.generatePropertiesWithDefaults();
       if (typeof bounds !== 'undefined') {
         this._setResourceBounds(ctrlResource, bounds);
+      }
+    }
+
+    // Adds a control with given resoucrce id, type, and bounds.
+    _removeControl(locale, uniqueId) {
+      if (this._resourceSet.removeControl(locale, uniqueId)) {
+        this._controller.notifyControlRemoved(this, uniqueId);
       }
     }
 
@@ -424,6 +435,12 @@ cred.resource = (function() {
     // Returns the control resource.
     addControl(locale, ctrlType, resourceId) {
       return this.dialogResource(locale).addControl(ctrlType, resourceId);
+    }
+
+    // Removes a control with a given id from the dialog resource for a given locale.
+    // Returns true/false as success status.
+    removeControl(locale, uniqueId) {
+      return this.dialogResource(locale).removeControl(uniqueId);
     }
 
     // Updates the dialog's id in all dialog resources.
@@ -1145,6 +1162,12 @@ cred.resource = (function() {
       return this._dlg.addControl(ctrlType, resourceId);
     }
 
+    // Removes a control with a given id from the dialog.
+    // Returns true/false as success status.
+    removeControl(uniqueId) {
+      return this._dlg.removeControl(uniqueId);
+    }
+
     // Generates a control resource id that has a given prefix and does not exist yet.
     generateUnusedControlResourceId(prefix) {
       return this._dlg.generateUnusedControlResourceId(prefix);
@@ -1334,6 +1357,16 @@ cred.resource = (function() {
       );
       this._controls.set(ctrl.uniqueId.hash(), ctrl);
       return ctrl;
+    }
+
+    // Removes a control with a given id from the dialog.
+    // Returns true/false as success status.
+    removeControl(uniqueId) {
+      if (this._controls.has(uniqueId.hash())) {
+        this._controls.delete(uniqueId.hash());
+        return true;
+      }
+      return false;
     }
 
     // Updates the resource id of a control.

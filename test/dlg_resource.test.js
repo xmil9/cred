@@ -1739,6 +1739,45 @@ test('Dialog.addControl for existing control', () => {
   expect(() => dlg.addControl(cred.spec.controlType.label, 'label-id')).toBeDefined();
 });
 
+test('Dialog.removeControl', () => {
+  const dlg = new cred.resource.Dialog();
+  const label = dlg.addControl(cred.spec.controlType.label, 'label-id');
+  dlg.addControl(cred.spec.controlType.pushButton, 'button-id');
+
+  const res = dlg.removeControl(label.uniqueId);
+
+  expect(res).toBeTruthy();
+  expect(dlg.controlByResourceId('label-id', 0)).toBeUndefined();
+  expect(dlg.controlByResourceId('button-id', 0)).toBeDefined();
+  expect(Array.from(dlg.controls()).length).toEqual(1);
+});
+
+test('Dialog.removeControl for only control', () => {
+  const dlg = new cred.resource.Dialog();
+  const label = dlg.addControl(cred.spec.controlType.label, 'label-id');
+
+  const res = dlg.removeControl(label.uniqueId);
+
+  expect(res).toBeTruthy();
+  expect(dlg.controlByResourceId('label-id', 0)).toBeUndefined();
+  expect(Array.from(dlg.controls()).length).toEqual(0);
+});
+
+test('Dialog.removeControl for not existing control', () => {
+  const dlg = new cred.resource.Dialog();
+  dlg.addControl(cred.spec.controlType.label, 'label-id');
+  dlg.addControl(cred.spec.controlType.pushButton, 'button-id');
+
+  const res = dlg.removeControl(
+    cred.resource.UniqueResourceIdGenerator.generateId('non-existing', 0)
+  );
+
+  expect(res).toBeFalsy();
+  expect(dlg.controlByResourceId('label-id', 0)).toBeDefined();
+  expect(dlg.controlByResourceId('button-id', 0)).toBeDefined();
+  expect(Array.from(dlg.controls()).length).toEqual(2);
+});
+
 test('Dialog.updateControlId', () => {
   const dlg = new cred.resource.Dialog();
   const ctrl = dlg.addControl(cred.spec.controlType.label, 'label-id');
@@ -2091,6 +2130,45 @@ test('DialogResource.addControl for existing control', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.any);
   dlgRes.addControl(cred.spec.controlType.label, 'label-id');
   expect(() => dlgRes.addControl(cred.spec.controlType.label, 'label-id')).toBeDefined();
+});
+
+test('DialogResource.removeControl', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const label = dlgRes.addControl(cred.spec.controlType.label, 'label-id');
+  dlgRes.addControl(cred.spec.controlType.pushButton, 'button-id');
+
+  const result = dlgRes.removeControl(label.uniqueId);
+
+  expect(result).toBeTruthy();
+  expect(dlgRes.controlByResourceId('label-id', 0)).toBeUndefined();
+  expect(dlgRes.controlByResourceId('button-id', 0)).toBeDefined();
+  expect(Array.from(dlgRes.controls()).length).toEqual(1);
+});
+
+test('DialogResource.removeControl for only control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  const label = dlgRes.addControl(cred.spec.controlType.label, 'label-id');
+
+  const result = dlgRes.removeControl(label.uniqueId);
+
+  expect(result).toBeTruthy();
+  expect(dlgRes.controlByResourceId('label-id', 0)).toBeUndefined();
+  expect(Array.from(dlgRes.controls()).length).toEqual(0);
+});
+
+test('DialogResource.removeControl for not existing control', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.any);
+  dlgRes.addControl(cred.spec.controlType.label, 'label-id');
+  dlgRes.addControl(cred.spec.controlType.pushButton, 'button-id');
+
+  const result = dlgRes.removeControl(
+    cred.resource.UniqueResourceIdGenerator.generateId('non-existing', 0)
+  );
+
+  expect(result).toBeFalsy();
+  expect(dlgRes.controlByResourceId('label-id', 0)).toBeDefined();
+  expect(dlgRes.controlByResourceId('button-id', 0)).toBeDefined();
+  expect(Array.from(dlgRes.controls()).length).toEqual(2);
 });
 
 test('DialogResource.generateUnusedControlResourceId for not existing id', () => {
@@ -2902,6 +2980,32 @@ test('DialogResourceSet.addControl', () => {
   expect(
     resSet.dialogResource(cred.locale.german).controlByResourceId('ctrlId', 0)
   ).toBeUndefined();
+});
+
+test('DialogResourceSet.removeControl', () => {
+  const resSet = makeDialogResourceSet([
+    makeDialogResource(cred.locale.any, 'myid'),
+    makeDialogResource(cred.locale.german, 'myid'),
+    makeDialogResource(cred.locale.japanese, 'myid')
+  ]);
+  const ctrl = resSet.addControl(
+    cred.locale.any,
+    cred.spec.controlType.checkBox,
+    'ctrlId'
+  );
+  resSet.addControl(cred.locale.german, cred.spec.controlType.checkBox, 'ctrlId');
+
+  resSet.removeControl(cred.locale.any, ctrl.uniqueId);
+
+  expect(
+    resSet.dialogResource(cred.locale.any).controlByResourceId('ctrlId', 0)
+  ).toBeUndefined();
+  expect(
+    resSet.dialogResource(cred.locale.english).controlByResourceId('ctrlId', 0)
+  ).toBeUndefined();
+  expect(
+    resSet.dialogResource(cred.locale.german).controlByResourceId('ctrlId', 0)
+  ).toBeDefined();
 });
 
 test('DialogResourceSet.updateDialogId', () => {

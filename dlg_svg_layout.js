@@ -117,6 +117,13 @@ cred.svglayout = (function() {
       this._addControlToLinkedDisplays(ctrlItem);
     }
 
+    // Called from within the layout module to forward a notification to the controller
+    // that a control with given unique id should be removed.
+    notifyRemoveControl(uniqueId) {
+      this._removeControlFromDisplays(uniqueId);
+      this._controller.notifyRemoveControl(this, uniqueId);
+    }
+
     // --- Notification handlers ---
     // These functions are called by the controller to signal certain events in the
     // system. They orchestrate the layouts reaction to the event.
@@ -142,6 +149,10 @@ cred.svglayout = (function() {
     // Notifies the layout that the user wants to create a control with the given type.
     onAddControlChosenNotification(ctrlType) {
       this._addControlInteractively(ctrlType);
+    }
+
+    onControlRemovedNotification(uniqueId) {
+      this._removeControlFromDisplays(uniqueId);
     }
 
     // --- Internal functions ---
@@ -298,6 +309,15 @@ cred.svglayout = (function() {
       const displays = this._findLinkedDisplays(true);
       for (const display of displays) {
         display.addControlFromResource(ctrlItem.resource());
+      }
+    }
+
+    // Removes a control with a given id from all displays that are linked to the current
+    // display.
+    _removeControlFromDisplays(uniqueId) {
+      const displays = this._findLinkedDisplays(false);
+      for (const display of displays) {
+        display.removeControl(uniqueId);
       }
     }
   }

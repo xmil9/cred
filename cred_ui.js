@@ -44,6 +44,7 @@ cred.ui = (function() {
       $('#file-input').on('change', event => self._onFilesSelected(event));
       $('#save-cmd').on('click', event => self._onSaveCmdClicked(event));
       $('#add-ctrl-cmd').on('click', event => self._onAddControlCmdClicked(event));
+      $('#remove-ctrl-cmd').on('click', event => self._onRemoveControlCmdClicked(event));
       $('.tab').on('click', event => self._onLocaleTabClicked(event));
 
       this._populateAddControlMenu();
@@ -228,6 +229,14 @@ cred.ui = (function() {
     _onAddControlTypeClicked(event) {
       const ctrlType = $(event.target).text();
       this._controller.notifyAddControlChosen(this, ctrlType);
+    }
+
+    // Handles 'click' events for the 'remove control' button.
+    _onRemoveControlCmdClicked() {
+      const selectedItem = this._controller.selectedItem;
+      if (selectedItem) {
+        this._controller.notifyRemoveControl(this, selectedItem.uniqueId);
+      }
     }
 
     // Handles 'click' events for the locale tabs.

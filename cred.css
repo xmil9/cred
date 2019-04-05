@@ -99,8 +99,12 @@ body {
 }
 
 #add-ctrl-cmd {
-    background-image: url("resources/add_ctrl.png");
-    width: 35px;
+  background-image: url("resources/add_ctrl.png");
+  width: 35px;
+}
+
+#remove-ctrl-cmd {
+  background-image: url("resources/remove_ctrl.png");
 }
 
 /* --- Tabs --- */

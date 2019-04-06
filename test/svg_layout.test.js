@@ -4,10 +4,10 @@
 'use strict';
 
 const $ = require('jquery');
-var cred = require('../cred_types');
-cred.resource = require('../dlg_resource');
-cred.svglayout = require('../dlg_svg_layout');
-cred.svglayout_internal = require('../dlg_svg_layout_internal');
+var cred = require('../types');
+cred.resource = require('../resource');
+cred.svglayout = require('../svg_layout');
+cred.svglayout_internal = require('../svg_layout_internal');
 const geom = require('../geom');
 
 ///////////////////

@@ -4,9 +4,9 @@
 'use strict';
 
 var cred = cred || {};
-cred = require('../cred_types');
-cred.resource = require('../dlg_resource');
-cred.spec = require('../dlg_spec');
+cred = require('../types');
+cred.resource = require('../resource');
+cred.spec = require('../spec');
 const testutil = require('./test_util');
 
 ///////////////////

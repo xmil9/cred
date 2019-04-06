@@ -4,8 +4,8 @@
 'use strict';
 
 var cred = cred || {};
-cred = require('../cred_types');
-cred.lexer = require('../dlg_lexer');
+cred = require('../types');
+cred.lexer = require('../lexer');
 
 ///////////////////
 

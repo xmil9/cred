@@ -3,7 +3,7 @@
 //
 'use strict';
 
-var cred = require('../cred_types');
+var cred = require('../types');
 
 ///////////////////
 

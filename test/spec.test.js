@@ -3,8 +3,8 @@
 //
 'use strict';
 
-var cred = require('../cred_types');
-cred.spec = require('../dlg_spec');
+var cred = require('../types');
+cred.spec = require('../spec');
 
 ///////////////////
 

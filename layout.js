@@ -16,7 +16,7 @@ function tryRequire(file) {
 
 // Dependencies
 var cred = cred || {};
-cred.svglayout = tryRequire('./dlg_svg_layout') || cred.svglayout || {};
+cred.svglayout = tryRequire('./svg_layout') || cred.svglayout || {};
 
 ///////////////////
 

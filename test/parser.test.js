@@ -4,10 +4,10 @@
 'use strict';
 
 var cred = cred || {};
-cred = require('../cred_types');
-cred.lexer = require('../dlg_lexer');
-cred.parser = require('../dlg_parser');
-cred.spec = require('../dlg_spec');
+cred = require('../types');
+cred.lexer = require('../lexer');
+cred.parser = require('../parser');
+cred.spec = require('../spec');
 
 ///////////////////
 

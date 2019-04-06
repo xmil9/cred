@@ -4,8 +4,8 @@
 'use strict';
 
 var cred = cred || {};
-cred = require('../cred_types');
-cred.gen = require('../dlg_generator');
+cred = require('../types');
+cred.gen = require('../generator');
 const testutil = require('./test_util');
 
 ///////////////////

@@ -15,11 +15,11 @@ function tryRequire(file) {
 }
 
 // Dependencies
-var cred = tryRequire('./cred_types') || cred || {};
-cred.lexer = tryRequire('./dlg_lexer') || cred.lexer || {};
-cred.parser = tryRequire('./dlg_parser') || cred.parser || {};
-cred.gen = tryRequire('./dlg_generator') || cred.gen || {};
-cred.resource = tryRequire('./dlg_resource') || cred.resource || {};
+var cred = tryRequire('./types') || cred || {};
+cred.lexer = tryRequire('./lexer') || cred.lexer || {};
+cred.parser = tryRequire('./parser') || cred.parser || {};
+cred.gen = tryRequire('./generator') || cred.gen || {};
+cred.resource = tryRequire('./resource') || cred.resource || {};
 // Acquire Encoding library and make it accessible as 'encoding' for naming consistency.
 var Encoding = tryRequire('./encoding.min.js') || Encoding || {};
 var encoding = Encoding;

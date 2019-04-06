@@ -4,10 +4,10 @@
 'use strict';
 
 const $ = require('jquery');
-var cred = require('../cred_types');
-cred.resource = require('../dlg_resource');
-cred.spec = require('../dlg_spec');
-cred.svglayout_internal = require('../dlg_svg_layout_internal');
+var cred = require('../types');
+cred.resource = require('../resource');
+cred.spec = require('../spec');
+cred.svglayout_internal = require('../svg_layout_internal');
 const geom = require('../geom');
 // Need to import SVG module to be able to globally mock it. However, the module is
 // not directly used in this file, so ESLint flags it as unused var. The following

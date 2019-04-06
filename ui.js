@@ -15,8 +15,8 @@ function tryRequire(file) {
 }
 
 // Dependencies
-var cred = tryRequire('./cred_types') || cred || {};
-cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
+var cred = tryRequire('./types') || cred || {};
+cred.spec = tryRequire('./spec') || cred.spec || {};
 cred.ui_internal = tryRequire('./ui_internal') || cred.ui_internal || {};
 var html = tryRequire('./html') || html || {};
 

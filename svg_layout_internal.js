@@ -17,8 +17,8 @@ function tryRequire(file) {
 
 // Dependencies
 var $ = tryRequire('jquery') || $ || {};
-var cred = tryRequire('./cred_types') || cred || {};
-cred.spec = tryRequire('./dlg_spec') || cred.spec || {};
+var cred = tryRequire('./types') || cred || {};
+cred.spec = tryRequire('./spec') || cred.spec || {};
 var geom = tryRequire('./geom') || geom || {};
 var svg = tryRequire('./svg') || svg || {};
 var util = tryRequire('./util') || util || {};

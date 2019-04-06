@@ -4,9 +4,9 @@
 'use strict';
 
 var $ = require('jquery');
-var cred = require('../cred_types');
-cred.spec = require('../dlg_spec');
-cred.ui_internal = require('../cred_ui_internal');
+var cred = require('../types');
+cred.spec = require('../spec');
+cred.ui_internal = require('../ui_internal');
 
 ///////////////////
 

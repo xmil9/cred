@@ -3,8 +3,8 @@
 //
 'use strict';
 
-const cred = require('../cred_types');
-cred.io = require('../dlg_io');
+const cred = require('../types');
+cred.io = require('../io');
 const crypto = require('crypto');
 
 ///////////////////

@@ -16,9 +16,9 @@ function tryRequire(file) {
 
 // Dependencies
 var $ = tryRequire('jquery') || $ || {};
-var cred = tryRequire('./cred_types') || cred || {};
+var cred = tryRequire('./types') || cred || {};
 cred.svglayout_internal =
-  tryRequire('./dlg_svg_layout_internal') || cred.svglayout_internal || {};
+  tryRequire('./svg_layout_internal') || cred.svglayout_internal || {};
 var geom = tryRequire('./geom') || geom || {};
 
 ///////////////////

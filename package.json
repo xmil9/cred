@@ -2,7 +2,7 @@
   "name": "cvresourceeditor",
   "version": "1.0.0",
   "description": "",
-  "main": "cred_app.js",
+  "main": "app.js",
   "directories": {
     "test": "test"
   },

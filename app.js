@@ -15,7 +15,7 @@ function tryRequire(file) {
 }
 
 // Dependencies
-var cred = tryRequire('./cred_types') || cred || {};
+var cred = tryRequire('./types') || cred || {};
 
 ///////////////////
 

@@ -367,12 +367,12 @@ fieldset > div > span > label {
     background-repeat: no-repeat;
  }
  
- .global-image-checkbox:hover {
+.global-image-checkbox:hover {
     background-image: url("resources/globally_hover.png");
     background-repeat: no-repeat;
 }
- 
-.global-image-checkbox.disabled{
+
+.global-image-checkbox.disabled {
     background-image: url("resources/globally_disabled.png");
     background-repeat: no-repeat;
 }

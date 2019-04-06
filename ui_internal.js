@@ -496,10 +496,12 @@ cred.ui_internal = (function() {
         })
         .addClass('global-image-checkbox')
         .on('click', e => {
+          const $target = $(e.target);
           // Toggle flag that is used in CSS to apply an image.
-          if (!$(e.target).hasClass('disabled')) {
-            $(e.target).toggleClass('checked');
+          if (!$target.hasClass('disabled')) {
+            $target.toggleClass('checked');
           }
+          this._setApplicabilityTooltip($target);
         });
 
       const editContext = this.propertySpec.editContext;
@@ -509,6 +511,7 @@ cred.ui_internal = (function() {
       if (isLocal) {
         $imageCheckbox.addClass('checked');
       }
+      this._setApplicabilityTooltip($imageCheckbox);
 
       const isDisabled =
         editContext === cred.editContext.globalOnly ||
@@ -518,6 +521,13 @@ cred.ui_internal = (function() {
       }
 
       return $imageCheckbox;
+    }
+
+    _setApplicabilityTooltip($elem) {
+      const tooltip = $elem.hasClass('checked')
+        ? 'Local property. Its value applies only to the current locale.'
+        : 'Global property. Its value applies to all locales.';
+      $elem.prop('title', tooltip);
     }
   }
 

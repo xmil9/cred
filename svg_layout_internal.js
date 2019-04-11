@@ -128,6 +128,17 @@ cred.svglayout_internal = (function() {
       return this._dialogItem.findControlItemWithId(uniqueId);
     }
 
+    // Moves a given SVG item by given offsets.
+    moveItem(svgItem, offsetX, offsetY) {
+      if (svgItem) {
+        if (svgItem.isDialog()) {
+          // Moving the dialog is not supported.
+        } else {
+          svgItem.setPosition(svgItem.position.add(offsetX, offsetY), true);
+        }
+      }
+    }
+
     // Creates the root SVG DOM element.
     static _createHtmlElement(size, viewBox, parentHtmlElem) {
       return svg.create('svg', parentHtmlElem, {
@@ -150,8 +161,17 @@ cred.svglayout_internal = (function() {
     // Handles key down events.
     _onKeyDown(event) {
       const key = event.key;
+      const ctrlDown = event.ctrlKey;
       if (key === 'Delete' || key === 'Backspace') {
         this.removeItem(this.selectedItem);
+      } else if (key === 'ArrowLeft' || key === 'Left') {
+        this.moveItem(this.selectedItem, -this._calcMoveOffset(ctrlDown), 0);
+      } else if (key === 'ArrowRight' || key === 'Right') {
+        this.moveItem(this.selectedItem, this._calcMoveOffset(ctrlDown), 0);
+      } else if (key === 'ArrowUp' || key === 'Up') {
+        this.moveItem(this.selectedItem, 0, -this._calcMoveOffset(ctrlDown));
+      } else if (key === 'ArrowDown' || key === 'Down') {
+        this.moveItem(this.selectedItem, 0, this._calcMoveOffset(ctrlDown));
       }
     }
 
@@ -162,6 +182,14 @@ cred.svglayout_internal = (function() {
       $(this._htmlElem).on('mousedown', e => self._onMouseDown(e));
       //$(this._htmlElem).on('keydown', e => self._onKeyDown(e));
       $(document).on('keydown', e => self._onKeyDown(e));
+    }
+
+    // Returns the offset in pixels to use for a move operation.
+    _calcMoveOffset(ctrlDown) {
+      if (ctrlDown) {
+        return 10;
+      }
+      return 1;
     }
   }
 

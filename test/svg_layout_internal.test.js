@@ -2248,3 +2248,34 @@ test('SvgDisplay.findItemWithId for not existing item', () => {
   const unknownId = cred.resource.UniqueResourceIdGenerator.generateId('unknown', 0);
   expect(svgDisplay.findItemWithId(unknownId)).toBeUndefined();
 });
+
+test('SvgDisplay.moveItem for control', () => {
+  const [svgDisplay, mockedController] = setupSvgDisplayTestEnv();
+  svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+  const ctrlMock = new ControlMock(
+    'myctrl',
+    cred.spec.controlType.label,
+    new Map([
+      [cred.spec.propertyLabel.left, 3],
+      [cred.spec.propertyLabel.top, 5],
+      [cred.spec.propertyLabel.width, 40],
+      [cred.spec.propertyLabel.height, 22]
+    ])
+  );
+  const ctrlItem = new cred.svglayout_internal.SvgControl(ctrlMock, svgDisplay);
+
+  svgDisplay.moveItem(ctrlItem, 10, -2);
+
+  expect(ctrlItem.position).toEqual(new geom.Point(13, 3));
+  expect(mockedController.notifyItemBoundsModifiedCalled).toBeTruthy();
+});
+
+test('SvgDisplay.moveItem for dialog', () => {
+  const [svgDisplay, mockedController] = setupSvgDisplayTestEnv();
+  const dlgItem = svgDisplay.buildDialog(makeDialogResourceForSvgDisplayTests());
+
+  svgDisplay.removeItem(dlgItem);
+
+  expect(dlgItem.position).toEqual(new geom.Point(0, 0));
+  expect(mockedController.notifyItemBoundsModifiedCalled).toBeFalsy();
+});

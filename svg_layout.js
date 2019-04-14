@@ -128,6 +128,11 @@ cred.svglayout = (function() {
     // These functions are called by the controller to signal certain events in the
     // system. They orchestrate the layouts reaction to the event.
 
+    onDialogCreatedNotification() {
+      this.clear();
+      this.populate(this._controller.displayHtmlElements());
+    }
+
     // Notifies the layout that a new dialog was loaded.
     onDialogLoadedNotification() {
       this.clear();

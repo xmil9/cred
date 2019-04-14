@@ -64,6 +64,10 @@ cred.resource = (function() {
 
     // Notifications
 
+    onCreateDialogNotification() {
+      this._createDialog();
+    }
+
     onFilesChosenNotification(files) {
       this._openFiles(files);
     }
@@ -112,6 +116,25 @@ cred.resource = (function() {
 
     onRemoveControlNotification(uniqueId) {
       this._removeControl(this._controller.currentLocale, uniqueId);
+    }
+
+    // Resets the resoure managers internal state to hold a new dialog.
+    _createDialog() {
+      const dlgTitleText = '';
+      const dlgTitleTextStrId = 'kTitleStrId';
+
+      const builder = new cred.resource.DialogResourceSetBuilder();
+      builder.addResource(
+        makeMinimalDialogResource(cred.locale.any, 'ENTER_ID', dlgTitleTextStrId)
+      );
+      for (const lang of cred.language) {
+        const strMap = new StringMap();
+        strMap.add(dlgTitleTextStrId, dlgTitleText, lang);
+        builder.addStrings(lang, strMap);
+      }
+
+      this._resourceSet = builder.build();
+      this._controller.notifyDialogCreated(this, this._resourceSet);
     }
 
     // Opens a given array of files.
@@ -1212,6 +1235,33 @@ cred.resource = (function() {
     updateControlId(ctrlId, newResourceId) {
       this._dlg.updateControlId(ctrlId, newResourceId);
     }
+  }
+
+  // Makes a dialog resource instance that contains nothing but the minimally
+  // needed properties.
+  function makeMinimalDialogResource(locale, dlgId, titleStrId) {
+    const propLabel = cred.spec.propertyLabel;
+    const propType = cred.spec.physicalPropertyType;
+    const propDescriptions = [
+      [propLabel.id, propType.identifier, dlgId],
+      [propLabel.left, propType.number, 0],
+      [propLabel.top, propType.number, 0],
+      [propLabel.width, propType.number, 100],
+      [propLabel.height, propType.number, 100],
+      [propLabel.text, propType.identifier, `${titleStrId}`],
+      [propLabel.resourceClass, propType.string, 'Dialog'],
+      [propLabel.font, propType.string, ''],
+      [propLabel.fontSize, propType.number, 0],
+      [propLabel.killPopup, propType.number, 0],
+      [propLabel.paddingType, propType.number, 0],
+      [propLabel.styleFlags, propType.flags, 31]
+    ];
+
+    const dlgRes = new DialogResource(locale);
+    for (const descr of propDescriptions) {
+      dlgRes.addLabeledProperty(descr[0], makeProperty(descr[0], descr[1], descr[2]));
+    }
+    return dlgRes;
   }
 
   ///////////////////

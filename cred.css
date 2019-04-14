@@ -83,6 +83,10 @@ body {
     font-size: 0.9em;
 }
 
+#new-cmd {
+  background-image: url("resources/new_dlg.png");
+}
+
 #open-cmd {
     background-image: url("resources/open.png");
 }
@@ -100,7 +104,6 @@ body {
 
 #add-ctrl-cmd {
   background-image: url("resources/add_ctrl.png");
-  width: 35px;
 }
 
 #remove-ctrl-cmd {

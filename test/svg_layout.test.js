@@ -377,6 +377,22 @@ test('SvgLayout.notifyItemBoundsModified for an unlinked locale', () => {
   expect(dlgItemBounds(cred.locale.japanese)).toEqual(originalBounds);
 });
 
+test('SvgLayout.onDialogCreatedNotification', () => {
+  const controllerConfig = {
+    dialogResources: new Map([[cred.locale.any, makeDialogResourceForSvgDisplayTests()]])
+  };
+  const [layout] = setupSvgLayoutTestEnv(controllerConfig);
+
+  layout.onDialogCreatedNotification();
+
+  expect(spyOnLayoutDisplay(layout, cred.locale.any)).toBeDefined();
+  expect(spyOnLayoutDisplay(layout, cred.locale.english)).toBeUndefined();
+  expect(spyOnLayoutDisplay(layout, cred.locale.german)).toBeUndefined();
+  expect(spyOnLayoutDisplay(layout, cred.locale.japanese)).toBeUndefined();
+  const svgElems = document.getElementsByTagName('svg');
+  expect(svgElems.length).toEqual(1);
+});
+
 test('SvgLayout.onDialogLoadedNotification', () => {
   const controllerConfig = {
     dialogResources: new Map([

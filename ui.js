@@ -40,6 +40,7 @@ cred.ui = (function() {
     setup() {
       let self = this;
       $(window).on('click', event => self._onWindowClicked(event));
+      $('#new-cmd').on('click', event => self._onNewCmdClicked(event));
       $('#open-cmd').on('click', event => self._onOpenCmdClicked(event));
       $('#file-input').on('change', event => self._onFilesSelected(event));
       $('#save-cmd').on('click', event => self._onSaveCmdClicked(event));
@@ -157,6 +158,11 @@ cred.ui = (function() {
 
     // --- Notification handlers ---
 
+    onDialogCreatedNotification(dlgResourceSet) {
+      this.clear();
+      this.populate(dlgResourceSet);
+    }
+
     onDialogLoadedNotification(dlgResourceSet) {
       this.clear();
       this.populate(dlgResourceSet);
@@ -195,6 +201,11 @@ cred.ui = (function() {
     // Handles 'click' events for the entire window.
     _onWindowClicked() {
       this._closeDropdownMenus();
+    }
+
+    // Handles 'click' events for the 'new dialog' button.
+    _onNewCmdClicked() {
+      this._controller.notifyCreateDialogChosen(this);
     }
 
     // Handles 'click' events for the 'open' button.

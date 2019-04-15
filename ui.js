@@ -47,6 +47,9 @@ cred.ui = (function() {
       $('#add-ctrl-cmd').on('click', event => self._onAddControlCmdClicked(event));
       $('#remove-ctrl-cmd').on('click', event => self._onRemoveControlCmdClicked(event));
       $('.tab').on('click', event => self._onLocaleTabClicked(event));
+      // New Dialog modal.
+      $('#confirm-new-dlg').on('click', event => self._onNewDialogModalConfirmed(event));
+      $('#cancel-new-dlg').on('click', event => self._onNewDialogModalCanceled(event));
 
       this._populateAddControlMenu();
 
@@ -205,7 +208,7 @@ cred.ui = (function() {
 
     // Handles 'click' events for the 'new dialog' button.
     _onNewCmdClicked() {
-      this._controller.notifyCreateDialogChosen(this);
+      this._showNewDialogModal();
     }
 
     // Handles 'click' events for the 'open' button.
@@ -265,6 +268,22 @@ cred.ui = (function() {
       this._displayHeader.update();
     }
 
+    // Handles 'click' events for the 'OK' button of the New Dialog modal.
+    _onNewDialogModalConfirmed() {
+      const dlgId = $('#new-dlg-id').val();
+      if (typeof dlgId !== 'string' || dlgId.length === 0) {
+        this.showError('Enter a valid dialog id.');
+      } else {
+        $('#new-dlg-modal-bkg').hide();
+        this._controller.notifyCreateDialogChosen(this, dlgId);
+      }
+    }
+
+    // Handles 'click' events for the 'Cancel' button of the New Dialog modal.
+    _onNewDialogModalCanceled() {
+      $('#new-dlg-modal-bkg').hide();
+    }
+
     // --- Internal functions ---
 
     // Returns the HTML element where the dialog for a given locale is displayed.
@@ -311,6 +330,14 @@ cred.ui = (function() {
     // Closes all open dropdown menus.
     _closeDropdownMenus() {
       $('.dropdown-menu').removeClass('dropped');
+    }
+
+    // Display a modal to enter data for a new dialog.
+    _showNewDialogModal() {
+      // Clear the dlg id text input.
+      $('#new-dlg-id').val('');
+      $('#new-dlg-modal-bkg').show();
+      $('#new-dlg-id').focus();
     }
   }
 

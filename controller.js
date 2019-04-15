@@ -108,8 +108,8 @@ cred.controller = (function() {
       this._dispatch(source, 'onErrorOccurredNotification', errMsg);
     }
 
-    notifyCreateDialogChosen(source) {
-      this._dispatch(source, 'onCreateDialogNotification');
+    notifyCreateDialogChosen(source, dlgId) {
+      this._dispatch(source, 'onCreateDialogNotification', dlgId);
     }
 
     notifyDialogCreated(source, dlgResourceSet) {

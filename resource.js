@@ -64,8 +64,8 @@ cred.resource = (function() {
 
     // Notifications
 
-    onCreateDialogNotification() {
-      this._createDialog();
+    onCreateDialogNotification(dlgId) {
+      this._createDialog(dlgId);
     }
 
     onFilesChosenNotification(files) {
@@ -119,13 +119,13 @@ cred.resource = (function() {
     }
 
     // Resets the resoure managers internal state to hold a new dialog.
-    _createDialog() {
+    _createDialog(dlgId) {
       const dlgTitleText = '';
       const dlgTitleTextStrId = 'kTitleStrId';
 
       const builder = new cred.resource.DialogResourceSetBuilder();
       builder.addResource(
-        makeMinimalDialogResource(cred.locale.any, 'ENTER_ID', dlgTitleTextStrId)
+        makeMinimalDialogResource(cred.locale.any, dlgId, dlgTitleTextStrId)
       );
       for (const lang of cred.language) {
         const strMap = new StringMap();

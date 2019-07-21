@@ -83,45 +83,37 @@ cred.svglayout = (function() {
     // as proxy for the controller to all objects within the layout module. It calls
     // the actual controller with the correct 'source' parameter.
 
-    // Called from within the layout module to forward a notification to the controller
-    // that a given item was selected.
     notifyItemSelected(item) {
       this._controller.notifyItemSelected(this, item);
     }
 
-    // Called from within the layout module to forward a notification to the controller
-    // that the selection of the current locale was cleared.
     notifySelectionCleared() {
       this._controller.notifySelectionCleared(this);
     }
 
-    // Called from within the layout module to forward a notification to the controller
-    // that the bounds of the currently selected item have changed.
     notifyItemBoundsModified(bounds) {
       this._controller.notifyItemBoundsModified(this, bounds);
       // Apply bounds change to all linked SVG displays.
       this._setBounds(bounds, true);
     }
 
-    // Called from within the layout module to forward a notification to the controller
-    // that a control with given resource id, type and bounds should be added.
     notifyAddControl(resourceId, ctrlType, bounds) {
       this._controller.notifyAddControl(this, resourceId, ctrlType, bounds);
     }
 
-    // Called from within the layout module to forward a notification to the controller
-    // that a control was added.
     notifyControlAdded(ctrlItem) {
       this._controller.notifyControlAdded(this, ctrlItem);
       // Add a control item to all linked SVG displays.
       this._addControlToLinkedDisplays(ctrlItem);
     }
 
-    // Called from within the layout module to forward a notification to the controller
-    // that a control with given unique id should be removed.
     notifyRemoveControl(uniqueId) {
       this._removeControlFromDisplays(uniqueId);
       this._controller.notifyRemoveControl(this, uniqueId);
+    }
+
+    notifyStoreUndo() {
+      this._controller.notifyStoreUndo(this);
     }
 
     // --- Notification handlers ---
@@ -158,6 +150,11 @@ cred.svglayout = (function() {
 
     onControlRemovedNotification(uniqueId) {
       this._removeControlFromDisplays(uniqueId);
+    }
+
+    onUndoAppliedNotification() {
+      this.clear();
+      this.populate(this._controller.displayHtmlElements());
     }
 
     // --- Internal functions ---

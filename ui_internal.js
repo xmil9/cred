@@ -56,6 +56,7 @@ cred.ui_internal = (function() {
 
     _onLinkedToMasterChanged() {
       this.controller.notifyLinkedToMasterModified($('#linked-flag').is(':checked'));
+      this.controller.notifyStoreUndo();
     }
   }
 
@@ -186,6 +187,7 @@ cred.ui_internal = (function() {
       const value = $targetElem.val();
       const propLabel = extractPropertyLabelFromHtmlId($targetElem.attr('id'));
       this.controller.notifyItemPropertyModified(propLabel, value);
+      this.controller.notifyStoreUndo();
     }
 
     // Handles changes to the values of localized string properties.
@@ -194,6 +196,7 @@ cred.ui_internal = (function() {
       const value = $targetElem.val();
       const propLabel = extractPropertyLabelFromHtmlId($targetElem.attr('id'));
       this.controller.notifyItemLocalizedStringPropertyModified(propLabel, value);
+      this.controller.notifyStoreUndo();
     }
 
     // Handles changes to the values of boolean properties.
@@ -202,6 +205,7 @@ cred.ui_internal = (function() {
       const value = $targetElem.is(':checked');
       const propLabel = extractPropertyLabelFromHtmlId($targetElem.attr('id'));
       this.controller.notifyItemPropertyModified(propLabel, value);
+      this.controller.notifyStoreUndo();
     }
 
     // Handles changes to the values of flags properties.
@@ -220,16 +224,20 @@ cred.ui_internal = (function() {
         flagValue,
         isSet
       );
+      this.controller.notifyStoreUndo();
     }
 
     // Handles changes to the id property in the pane.
     _onIdChanged() {
+      event.stopPropagation();
       const id = $(makePropertyIdSelector(cred.spec.propertyLabel.id)).val();
       this.controller.notifyItemIdModified(id);
+      this.controller.notifyStoreUndo();
     }
 
     // Handles changes to the values of bounds related properties in the pane.
-    _onBoundsChanged() {
+    _onBoundsChanged(event) {
+      event.stopPropagation();
       const propertyLabel = cred.spec.propertyLabel;
       const bounds = new geom.Rect(
         $(makePropertyIdSelector(propertyLabel.left)).val(),
@@ -238,6 +246,7 @@ cred.ui_internal = (function() {
         $(makePropertyIdSelector(propertyLabel.height)).val()
       );
       this.controller.notifyItemBoundsModified(bounds);
+      this.controller.notifyStoreUndo();
     }
 
     // --- Internal functions ---

@@ -1,8 +1,9 @@
 TODO
 ----
 
-- Multi0item selection.
-- Undo suppport.
-- Align items.
-- Draw text into items.
-- Draw item types differently.
+- Feature: Support multi-item selection.
+- Feature: Undo suppport.
+- Feature: Align items.
+- Feature: Draw text into items.
+- Feature: Draw item types differently.
+- Bug: When id of dialog is edited, the name of the open dialog should change in the UI.

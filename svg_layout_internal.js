@@ -160,6 +160,7 @@ cred.svglayout_internal = (function() {
 
     // Handles key down events.
     _onKeyDown(event) {
+      event.stopPropagation();
       const key = event.key;
       const ctrlDown = event.ctrlKey;
       if (key === 'Delete' || key === 'Backspace') {
@@ -180,8 +181,7 @@ cred.svglayout_internal = (function() {
       let self = this;
       // Register for mouse down events inside the SVG display.
       $(this._htmlElem).on('mousedown', e => self._onMouseDown(e));
-      //$(this._htmlElem).on('keydown', e => self._onKeyDown(e));
-      $(document).on('keydown', e => self._onKeyDown(e));
+      $(this._htmlElem).on('keydown', e => self._onKeyDown(e));
     }
 
     // Returns the offset in pixels to use for a move operation.
@@ -259,6 +259,7 @@ cred.svglayout_internal = (function() {
       }
       if (withNotification) {
         this.controller.notifyItemBoundsModified(this.bounds);
+        this.controller.notifyStoreUndo();
       }
     }
 
@@ -311,6 +312,7 @@ cred.svglayout_internal = (function() {
       if (this.isSelectable) {
         this.svgDisplay.clearSelection();
         this._isSelected = true;
+        this._htmlElem.focus();
         this.svgDisplay.selectItem(this);
       }
     }
@@ -535,6 +537,7 @@ cred.svglayout_internal = (function() {
         width: `${bounds.width}`,
         height: `${bounds.height}`,
         class: 'dialog',
+        tabindex: '0',
         'vector-effect': 'non-scaling-stroke'
       });
     }
@@ -657,7 +660,10 @@ cred.svglayout_internal = (function() {
 
       this._addedControl.setBounds(
         new geom.Rect(ctrlPos.x, ctrlPos.y, newWidth, newHeight),
-        true
+        true,
+        // No undos for each mouse move. Only the entire control creation will store
+        // an undo.
+        false
       );
     }
   }
@@ -725,6 +731,7 @@ cred.svglayout_internal = (function() {
         width: `${bounds.width}`,
         height: `${bounds.height}`,
         class: 'control',
+        tabindex: '0',
         'vector-effect': 'non-scaling-stroke'
       });
     }

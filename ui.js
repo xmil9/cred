@@ -46,6 +46,8 @@ cred.ui = (function() {
       $('#save-cmd').on('click', event => self._onSaveCmdClicked(event));
       $('#add-ctrl-cmd').on('click', event => self._onAddControlCmdClicked(event));
       $('#remove-ctrl-cmd').on('click', event => self._onRemoveControlCmdClicked(event));
+      $('#undo-cmd').on('click', event => self._onUndoCmdClicked(event));
+      $('#redo-cmd').on('click', event => self._onRedoCmdClicked(event));
       $('.tab').on('click', event => self._onLocaleTabClicked(event));
       // New Dialog modal.
       $('#confirm-new-dlg').on('click', event => self._onNewDialogModalConfirmed(event));
@@ -109,7 +111,8 @@ cred.ui = (function() {
 
     // Clears the content displayed in the UI.
     clear() {
-      // TODO
+      $('#filename').text('');
+      this._propertyPane.clear();
     }
 
     // Displays error information.
@@ -159,6 +162,10 @@ cred.ui = (function() {
       this._propertyPane.update();
     }
 
+    notifyStoreUndo() {
+      this._controller.notifyStoreUndo(this);
+    }
+
     // --- Notification handlers ---
 
     onDialogCreatedNotification(dlgResourceSet) {
@@ -197,6 +204,13 @@ cred.ui = (function() {
 
     onItemBoundsModifiedNotification(bounds) {
       this._propertyPane.setBounds(bounds);
+    }
+
+    onUndoAppliedNotification(dlgResourceSet) {
+      this.clear();
+      this.populate(dlgResourceSet);
+      this._propertyPane.update();
+      this._displayHeader.update();
     }
 
     // --- Event handlers ---
@@ -243,6 +257,7 @@ cred.ui = (function() {
     _onAddControlTypeClicked(event) {
       const ctrlType = $(event.target).text();
       this._controller.notifyAddControlChosen(this, ctrlType);
+      this._controller.notifyStoreUndo();
     }
 
     // Handles 'click' events for the 'remove control' button.
@@ -250,7 +265,18 @@ cred.ui = (function() {
       const selectedItem = this._controller.selectedItem;
       if (selectedItem) {
         this._controller.notifyRemoveControl(this, selectedItem.uniqueId);
+        this._controller.notifyStoreUndo();
       }
+    }
+
+    // Handles 'click' events for the 'undo' button.
+    _onUndoCmdClicked() {
+      this._controller.notifyUndo(this);
+    }
+
+    // Handles 'click' events for the 'redo' button.
+    _onRedoCmdClicked() {
+      this._controller.notifyRedo(this);
     }
 
     // Handles 'click' events for the locale tabs.

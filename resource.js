@@ -31,6 +31,7 @@ cred.resource = (function() {
     constructor() {
       this._resourceSet = undefined;
       this._controller = undefined;
+      this._undos = new Undos();
     }
 
     setup() {
@@ -118,6 +119,18 @@ cred.resource = (function() {
       this._removeControl(this._controller.currentLocale, uniqueId);
     }
 
+    onStoreUndoNotification() {
+      this._storeUndo();
+    }
+
+    onUndoNotification() {
+      this._undo();
+    }
+
+    onRedoNotification() {
+      this._redo();
+    }
+
     // Resets the resoure managers internal state to hold a new dialog.
     _createDialog(dlgId) {
       const dlgTitleText = '';
@@ -134,6 +147,7 @@ cred.resource = (function() {
       }
 
       this._resourceSet = builder.build();
+      this._storeUndo();
       this._controller.notifyDialogCreated(this, this._resourceSet);
     }
 
@@ -155,6 +169,7 @@ cred.resource = (function() {
         .read()
         .then(resourceSet => {
           self._resourceSet = resourceSet;
+          self._storeUndo();
           self._controller.notifyDialogLoaded(this, resourceSet);
         })
         .catch(err => {
@@ -242,7 +257,7 @@ cred.resource = (function() {
       }
     }
 
-    // Adds a control with given resoucrce id, type, and bounds.
+    // Adds a control with given resource id, type, and bounds.
     _addControl(locale, resourceId, ctrlType, bounds) {
       const ctrlResource = this._resourceSet.addControl(locale, ctrlType, resourceId);
       ctrlResource.generatePropertiesWithDefaults();
@@ -251,7 +266,7 @@ cred.resource = (function() {
       }
     }
 
-    // Adds a control with given resoucrce id, type, and bounds.
+    // Removes a control with given id.
     _removeControl(locale, uniqueId) {
       if (this._resourceSet.removeControl(locale, uniqueId)) {
         this._controller.notifyControlRemoved(this, uniqueId);
@@ -281,6 +296,29 @@ cred.resource = (function() {
     _isGlobalProperty(propLabel) {
       return this._controller.isCurrentPropertyGlobal(propLabel);
     }
+
+    // Stores the current resource state in the undo sequence.
+    _storeUndo() {
+      this._undos.addNewState(this._resourceSet.copy());
+    }
+
+    // Applies a given undo state as new resource state.
+    _applyUndo(undoState) {
+      if (typeof undoState !== 'undefined') {
+        this._resourceSet = undoState.copy();
+        this._controller.notifyUndoApplied(this, this._resourceSet);
+      }
+    }
+
+    // Performs undo.
+    _undo() {
+      this._applyUndo(this._undos.undo());
+    }
+
+    // Performs redo.
+    _redo() {
+      this._applyUndo(this._undos.redo());
+    }
   }
 
   // Returns an error message for a failed dialog opening operation.
@@ -291,6 +329,40 @@ cred.resource = (function() {
       return 'Unable to open dialog files. Some string files are missing.';
     } else {
       return 'Unable to open dialog files. Unexpected error.';
+    }
+  }
+
+  ///////////////////
+
+  // Keeps track of the undo/redo state of the resources.
+  class Undos {
+    constructor() {
+      // Array of resource sets each representing an undo state.
+      this._undoStates = [];
+      this._pos = -1;
+    }
+
+    addNewState(resourceSet) {
+      // Discard all states past the current one.
+      this._undoStates = this._undoStates.slice(0, this._pos + 1);
+      this._undoStates.push(resourceSet);
+      this._pos = this._undoStates.length - 1;
+    }
+
+    undo() {
+      if (this._pos > 0) {
+        --this._pos;
+        return this._undoStates[this._pos];
+      }
+      return undefined;
+    }
+
+    redo() {
+      if (this._pos < this._undoStates.length - 1) {
+        ++this._pos;
+        return this._undoStates[this._pos];
+      }
+      return undefined;
     }
   }
 
@@ -316,6 +388,23 @@ cred.resource = (function() {
       // window.crypto.getRandomValues.
       // Can be injected by calling setCrypto().
       this._crypto = window.crypto;
+    }
+
+    // Returns a deep copy of the resource set.
+    copy() {
+      const copiedResources = new Map();
+      for (const [locale, dlgRes] of this._resources) {
+        copiedResources.set(locale, dlgRes.copy());
+      }
+      const copiedImportLogs = new Map();
+      for (const [locale, log] of this._importLogs) {
+        copiedImportLogs.set(locale, util.copyArrayShallow(log));
+      }
+      return new DialogResourceSet(
+        copiedResources,
+        this._stringMap.copy(),
+        copiedImportLogs
+      );
     }
 
     // Inject a custom crypto API.
@@ -993,6 +1082,40 @@ cred.resource = (function() {
       this._srcEncoding = new Map();
     }
 
+    // Returns a deep copy of the string map.
+    copy() {
+      let duplicate = new StringMap();
+      for (let [lang, encoding] of this._srcEncoding) {
+        duplicate.setSourceEncoding(lang, encoding);
+      }
+      for (let [id, text, lang] of this) {
+        duplicate.add(id, text, lang);
+      }
+      return duplicate;
+    }
+
+    // Creates a duplicate of the string map with ids replaced based on a given id
+    // generator.
+    // Returns the new string map and a mapping of the old string ids to the new ones.
+    copyWithRegeneratedIds(idGenerator) {
+      let duplicate = new StringMap();
+      for (let [lang, encoding] of this._srcEncoding) {
+        duplicate.setSourceEncoding(lang, encoding);
+      }
+
+      let idMapping = new Map();
+      for (let [id, text, lang] of this) {
+        let newId = idMapping.get(id);
+        if (typeof newId === 'undefined') {
+          newId = idGenerator();
+          idMapping.set(id, newId);
+        }
+        duplicate.add(newId, text, lang);
+      }
+
+      return [duplicate, idMapping];
+    }
+
     // Adds a string to the map.
     add(id, text, language) {
       this._map.get(language).set(id, text);
@@ -1038,28 +1161,6 @@ cred.resource = (function() {
       this._srcEncoding.set(language, encoding);
     }
 
-    // Creates a duplicate of the string map with ids replaced based on a given id
-    // generator.
-    // Returns the new string map and a mapping of the old string ids to the new ones.
-    copyWithRegeneratedIds(idGenerator) {
-      let duplicate = new StringMap();
-      for (let [lang, encoding] of this._srcEncoding) {
-        duplicate.setSourceEncoding(lang, encoding);
-      }
-      let idMapping = new Map();
-
-      for (let [id, text, lang] of this) {
-        let newId = idMapping.get(id);
-        if (typeof newId === 'undefined') {
-          newId = idGenerator();
-          idMapping.set(id, newId);
-        }
-        duplicate.add(newId, text, lang);
-      }
-
-      return [duplicate, idMapping];
-    }
-
     // Creates the top level map object that associates languages with their string maps.
     // Initializes each inner string map to be empty.
     static _makeTopLevelMap() {
@@ -1090,6 +1191,11 @@ cred.resource = (function() {
       this._layers = [];
 
       // When editing properties, also edit the copy function below!
+    }
+
+    // Returns a deep copy of the dialog resource.
+    copy() {
+      return this.copyAs(this.locale);
     }
 
     // Returns a deep copy of the dialog resource with the locale adjusted to

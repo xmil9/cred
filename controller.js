@@ -197,6 +197,22 @@ cred.controller = (function() {
       this._dispatch(source, 'onLinkedToMasterModifiedNotification', isLinked);
     }
 
+    notifyStoreUndo(source) {
+      this._dispatch(source, 'onStoreUndoNotification');
+    }
+
+    notifyUndo(source) {
+      this._dispatch(source, 'onUndoNotification');
+    }
+
+    notifyRedo(source) {
+      this._dispatch(source, 'onRedoNotification');
+    }
+
+    notifyUndoApplied(source, dlgResourceSet) {
+      this._dispatch(source, 'onUndoAppliedNotification', dlgResourceSet);
+    }
+
     // --- Internal functions ---
 
     // Dispatches notifications to the controlled components.

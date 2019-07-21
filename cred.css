@@ -110,6 +110,14 @@ body {
   background-image: url("resources/remove_ctrl.png");
 }
 
+#undo-cmd {
+  background-image: url("resources/undo.png");
+}
+
+#redo-cmd {
+  background-image: url("resources/redo.png");
+}
+
 /* --- Tabs --- */
 
 .tabs {

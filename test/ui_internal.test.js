@@ -47,6 +47,7 @@ class ControllerMock {
     this.notifyItemIdModifiedCalled = false;
     this.notifyItemBoundsModifiedCalled = false;
     this.notifyLinkedToMasterModifiedCalled = false;
+    this.notifyStoreUndoCalled = false;
   }
 
   lookupString() {
@@ -79,6 +80,10 @@ class ControllerMock {
 
   notifyLinkedToMasterModified() {
     this.notifyLinkedToMasterModifiedCalled = true;
+  }
+
+  notifyStoreUndo() {
+    this.notifyStoreUndoCalled = true;
   }
 }
 

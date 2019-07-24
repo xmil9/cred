@@ -88,6 +88,7 @@ class ControllerMock {
     this.notifyItemSelectedCalled = false;
     this.notifySelectionClearedCalled = false;
     this.notifyRemoveControlCalled = false;
+    this.notifyStoreUndoCalled = false;
   }
 
   notifyItemBoundsModified() {
@@ -117,6 +118,10 @@ class ControllerMock {
 
   notifyRemoveControl() {
     this.notifyRemoveControlCalled = true;
+  }
+
+  notifyStoreUndo() {
+    this.notifyStoreUndoCalled = true;
   }
 }
 

@@ -228,7 +228,7 @@ cred.ui_internal = (function() {
     }
 
     // Handles changes to the id property in the pane.
-    _onIdChanged() {
+    _onIdChanged(event) {
       event.stopPropagation();
       const id = $(makePropertyIdSelector(cred.spec.propertyLabel.id)).val();
       this.controller.notifyItemIdModified(id);

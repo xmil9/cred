@@ -73,6 +73,8 @@ cred.ui_internal = (function() {
       // Map that associates property labels with component objects for
       // those properties.
       this._propertyComponents = new Map();
+      // Timeout id for aggregating bounds changes.
+      this._boundsUndoTimeoutId = undefined;
     }
 
     setup() {}
@@ -246,7 +248,7 @@ cred.ui_internal = (function() {
         $(makePropertyIdSelector(propertyLabel.height)).val()
       );
       this.controller.notifyItemBoundsModified(bounds);
-      this.controller.notifyStoreUndo();
+      this._delayBoundsUndo();
     }
 
     // --- Internal functions ---
@@ -283,6 +285,20 @@ cred.ui_internal = (function() {
           );
         }
       }
+    }
+
+    // Delays storing an undo for bounds changes. This accumulates consecutive
+    // changes into one undo.
+    _delayBoundsUndo() {
+      const self = this;
+      // Cancel existing delay.
+      if (typeof this._boundsUndoTimeoutId !== 'undefined') {
+        clearTimeout(this._boundsUndoTimeoutId);
+      }
+      // Set up new delay.
+      this._boundsUndoTimeoutId = setTimeout(() => {
+        self.controller.notifyStoreUndo();
+      }, 500);
     }
   }
 

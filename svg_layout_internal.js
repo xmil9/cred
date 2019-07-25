@@ -40,6 +40,8 @@ cred.svglayout_internal = (function() {
       // Proxy to the controller. Can be called as if it were the controller but
       // without having to pass a source object for notifications.
       this._controllerProxy = controllerProxy;
+      // Timeout id for aggregating move operations.
+      this._moveUndoTimeoutId = undefined;
 
       this._registerEvents();
     }
@@ -135,6 +137,7 @@ cred.svglayout_internal = (function() {
           // Moving the dialog is not supported.
         } else {
           svgItem.setPosition(svgItem.position.add(offsetX, offsetY), true);
+          this._delayMoveUndo();
         }
       }
     }
@@ -190,6 +193,20 @@ cred.svglayout_internal = (function() {
         return 10;
       }
       return 1;
+    }
+
+    // Delays storing an undo for move operations. This accumulates consecutive
+    // moves into one undo.
+    _delayMoveUndo() {
+      const self = this;
+      // Cancel existing delay.
+      if (typeof this._moveUndoTimeoutId !== 'undefined') {
+        clearTimeout(this._moveUndoTimeoutId);
+      }
+      // Set up new delay.
+      this._moveUndoTimeoutId = setTimeout(() => {
+        self.controller.notifyStoreUndo();
+      }, 500);
     }
   }
 
@@ -259,7 +276,6 @@ cred.svglayout_internal = (function() {
       }
       if (withNotification) {
         this.controller.notifyItemBoundsModified(this.bounds);
-        this.controller.notifyStoreUndo();
       }
     }
 
@@ -361,6 +377,7 @@ cred.svglayout_internal = (function() {
 
       if (this._isDragged) {
         this.drag(event, mouseDownOffset);
+        this.controller.notifyStoreUndo();
       } else if (!this._isSelected) {
         this.select();
       }

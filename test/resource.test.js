@@ -140,6 +140,48 @@ test('StringMap construction', () => {
   expect(Array.from(strMap).length).toEqual(0);
 });
 
+test('StringMap.copy', () => {
+  const strMap = new cred.resource.StringMap();
+  strMap.add('str1', 'aaa', cred.language.english);
+  strMap.add('str1', 'bbb', cred.language.german);
+  strMap.add('str1', 'ccc', cred.language.japanese);
+  strMap.add('str2', '111', cred.language.english);
+  strMap.setSourceEncoding(cred.language.german, 'ascii');
+  strMap.setSourceEncoding(cred.language.japanese, 'shift-jis');
+
+  const copy = strMap.copy();
+
+  expect(copy).toBeDefined();
+  expect(copy).not.toBe(strMap);
+  expect(copy).toEqual(strMap);
+  expect(copy.text('str1', cred.language.english)).toEqual('aaa');
+  expect(copy.sourceEncoding(cred.language.german)).toEqual('ascii');
+  expect(copy.sourceEncoding(cred.language.japanese)).toEqual('shift-jis');
+});
+
+test('StringMap.copyWithRegeneratedIds', () => {
+  const strMap = new cred.resource.StringMap();
+  strMap.add('str1', 'aaa', cred.language.english);
+  strMap.add('str1', 'bbb', cred.language.german);
+  strMap.add('str1', 'ccc', cred.language.japanese);
+  strMap.add('str2', '111', cred.language.english);
+  strMap.setSourceEncoding(cred.language.german, 'ascii');
+  strMap.setSourceEncoding(cred.language.japanese, 'shift-jis');
+
+  let idCount = 0;
+  const idGenerator = () => ++idCount;
+  const [copy, mapping] = strMap.copyWithRegeneratedIds(idGenerator);
+
+  expect(copy).toBeDefined();
+  expect(copy).not.toBe(strMap);
+  expect(mapping).toBeDefined();
+  expect(Array.from(copy).length).toEqual(Array.from(strMap).length);
+  expect(copy.text('str1', cred.language.english)).toBeUndefined();
+  expect(copy.text(mapping.get('str1'), cred.language.english)).toEqual('aaa');
+  expect(copy.sourceEncoding(cred.language.german)).toEqual('ascii');
+  expect(copy.sourceEncoding(cred.language.japanese)).toEqual('shift-jis');
+});
+
 test('StringMap.add to empty map', () => {
   const strMap = new cred.resource.StringMap();
   strMap.add('str1', 'hello', cred.language.english);
@@ -402,29 +444,6 @@ test('StringMap.sourceEncoding for existing encoding', () => {
 test('StringMap.sourceEncoding for no encoding', () => {
   const strMap = new cred.resource.StringMap();
   expect(strMap.sourceEncoding(cred.language.english)).toBeUndefined();
-});
-
-test('StringMap.copyWithRegeneratedIds', () => {
-  const strMap = new cred.resource.StringMap();
-  strMap.add('str1', 'aaa', cred.language.english);
-  strMap.add('str1', 'bbb', cred.language.german);
-  strMap.add('str1', 'ccc', cred.language.japanese);
-  strMap.add('str2', '111', cred.language.english);
-  strMap.setSourceEncoding(cred.language.german, 'ascii');
-  strMap.setSourceEncoding(cred.language.japanese, 'shift-jis');
-
-  let idCount = 0;
-  const idGenerator = () => ++idCount;
-  const [copy, mapping] = strMap.copyWithRegeneratedIds(idGenerator);
-
-  expect(copy).toBeDefined();
-  expect(copy).not.toBe(strMap);
-  expect(mapping).toBeDefined();
-  expect(Array.from(copy).length).toEqual(Array.from(strMap).length);
-  expect(copy.text('str1', cred.language.english)).toBeUndefined();
-  expect(copy.text(mapping.get('str1'), cred.language.english)).toEqual('aaa');
-  expect(copy.sourceEncoding(cred.language.german)).toEqual('ascii');
-  expect(copy.sourceEncoding(cred.language.japanese)).toEqual('shift-jis');
 });
 
 ///////////////////

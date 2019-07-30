@@ -1860,6 +1860,28 @@ test('DialogResource construction', () => {
   expect(Array.from(dlgRes.controls()).length).toEqual(0);
 });
 
+test('DialogResource.copy', () => {
+  const dlgRes = new cred.resource.DialogResource(cred.locale.english);
+  dlgRes.addLabeledProperty(
+    cred.spec.propertyLabel.id,
+    cred.resource.makeProperty(
+      cred.spec.propertyLabel.id,
+      cred.spec.physicalPropertyType.identifier,
+      'myid'
+    )
+  );
+  dlgRes.addControl(cred.spec.controlType.label, 'label-id');
+  dlgRes.addLayer(new cred.resource.Layer('test-layer', [1, 2]));
+  dlgRes.addIncludedHeader('test-header.h');
+
+  const copy = dlgRes.copy();
+
+  expect(copy).toBeDefined();
+  expect(copy).not.toBe(dlgRes);
+  expect(copy).toEqual(dlgRes);
+  expect(copy.locale).toEqual(cred.locale.english);
+});
+
 test('DialogResource.copyAs', () => {
   const dlgRes = new cred.resource.DialogResource(cred.locale.english);
   dlgRes.addLabeledProperty(

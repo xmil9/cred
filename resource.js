@@ -400,11 +400,14 @@ cred.resource = (function() {
       for (const [locale, log] of this._importLogs) {
         copiedImportLogs.set(locale, util.copyArrayShallow(log));
       }
-      return new DialogResourceSet(
+
+      const copiedSet = new DialogResourceSet(
         copiedResources,
         this._stringMap.copy(),
         copiedImportLogs
       );
+      copiedSet.setCrypto(this._crypto);
+      return copiedSet;
     }
 
     // Inject a custom crypto API.

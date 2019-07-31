@@ -2606,6 +2606,41 @@ function makeDialogResourceSetWithStrings(resources, strings) {
   return builder.build();
 }
 
+test('DialogResourceSet.copy', () => {
+  // Create non-trivial resource set.
+  const masterRes = new cred.resource.DialogResource(cred.locale.any);
+  masterRes.addLabeledProperty(
+    cred.spec.propertyLabel.text,
+    cred.resource.makeProperty(
+      cred.spec.propertyLabel.text,
+      cred.spec.physicalPropertyType.identifier,
+      'str-id'
+    )
+  );
+  const jpRes = new cred.resource.DialogResource(cred.locale.japanese);
+  jpRes.addLabeledProperty(
+    cred.spec.propertyLabel.text,
+    cred.resource.makeProperty(
+      cred.spec.propertyLabel.text,
+      cred.spec.physicalPropertyType.identifier,
+      'str-id'
+    )
+  );
+  const builder = testutil.makeDialogResourceSetBuilderForNode();
+  builder.addResource(masterRes, []);
+  builder.addResource(jpRes, []);
+  const resSet = builder.build();
+  resSet.addString('str-id', 'initial', cred.language.english);
+  resSet.addString('str-id', 'initial', cred.language.german);
+  resSet.addString('str-id', 'initial', cred.language.japanese);
+
+  const copy = resSet.copy();
+
+  expect(copy).toBeDefined();
+  expect(copy).not.toBe(resSet);
+  expect(copy).toEqual(resSet);
+});
+
 test('DialogResourceSet.masterFileName', () => {
   const resSet = makeDialogResourceSet([makeDialogResource(cred.locale.any, 'myid')]);
   expect(resSet.masterFileName).toEqual('myid.dlg');

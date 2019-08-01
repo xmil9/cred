@@ -25,6 +25,7 @@ class ControllerMock {
     this.notifyItemSelected = jest.fn();
     this.notifySelectionCleared = jest.fn();
     this.notifyItemBoundsModified = jest.fn();
+    this.notifyStoreUndo = jest.fn();
   }
 
   displayHtmlElements() {
@@ -377,6 +378,13 @@ test('SvgLayout.notifyItemBoundsModified for an unlinked locale', () => {
   expect(dlgItemBounds(cred.locale.japanese)).toEqual(originalBounds);
 });
 
+test('SvgLayout.notifyStoreUndo', () => {
+  const [layout, controllerMock] = setupSvgLayoutTestEnv();
+  layout.notifyStoreUndo({});
+
+  expect(controllerMock.notifyStoreUndo).toBeCalled();
+});
+
 test('SvgLayout.onDialogCreatedNotification', () => {
   const controllerConfig = {
     dialogResources: new Map([[cred.locale.any, makeDialogResourceForSvgDisplayTests()]])
@@ -567,4 +575,20 @@ test('SvgLayout.onLinkedToMasterModifiedNotification to link locale', () => {
   expect(spyOnLayoutDisplay(layout, cred.locale.japanese)).toBe(
     originalDisplays.get(cred.locale.japanese)
   );
+});
+
+test('SvgLayout.onUndoAppliedNotification', () => {
+  const controllerConfig = {
+    dialogResources: new Map([[cred.locale.any, makeDialogResourceForSvgDisplayTests()]])
+  };
+  const [layout] = setupSvgLayoutTestEnv(controllerConfig);
+
+  layout.onUndoAppliedNotification();
+
+  expect(spyOnLayoutDisplay(layout, cred.locale.any)).toBeDefined();
+  expect(spyOnLayoutDisplay(layout, cred.locale.english)).toBeUndefined();
+  expect(spyOnLayoutDisplay(layout, cred.locale.german)).toBeUndefined();
+  expect(spyOnLayoutDisplay(layout, cred.locale.japanese)).toBeUndefined();
+  const svgElems = document.getElementsByTagName('svg');
+  expect(svgElems.length).toEqual(1);
 });

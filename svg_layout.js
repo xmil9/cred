@@ -121,14 +121,12 @@ cred.svglayout = (function() {
     // system. They orchestrate the layouts reaction to the event.
 
     onDialogCreatedNotification() {
-      this.clear();
-      this.populate(this._controller.displayHtmlElements());
+      this._refresh();
     }
 
     // Notifies the layout that a new dialog was loaded.
     onDialogLoadedNotification() {
-      this.clear();
-      this.populate(this._controller.displayHtmlElements());
+      this._refresh();
     }
 
     // Notifies the layout that the bounds of the currently selected item have
@@ -153,8 +151,7 @@ cred.svglayout = (function() {
     }
 
     onUndoAppliedNotification() {
-      this.clear();
-      this.populate(this._controller.displayHtmlElements());
+      this._refresh();
     }
 
     // --- Internal functions ---
@@ -232,6 +229,12 @@ cred.svglayout = (function() {
         dlgBounds.width + fillerSpace.w,
         dlgBounds.height + fillerSpace.h
       );
+    }
+
+    // Refreshes the layout.
+    _refresh() {
+      this.clear();
+      this.populate(this._controller.displayHtmlElements());
     }
 
     // Sets the bounds of all items that are affected by a bounds modification.

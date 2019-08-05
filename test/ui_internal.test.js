@@ -765,6 +765,22 @@ test('PropertyPane notify controller when a property changes', () => {
   expect(controller.notifyItemPropertyModifiedCalled).toBeTruthy();
 });
 
+test('PropertyPane stores an undo when a property changes', () => {
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#FontSize-property');
+  $elem.text('22');
+  $elem.trigger('change');
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
+});
+
 test('PropertyPane notify controller when a localized string property changes', () => {
   setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
@@ -778,7 +794,23 @@ test('PropertyPane notify controller when a localized string property changes', 
   $elem.text('new text');
   $elem.trigger('change');
 
-  expect(controller.notifyItemLocalizedStringPropertyModified).toBeTruthy();
+  expect(controller.notifyItemLocalizedStringPropertyModifiedCalled).toBeTruthy();
+});
+
+test('PropertyPane stores an undo when a localized string property changes', () => {
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#Text-property');
+  $elem.text('new text');
+  $elem.trigger('change');
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
 });
 
 test('PropertyPane notify controller when a boolean property changes', () => {
@@ -797,6 +829,22 @@ test('PropertyPane notify controller when a boolean property changes', () => {
   expect(controller.notifyItemPropertyModifiedCalled).toBeTruthy();
 });
 
+test('PropertyPane stores an undo when a boolean property changes', () => {
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#KillPopup-property');
+  $elem.prop('checked', true);
+  $elem.trigger('change');
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
+});
+
 test('PropertyPane notify controller when a flags property changes', () => {
   setupPropertyPaneTestEnv();
   const controller = new ControllerMock();
@@ -810,7 +858,23 @@ test('PropertyPane notify controller when a flags property changes', () => {
   $elem.prop('checked', true);
   $elem.trigger('change');
 
-  expect(controller.notifyItemFlagPropertyModified).toBeTruthy();
+  expect(controller.notifyItemFlagPropertyModifiedCalled).toBeTruthy();
+});
+
+test('PropertyPane stores an undo when a flags property changes', () => {
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#WS_CHILD-flag');
+  $elem.prop('checked', true);
+  $elem.trigger('change');
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
 });
 
 test('PropertyPane notify controller when a id property changes', () => {
@@ -826,7 +890,23 @@ test('PropertyPane notify controller when a id property changes', () => {
   $elem.text('newId');
   $elem.trigger('change');
 
-  expect(controller.notifyItemIdModified).toBeTruthy();
+  expect(controller.notifyItemIdModifiedCalled).toBeTruthy();
+});
+
+test('PropertyPane stores an undo when a id property changes', () => {
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  const $elem = $('#ResourceName-property');
+  $elem.text('newId');
+  $elem.trigger('change');
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
 });
 
 test('PropertyPane notify controller when a bounds property changes', () => {
@@ -842,13 +922,50 @@ test('PropertyPane notify controller when a bounds property changes', () => {
   $elem.text('0');
   $elem.trigger('change');
 
-  expect(controller.notifyItemBoundsModified).toBeTruthy();
+  expect(controller.notifyItemBoundsModifiedCalled).toBeTruthy();
 
   $elem = $('#Height-property');
   $elem.text('200');
   $elem.trigger('change');
 
-  expect(controller.notifyItemBoundsModified).toBeTruthy();
+  expect(controller.notifyItemBoundsModifiedCalled).toBeTruthy();
+});
+
+test('PropertyPane waits for some time before storing an undo when a bounds property changes', () => {
+  jest.useFakeTimers();
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  let $elem = $('#Left-property');
+  $elem.text('0');
+  $elem.trigger('change');
+
+  expect(setTimeout).toHaveBeenCalledTimes(1);
+  expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), 500);
+});
+
+test('PropertyPane stores an undo when a bounds property changes', () => {
+  jest.useFakeTimers();
+  setupPropertyPaneTestEnv();
+  const controller = new ControllerMock();
+  const pane = new cred.ui_internal.PropertyPane(controller);
+  const resDef = new ResourceDefinitinMock();
+  const spec = cred.spec.makeDialogSpec();
+  const item = new SvgItemMock(resDef, spec);
+  pane.populate(item);
+
+  let $elem = $('#Left-property');
+  $elem.text('0');
+  $elem.trigger('change');
+
+  jest.runAllTimers();
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
 });
 
 test('PropertyPane.clear', () => {
@@ -942,6 +1059,19 @@ test('DisplayHeader notifies controller about changes in linked-to-master state'
   $linkedFlag.trigger('change');
 
   expect(controller.notifyLinkedToMasterModifiedCalled).toBeTruthy();
+});
+
+test('DisplayHeader stores an undo for changes in linked-to-master state', () => {
+  setupDisplayHeaderTestEnv();
+  const controller = new ControllerMock();
+  const header = new cred.ui_internal.DisplayHeader(controller);
+  header.setup();
+
+  const $linkedFlag = $('#linked-flag');
+  $linkedFlag.prop('checked', true);
+  $linkedFlag.trigger('change');
+
+  expect(controller.notifyStoreUndoCalled).toBeTruthy();
 });
 
 test('DisplayHeader.controller', () => {

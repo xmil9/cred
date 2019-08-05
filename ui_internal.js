@@ -279,9 +279,7 @@ cred.ui_internal = (function() {
           this._propertyComponents.set(label, component);
         } else if (propSpec.isRequired()) {
           throw new Error(
-            `Defintion for required property ${label} for control ${
-              spec.title
-            } is missing.`
+            `Defintion for required property ${label} for control ${spec.title} is missing.`
           );
         }
       }

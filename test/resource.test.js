@@ -4533,6 +4533,76 @@ test('DialogResourceSet.denormalizeLocalizedStrings for control string that is e
 
 ///////////////////
 
+class ControllerMock {
+  constructor() {
+    this._notifyUndoAppliedCalled = false;
+  }
+
+  notifyUndoApplied() {
+    this._notifyUndoAppliedCalled = true;
+  }
+}
+
+function makeResourceManager(resourceSet) {
+  const mgr = new cred.resource.ResourceManager();
+  mgr.controller = new ControllerMock();
+  mgr.resourceSet = resourceSet;
+  return mgr;
+}
+
+test('ResourceManager stores undo state and undoes operation', () => {
+  const resSet = makeDialogResourceSet([
+    makeDialogResource(cred.locale.any, 'myid'),
+    makeDialogResource(cred.locale.german, 'myid'),
+    makeDialogResource(cred.locale.japanese, 'myid')
+  ]);
+  resSet.addControl(cred.locale.any, cred.spec.controlType.checkBox, 'ctrlId_1');
+  const resMgr = makeResourceManager(resSet);
+
+  resMgr.onStoreUndoNotification();
+  resSet.addControl(cred.locale.any, cred.spec.controlType.label, 'ctrlId_2');
+  resMgr.onStoreUndoNotification();
+
+  // Establish pre-condition.
+  expect(
+    resMgr.dialogResource(cred.locale.any).controlByResourceId('ctrlId_2', 0)
+  ).toBeDefined();
+
+  resMgr.onUndoNotification();
+
+  expect(
+    resMgr.dialogResource(cred.locale.any).controlByResourceId('ctrlId_2', 0)
+  ).toBeUndefined();
+});
+
+test('ResourceManager stores undo state and redoes operation', () => {
+  const resSet = makeDialogResourceSet([
+    makeDialogResource(cred.locale.any, 'myid'),
+    makeDialogResource(cred.locale.german, 'myid'),
+    makeDialogResource(cred.locale.japanese, 'myid')
+  ]);
+  resSet.addControl(cred.locale.any, cred.spec.controlType.checkBox, 'ctrlId_1');
+  const resMgr = makeResourceManager(resSet);
+
+  resMgr.onStoreUndoNotification();
+  resSet.addControl(cred.locale.any, cred.spec.controlType.label, 'ctrlId_2');
+  resMgr.onStoreUndoNotification();
+  resMgr.onUndoNotification();
+
+  // Establish pre-condition.
+  expect(
+    resMgr.dialogResource(cred.locale.any).controlByResourceId('ctrlId_2', 0)
+  ).toBeUndefined();
+
+  resMgr.onRedoNotification();
+
+  expect(
+    resMgr.dialogResource(cred.locale.any).controlByResourceId('ctrlId_2', 0)
+  ).toBeDefined();
+});
+
+///////////////////
+
 // Checks whether a log has entries for a given category and with an optional topic.
 function hasEntries(log, category, topic) {
   for (const entry of log) {

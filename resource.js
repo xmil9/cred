@@ -43,6 +43,11 @@ cred.resource = (function() {
       this._controller = value;
     }
 
+    // Inject resource set. For testing only.
+    set resourceSet(value) {
+      this._resourceSet = value;
+    }
+
     dialogResource(locale) {
       return this._resourceSet.dialogResource(locale);
     }
@@ -1670,9 +1675,7 @@ cred.resource = (function() {
     setPropertyValue(label, value) {
       if (!this.haveProperty(label)) {
         throw new Error(
-          `Attempting to set value of non-existing property '${label}' for control '${
-            this._ctrlId
-          }'.`
+          `Attempting to set value of non-existing property '${label}' for control '${this._ctrlId}'.`
         );
       }
       this.property(label).value = value;

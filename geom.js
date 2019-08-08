@@ -10,6 +10,7 @@ var geom = (function() {
   ///////////////////
 
   // Represents a rectangle.
+  // Uses screen coordinate system (y-coordinates increase from top to bottom).
   // Rect instances are immutable.
   class Rect {
     constructor(left = 0, top = 0, width = 0, height = 0) {
@@ -35,6 +36,8 @@ var geom = (function() {
     }
 
     get bottom() {
+      // Use screen coordinate system. In Cartesian coordinate system we would
+      // subtract the height.
       return this.top + this.height;
     }
 

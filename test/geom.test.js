@@ -7,226 +7,141 @@ const geom = require('../geom');
 
 ///////////////////
 
-test('geom.Rect left, top, width, height for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.left).toEqual(1);
-  expect(r.top).toEqual(2);
-  expect(r.width).toEqual(10);
-  expect(r.height).toEqual(20);
-});
+describe('geom.Rect', () => {
+  test('constructor sets coordinates and dimensions', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.left).toEqual(1);
+    expect(r.top).toEqual(-2);
+    expect(r.width).toEqual(10);
+    expect(r.height).toEqual(20);
+  });
 
-test('geom.Rect left, top, width, height for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.left).toEqual(-1);
-  expect(r.top).toEqual(-2);
-  expect(r.width).toEqual(10);
-  expect(r.height).toEqual(20);
-});
+  test('allow zeros for coordinates and dimensions', () => {
+    const r = new geom.Rect(0, 0, 0, 0);
+    expect(r.left).toEqual(0);
+    expect(r.top).toEqual(0);
+    expect(r.width).toEqual(0);
+    expect(r.height).toEqual(0);
+  });
 
-test('geom.Rect left, top, width, height for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.left).toEqual(0);
-  expect(r.top).toEqual(0);
-  expect(r.width).toEqual(0);
-  expect(r.height).toEqual(0);
-});
+  test('default constructor sets zeros', () => {
+    const r = new geom.Rect();
+    expect(r.left).toEqual(0);
+    expect(r.top).toEqual(0);
+    expect(r.width).toEqual(0);
+    expect(r.height).toEqual(0);
+  });
 
-test('geom.Rect left, top, width, height for default values', () => {
-  const r = new geom.Rect();
-  expect(r.left).toEqual(0);
-  expect(r.top).toEqual(0);
-  expect(r.width).toEqual(0);
-  expect(r.height).toEqual(0);
-});
+  test('forbid negative width or height', () => {
+    expect(() => new geom.Rect(1, 1, -1, 10)).toThrow();
+    expect(() => new geom.Rect(1, 1, 10, -10)).toThrow();
+  });
 
-test('geom.Rect negative width, height', () => {
-  expect(() => new geom.Rect(1, 1, -1, 10)).toThrow();
-  expect(() => new geom.Rect(1, 1, 10, -10)).toThrow();
-});
+  test('calculate right and bottom coordinates', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.right).toEqual(11);
+    expect(r.bottom).toEqual(18);
+  });
 
-test('geom.Rect right, bottom for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.right).toEqual(11);
-  expect(r.bottom).toEqual(22);
-});
+  test('uses screen coordinate system', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.bottom).toEqual(18);
+    // In a Cartesian coordinate system the result would be '-22'.
+  });
 
-test('geom.Rect right, bottom for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.right).toEqual(9);
-  expect(r.bottom).toEqual(18);
-});
+  test('calculate dimensions', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.size()).toEqual(new geom.Size(10, 20));
+  });
 
-test('geom.Rect right, bottom for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.right).toEqual(0);
-  expect(r.bottom).toEqual(0);
-});
+  test('calculate left-top', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.leftTop()).toEqual(new geom.Point(1, -2));
+  });
 
-test('geom.Rect.size for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.size()).toEqual(new geom.Size(10, 20));
-});
+  test('calculate center-top for positive coordinates', () => {
+    const r = new geom.Rect(1, 2, 10, 20);
+    expect(r.centerTop()).toEqual(new geom.Point(6, 2));
+  });
 
-test('geom.Rect.size for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.size()).toEqual(new geom.Size(10, 20));
-});
+  test('calculate center-top for negative coordinates', () => {
+    const r = new geom.Rect(-1, -2, 10, 20);
+    expect(r.centerTop()).toEqual(new geom.Point(4, -2));
+  });
 
-test('geom.Rect.size for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.size()).toEqual(new geom.Size(0, 0));
-});
+  test('calculate right-top', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.rightTop()).toEqual(new geom.Point(11, -2));
+  });
 
-test('geom.Rect.leftTop for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.leftTop()).toEqual(new geom.Point(1, 2));
-});
+  test('calculate right-center for positive coordinates', () => {
+    const r = new geom.Rect(1, 2, 10, 20);
+    expect(r.rightCenter()).toEqual(new geom.Point(11, 12));
+  });
 
-test('geom.Rect.leftTop for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.leftTop()).toEqual(new geom.Point(-1, -2));
-});
+  test('calculate right-center for negative coordinates', () => {
+    const r = new geom.Rect(-1, -2, 10, 20);
+    expect(r.rightCenter()).toEqual(new geom.Point(9, 8));
+  });
 
-test('geom.Rect.leftTop for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.leftTop()).toEqual(new geom.Point(0, 0));
-});
+  test('calculate right-bottom', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.rightBottom()).toEqual(new geom.Point(11, 18));
+  });
 
-test('geom.Rect.centerTop for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.centerTop()).toEqual(new geom.Point(6, 2));
-});
+  test('calculate center-bottom for positive coordinates', () => {
+    const r = new geom.Rect(1, 2, 10, 20);
+    expect(r.centerBottom()).toEqual(new geom.Point(6, 22));
+  });
 
-test('geom.Rect.centerTop for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.centerTop()).toEqual(new geom.Point(4, -2));
-});
+  test('calculate center-bottom for negative coordinates', () => {
+    const r = new geom.Rect(-1, -2, 10, 20);
+    expect(r.centerBottom()).toEqual(new geom.Point(4, 18));
+  });
 
-test('geom.Rect.centerTop for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.centerTop()).toEqual(new geom.Point(0, 0));
-});
+  test('calulate left-bottom', () => {
+    const r = new geom.Rect(1, -2, 10, 20);
+    expect(r.leftBottom()).toEqual(new geom.Point(1, 18));
+  });
 
-test('geom.Rect.rightTop for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.rightTop()).toEqual(new geom.Point(11, 2));
-});
+  test('calulate left-center for positive coordinates', () => {
+    const r = new geom.Rect(1, 2, 10, 20);
+    expect(r.leftCenter()).toEqual(new geom.Point(1, 12));
+  });
 
-test('geom.Rect.rightTop for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.rightTop()).toEqual(new geom.Point(9, -2));
-});
+  test('calulate left-center for negative coordinates', () => {
+    const r = new geom.Rect(-1, -2, 10, 20);
+    expect(r.leftCenter()).toEqual(new geom.Point(-1, 8));
+  });
 
-test('geom.Rect.rightTop for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.rightTop()).toEqual(new geom.Point(0, 0));
-});
+  test('calculate center for positive coordinates', () => {
+    const r = new geom.Rect(1, 2, 10, 20);
+    expect(r.center()).toEqual(new geom.Point(6, 12));
+  });
 
-test('geom.Rect.rightCenter for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.rightCenter()).toEqual(new geom.Point(11, 12));
-});
+  test('calculate center for negative coordinates', () => {
+    const r = new geom.Rect(-1, -2, 10, 20);
+    expect(r.center()).toEqual(new geom.Point(4, 8));
+  });
 
-test('geom.Rect.rightCenter for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.rightCenter()).toEqual(new geom.Point(9, 8));
-});
-
-test('geom.Rect.rightCenter for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.rightCenter()).toEqual(new geom.Point(0, 0));
-});
-
-test('geom.Rect.rightBottom for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.rightBottom()).toEqual(new geom.Point(11, 22));
-});
-
-test('geom.Rect.rightBottom for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.rightBottom()).toEqual(new geom.Point(9, 18));
-});
-
-test('geom.Rect.rightBottom for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.rightBottom()).toEqual(new geom.Point(0, 0));
-});
-
-test('geom.Rect.centerBottom for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.centerBottom()).toEqual(new geom.Point(6, 22));
-});
-
-test('geom.Rect.centerBottom for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.centerBottom()).toEqual(new geom.Point(4, 18));
-});
-
-test('geom.Rect.centerBottom for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.centerBottom()).toEqual(new geom.Point(0, 0));
-});
-
-test('geom.Rect.leftBottom for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.leftBottom()).toEqual(new geom.Point(1, 22));
-});
-
-test('geom.Rect.leftBottom for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.leftBottom()).toEqual(new geom.Point(-1, 18));
-});
-
-test('geom.Rect.leftBottom for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.leftBottom()).toEqual(new geom.Point(0, 0));
-});
-
-test('geom.Rect.leftCenter for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.leftCenter()).toEqual(new geom.Point(1, 12));
-});
-
-test('geom.Rect.leftCenter for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.leftCenter()).toEqual(new geom.Point(-1, 8));
-});
-
-test('geom.Rect.leftCenter for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.leftCenter()).toEqual(new geom.Point(0, 0));
-});
-
-test('geom.Rect.center for positive coordinates', () => {
-  const r = new geom.Rect(1, 2, 10, 20);
-  expect(r.center()).toEqual(new geom.Point(6, 12));
-});
-
-test('geom.Rect.center for negative coordinates', () => {
-  const r = new geom.Rect(-1, -2, 10, 20);
-  expect(r.center()).toEqual(new geom.Point(4, 8));
-});
-
-test('geom.Rect.center for empty rectangle', () => {
-  const r = new geom.Rect(0, 0, 0, 0);
-  expect(r.center()).toEqual(new geom.Point(0, 0));
-});
-
-test('geom.Rect.round', () => {
-  expect(new geom.Rect(1.0, 2, 10, 20).round()).toEqual(new geom.Rect(1, 2, 10, 20));
-  expect(new geom.Rect(1.1, 2.4, 10.3, 20.2).round()).toEqual(
-    new geom.Rect(1, 2, 10, 20)
-  );
-  expect(new geom.Rect(1.5, 2.7, 10.6, 20.9).round()).toEqual(
-    new geom.Rect(2, 3, 11, 21)
-  );
-  expect(new geom.Rect(-1.0, -2, 10, 20).round()).toEqual(new geom.Rect(-1, -2, 10, 20));
-  expect(new geom.Rect(-1.1, -2.4, 10.2, 20.4).round()).toEqual(
-    new geom.Rect(-1, -2, 10, 20)
-  );
-  expect(new geom.Rect(-1.5, -2.7, 10.6, 20.5).round()).toEqual(
-    new geom.Rect(-1, -3, 11, 21)
-  );
+  test('round coordinates and dimensions', () => {
+    expect(new geom.Rect(1.0, 2, 10, 20).round()).toEqual(new geom.Rect(1, 2, 10, 20));
+    expect(new geom.Rect(1.1, 2.4, 10.3, 20.2).round()).toEqual(
+      new geom.Rect(1, 2, 10, 20)
+    );
+    expect(new geom.Rect(1.5, 2.7, 10.6, 20.9).round()).toEqual(
+      new geom.Rect(2, 3, 11, 21)
+    );
+    expect(new geom.Rect(-1.0, -2, 10, 20).round()).toEqual(
+      new geom.Rect(-1, -2, 10, 20)
+    );
+    expect(new geom.Rect(-1.1, -2.4, 10.2, 20.4).round()).toEqual(
+      new geom.Rect(-1, -2, 10, 20)
+    );
+    expect(new geom.Rect(-1.5, -2.7, 10.6, 20.5).round()).toEqual(
+      new geom.Rect(-1, -3, 11, 21)
+    );
+  });
 });
 
 ///////////////////
